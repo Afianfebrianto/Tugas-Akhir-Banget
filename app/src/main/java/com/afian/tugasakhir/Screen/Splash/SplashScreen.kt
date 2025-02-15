@@ -3,7 +3,9 @@ package com.afian.tugasakhir.Screen.Splash
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
@@ -19,7 +21,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.afian.tugasakhir.Greeting
 import com.afian.tugasakhir.R
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -42,7 +43,7 @@ fun SplashScreen() {
         ) {
             // Menampilkan Lottie Animation
             MyLottie()
-
+            Spacer(modifier = Modifier.height(4.dp)) // Kurangi tinggi spacer agar lebih dekat
             // Menambahkan teks "DosenTracker" di bawah Lottie
             Text(
                 text = buildAnnotatedString {
@@ -53,7 +54,7 @@ fun SplashScreen() {
                 },
                 color = Color(0xFF1E3E62), // Warna teks 1E3E62
                 fontSize = 24.sp, // Ukuran font
-                modifier = Modifier.padding(top = 16.dp) // Jarak antara Lottie dan teks
+                modifier = Modifier.padding(top = 8.dp) // Jarak antara Lottie dan teks
             )
         }
     }
@@ -74,7 +75,7 @@ fun MyLottie() {
     LottieAnimation(
         composition = preLoaderLottie,
         progress = {preLoaderProgress},
-        modifier = Modifier.size(300.dp)
+        modifier = Modifier.size(400.dp)
     )
 
 }

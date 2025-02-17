@@ -64,7 +64,7 @@ fun SplashScreen() {
 @Composable
 fun MyLottie() {
     val preLoaderLottie by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.logo)
+        LottieCompositionSpec.RawRes(R.raw.animate_logo)
     )
 
     val preLoaderProgress by animateLottieCompositionAsState(preLoaderLottie,
@@ -75,7 +75,7 @@ fun MyLottie() {
     LottieAnimation(
         composition = preLoaderLottie,
         progress = {preLoaderProgress},
-        modifier = Modifier.size(400.dp)
+//        modifier = Modifier.fillMaxSize()
     )
 
 }

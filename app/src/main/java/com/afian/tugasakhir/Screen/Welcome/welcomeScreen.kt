@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.afian.tugasakhir.R
+import com.afian.tugasakhir.Screen.Splash.MyLottie
 import com.afian.tugasakhir.Screen.Splash.SplashScreen
 
 @Composable
@@ -45,11 +46,12 @@ fun WelcomeScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Gambar dari Drawable
-            Image(
-                painter = painterResource(id = R.drawable.fikomwelcome), // Ganti dengan nama file gambar
-                contentDescription = "App Logo",
-                modifier = Modifier.size(120.dp) // Sesuaikan ukuran gambar
-            )
+            MyLottie()
+//            Image(
+//                painter = painterResource(id = R.drawable.logoapp), // Ganti dengan nama file gambar
+//                contentDescription = "App Logo",
+//                modifier = Modifier.size(120.dp) // Sesuaikan ukuran gambar
+//            )
             Text(
                 text = "Welcome to DosenTracker!",
                 color = Color(0xFF1E3E62),
@@ -144,6 +146,11 @@ fun WelcomeScreen1() {
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewWelcome() {
+fun PreviewWelcome1() {
 WelcomeScreen1()
+}
+@Preview(showBackground = true)
+@Composable
+fun PreviewWelcome() {
+    WelcomeScreen()
 }

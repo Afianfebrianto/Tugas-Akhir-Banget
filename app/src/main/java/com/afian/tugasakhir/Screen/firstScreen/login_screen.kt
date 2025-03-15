@@ -1,15 +1,19 @@
-package com.afian.tugasakhir.Screen
+package com.afian.tugasakhir.Screen.firstScreen
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,114 +27,59 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.afian.tugasakhir.Component.ButtonAbu
+import com.afian.tugasakhir.R
 import com.afian.tugasakhir.ui.theme.TugasAkhirTheme
 
-class login_screen {
-}
-
 @Composable
-fun Login(){
-    var username by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ){
-            Column {
-                Row(
-                    modifier = Modifier
-                        .padding(bottom = 10.dp)
-                ) {
-                    Text(
-                        text = "Login",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize =40.sp,
-                        )
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                    .padding(bottom = 10.dp)) {
-                    TextField(
-                        value = username,
-                        onValueChange = {username = it},
-                        placeholder = { Text(text = "Username") },
-                        shape = RoundedCornerShape(12.dp),
-                        maxLines = 1,
-                        colors = TextFieldDefaults.colors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent
-                        )
-                    )
-                }
-                Row (
-                    modifier = Modifier
-                        .padding(bottom = 10.dp)
-                ){
-                    TextField(
-                        value = password,
-                        onValueChange = {password = it},
-                        placeholder = { Text(text = "Password") },
-                        shape = RoundedCornerShape(12.dp),
-                        maxLines = 1,
-                        colors = TextFieldDefaults.colors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent
-                        )
-                    )
-                }
-                Row (){
-                    Button(
-                        onClick = {
-                            //todo action button
-                        },
-                        modifier = Modifier.weight(1f, fill = false)
-//                            .align()
-                    ) {
-                        Text(text = "Masuk")
-                    }
-                }
-            }
-
-
-        }
-
-    }
-
-@Composable
-fun Login1() {
+fun Login() {
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .background(color = Color(0xFFFFD369)),
         contentAlignment = Alignment.Center // Memposisikan semuanya di tengah
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(), // Mengisi lebar penuh
             horizontalAlignment = Alignment.CenterHorizontally // Memposisikan kolom di tengah horizontal
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.logowithshadow), // Ganti dengan nama file gambar
+                contentDescription = "App Logo",
+                modifier = Modifier.size(120.dp) // Sesuaikan ukuran gambar
+            )
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Dosen")
+                    }
+                    append("Tracker")
+                },
+                color = Color(0xFF1E3E62), // Warna teks 1E3E62
+                fontSize = 24.sp, // Ukuran font
+                modifier = Modifier.padding(top = 8.dp) // Jarak antara Lottie dan teks
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
             // Teks Login yang di tengah
             Text(
                 text = "Login",
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    fontSize = 40.sp,
+                    fontSize = 30.sp,
+                    color = Color(0xFF1E3E62),
                 ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 20.dp)
@@ -169,19 +118,15 @@ fun Login1() {
                     .fillMaxWidth(0.8f) // Mengatur lebar TextField
                     .padding(bottom = 20.dp)
             )
-
+Spacer(modifier = Modifier .size(20.dp).fillMaxWidth(1f))
             // Button "Masuk" di sebelah kanan
             Row(
                 modifier = Modifier.fillMaxWidth()
                     .padding(horizontal = 30.dp),
-                horizontalArrangement = Arrangement.End // Posisikan tombol di kanan
+                horizontalArrangement = Arrangement.Center // Posisikan tombol di kanan
             ) {
-                Button(
-                    onClick = {
-                        // TODO: Action button
-                    }
-                ) {
-                    Text(text = "Masuk")
+                ButtonAbu(text = "Masuk", modifier = Modifier .width(180.dp)) {
+
                 }
             }
         }
@@ -193,6 +138,6 @@ fun Login1() {
 @Composable
 fun LoginPreview() {
     TugasAkhirTheme {
-        Login1()
+        Login()
     }
 }

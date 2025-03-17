@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.afian.tugasakhir"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.afian.tugasakhir"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -68,4 +68,11 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation (libs.lottie.compose)
+
+    implementation (libs.retrofit)
+
+    implementation (libs.converter.gson)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    implementation (libs.androidx.navigation.compose)
 }

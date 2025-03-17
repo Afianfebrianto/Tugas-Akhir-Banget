@@ -1,4 +1,4 @@
-package com.afian.tugasakhir.Screen.LoginScreen
+package com.afian.tugasakhir.View.Screen.LoginScreen
 
 import android.util.Log
 import androidx.compose.foundation.Image

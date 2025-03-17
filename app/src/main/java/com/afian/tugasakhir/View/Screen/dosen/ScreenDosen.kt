@@ -1,9 +1,9 @@
-package com.afian.tugasakhir.Screen.mahasiswa
+package com.afian.tugasakhir.View.Screen.dosen
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun ScreenMhs() {
-    Text("Mahasiswa")
+fun ScreenDosen() {
+    Text("Dosen")
 }

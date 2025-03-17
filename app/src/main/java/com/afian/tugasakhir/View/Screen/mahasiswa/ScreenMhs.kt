@@ -1,10 +1,9 @@
-package com.afian.tugasakhir.Screen.admin
+package com.afian.tugasakhir.View.Screen.mahasiswa
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
-
 @Composable
-fun ScreenAdmin() {
-    Text("Admin")
+fun ScreenMhs() {
+    Text("Mahasiswa")
 }

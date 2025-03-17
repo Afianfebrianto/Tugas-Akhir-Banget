@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import com.afian.tugasakhir.Screen.Navigation.NavGraph
-import com.afian.tugasakhir.Screen.LoginScreen.LoginScreen
+import com.afian.tugasakhir.View.Screen.Navigation.NavGraph
+import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
 import com.afian.tugasakhir.ui.theme.TugasAkhirTheme
 
 class MainActivity : ComponentActivity() {

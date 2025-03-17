@@ -1,14 +1,14 @@
-package com.afian.tugasakhir.Screen.Navigation
+package com.afian.tugasakhir.View.Screen.Navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.afian.tugasakhir.Controller.LoginViewModel
-import com.afian.tugasakhir.Screen.admin.ScreenAdmin
-import com.afian.tugasakhir.Screen.dosen.ScreenDosen
-import com.afian.tugasakhir.Screen.LoginScreen.LoginScreen
-import com.afian.tugasakhir.Screen.mahasiswa.ScreenMhs
+import com.afian.tugasakhir.View.Screen.admin.ScreenAdmin
+import com.afian.tugasakhir.View.Screen.dosen.ScreenDosen
+import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
+import com.afian.tugasakhir.View.Screen.mahasiswa.ScreenMhs
 
 @Composable
 fun NavGraph(navController: NavHostController) {

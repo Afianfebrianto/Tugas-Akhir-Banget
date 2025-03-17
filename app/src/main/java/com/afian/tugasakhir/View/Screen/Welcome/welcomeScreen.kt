@@ -1,4 +1,4 @@
-package com.afian.tugasakhir.Screen.Welcome
+package com.afian.tugasakhir.View.Screen.Welcome
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,8 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.afian.tugasakhir.R
-import com.afian.tugasakhir.Screen.Splash.MyLottie
-import com.afian.tugasakhir.Screen.Splash.SplashScreen
+import com.afian.tugasakhir.View.Screen.Splash.MyLottie
+import com.afian.tugasakhir.View.Screen.Splash.SplashScreen
 
 @Composable
 fun WelcomeScreen() {

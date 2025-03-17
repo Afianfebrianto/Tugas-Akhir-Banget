@@ -13,9 +13,6 @@ interface ApiService {
     suspend fun login(@Body body: LoginRequest): LoginResponse
 }
 
-data class LoginRequest(val identifier: String, val password: String)
-data class LoginResponse(val message: String, val status: Boolean, val user: User)
-
 object RetrofitClient {
     private const val BASE_URL = "http://192.168.0.103:3000/"
     private val retrofit = Retrofit.Builder()

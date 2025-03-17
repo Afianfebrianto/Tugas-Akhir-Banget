@@ -1,4 +1,4 @@
-package com.afian.tugasakhir.Screen.Splash
+package com.afian.tugasakhir.View.Screen.Splash
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

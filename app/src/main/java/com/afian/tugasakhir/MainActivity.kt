@@ -6,9 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.afian.tugasakhir.Component.DosenScreen
+import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.View.Screen.Navigation.NavGraph
 import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
 import com.afian.tugasakhir.ui.theme.TugasAkhirTheme
@@ -19,8 +22,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             // Inisialisasi NavController
-            val navController = rememberNavController()
-            NavGraph(navController)
+//            val navController = rememberNavController()
+//            NavGraph(navController)
+
+           DosenScreen()
         }
     }
 }

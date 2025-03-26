@@ -1,5 +1,6 @@
 package com.afian.tugasakhir.Component
 
+import android.R.attr.contentDescription
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
 import com.afian.tugasakhir.R
 
 @Composable
@@ -50,7 +52,7 @@ fun ButtonAbu(
 }
 
 @Composable
-fun Header() {
+fun HeaderOri() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -95,9 +97,56 @@ fun Header() {
     }
 }
 
+@Composable
+fun Header(username: String, identifier: String, profilePictureUrl: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .height(100.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween // Aligns items to the ends
+    ) {
+        // Text Column
+        Column {
+            Text(
+                text = "Hello,\n$username", // Use the username parameter
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_badge), // Replace with your badge icon resource
+                    contentDescription = "Badge Icon",
+                    modifier = Modifier.size(16.dp) // Adjust size as needed
+                )
+                Spacer(modifier = Modifier.width(4.dp)) // Space between text and icon
+                Text(
+                    text = identifier, // Use the identifier parameter
+                    fontSize = 16.sp,
+                    color = Color.White
+                )
+            }
+        }
+
+        // Profile Image
+        Image(
+            painter = rememberImagePainter(profilePictureUrl ?: R.drawable.placeholder_image), // Use an image loading library like Coil or Glide
+            contentDescription = "Profile Picture",
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape) // Clip the image to a circle
+        )
+    }
+}
+
 
 @Preview
 @Composable
 fun Preview() {
-    Header()
+val Username = "Afian Febrianto"
+    val Identifier = "13020210018"
+    val Foto = "987654dfghjkiuytf"
+    Header(username = Username, identifier = Identifier, profilePictureUrl = Foto )
 }

@@ -227,18 +227,9 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
             ) {
                 ButtonAbu(text = "Masuk", modifier = Modifier .width(180.dp), onClick = { viewModel.login(username, password) { user ->
                     when (user.role) {
-                        "dosen" -> {
-                            navController.navigate("dosen")
-                            Log.d("LoginScreen", "Navigating to Dosen Screen")
-                        }
-                        "mhs" -> {
-                            navController.navigate("mahasiswa")
-                            Log.d("LoginScreen", "Navigating to Mahasiswa Screen")
-                        }
-                        "admin" -> {
-                            navController.navigate("admin")
-                            Log.d("LoginScreen", "Navigating to Admin Screen")
-                        }
+                        "dosen" -> navController.navigate("dosen")
+                        "mhs" -> navController.navigate("mahasiswa")
+                        "admin" -> navController.navigate("admin")
                     }
                 } })
             }

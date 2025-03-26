@@ -29,12 +29,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.afian.tugasakhir.R
 import com.afian.tugasakhir.View.Screen.Splash.MyLottie
 import com.afian.tugasakhir.View.Screen.Splash.SplashScreen
 
+
 @Composable
-fun WelcomeScreen() {
+fun WelcomeScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -47,11 +50,6 @@ fun WelcomeScreen() {
         ) {
             // Gambar dari Drawable
             MyLottie()
-//            Image(
-//                painter = painterResource(id = R.drawable.logoapp), // Ganti dengan nama file gambar
-//                contentDescription = "App Logo",
-//                modifier = Modifier.size(120.dp) // Sesuaikan ukuran gambar
-//            )
             Text(
                 text = "Welcome to DosenTracker!",
                 color = Color(0xFF1E3E62),
@@ -64,10 +62,11 @@ fun WelcomeScreen() {
         IconButton(
             onClick = {
                 //todo next to login screen
+                navController.navigate("welcome1")
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .padding(bottom = 56.dp, end = 16.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowForward,
@@ -79,8 +78,10 @@ fun WelcomeScreen() {
     }
 }
 
+
+
 @Composable
-fun WelcomeScreen1() {
+fun WelcomeScreen1(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -133,6 +134,7 @@ fun WelcomeScreen1() {
             Button(
                 onClick = {
                     //todo next page Login
+                    navController.navigate("login")
                 },
                 colors = ButtonDefaults.buttonColors(Color(0xFFFFD369)),
                 modifier = Modifier.fillMaxWidth(0.6f) // Atur lebar tombol
@@ -144,13 +146,15 @@ fun WelcomeScreen1() {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewWelcome1() {
-WelcomeScreen1()
-}
-@Preview(showBackground = true)
-@Composable
-fun PreviewWelcome() {
-    WelcomeScreen()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewWelcome1() {
+//    val navController: NavHostController
+//WelcomeScreen1()
+//}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewWelcome() {
+//    val navController: NavHostController
+//    WelcomeScreen()
+//}

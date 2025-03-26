@@ -20,7 +20,7 @@ interface ApiService {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.153.170.147:3000/"
+    private const val BASE_URL = "http://192.168.8.103:3000/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())

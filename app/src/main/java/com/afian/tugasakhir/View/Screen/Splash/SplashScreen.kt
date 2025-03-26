@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,16 +22,18 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.afian.tugasakhir.R
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import kotlinx.coroutines.delay
 
 
 @Composable
-fun SplashScreen() {
+fun SplashScreen(navController: NavController) {
     // Mengatur warna background
     Box(
         modifier = Modifier
@@ -58,6 +61,11 @@ fun SplashScreen() {
             )
         }
     }
+    // Navigasi ke Welcome Screen setelah delay
+    LaunchedEffect(Unit) {
+        delay(2000) // Delay 2 detik
+        navController.navigate("welcome")
+    }
 }
 
 
@@ -80,8 +88,8 @@ fun MyLottie() {
 
 }
 
-@Preview(showBackground = true)
-@Composable
-fun Preview() {
-   SplashScreen()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun Preview() {
+//   SplashScreen()
+//}

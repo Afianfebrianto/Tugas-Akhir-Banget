@@ -43,12 +43,12 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.bumptech.glide.request.RequestOptions
 
 @Composable
-fun DosenScreen(viewModel: DosenViewModel = viewModel()) {
+fun DosenList(viewModel: DosenViewModel = viewModel()) {
     // Fetch the list of Dosen
     val dosenList = viewModel.dosenList.collectAsState(initial = emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(text = "Dosen on Campus", style = MaterialTheme.typography.displayLarge)
+        Text(text = "Dosen on Campus", style = MaterialTheme.typography.titleLarge)
 
         LazyColumn {
             items(dosenList.value) { dosen ->
@@ -70,8 +70,8 @@ fun DosenItem(dosen: Dosen) {
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(text = dosen.user_name, style = MaterialTheme.typography.bodyLarge)
-                Text(text = dosen.identifier, style = MaterialTheme.typography.bodyMedium)
+                Text(text = dosen.user_name, style = MaterialTheme.typography.labelLarge)
+                Text(text = dosen.identifier, style = MaterialTheme.typography.labelSmall)
             }
         }
     }
@@ -80,5 +80,5 @@ fun DosenItem(dosen: Dosen) {
 @Preview
 @Composable
 fun PreviewListDosen() {
-    DosenScreen()
+    DosenList()
 }

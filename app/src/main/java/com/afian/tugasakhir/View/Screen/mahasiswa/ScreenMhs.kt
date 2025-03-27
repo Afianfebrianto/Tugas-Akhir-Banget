@@ -1,5 +1,6 @@
 package com.afian.tugasakhir.View.Screen.mahasiswa
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,12 +26,17 @@ fun ScreenMhs() {
 @Composable
 fun HomeMhsScreen(loginViewModel: LoginViewModel) {
     // Ambil data pengguna dari ViewModel
-    val user = loginViewModel.currentUser.value
+    val user = loginViewModel.getUserData()
 
     // Jika user tidak ada, tampilkan pesan atau tampilan default
     val username = user?.user_name ?: "Guest"
     val identifier = user?.identifier ?: "No Identifier"
     val fotoProfile = user?.foto_profile ?: ""
+
+    // Tambahkan log untuk mencetak informasi pengguna
+    Log.d("HomeMhsScreen", "Username: $username")
+    Log.d("HomeMhsScreen", "Identifier: $identifier")
+    Log.d("HomeMhsScreen", "Foto Profile: $fotoProfile")
 
     Column(
         modifier = Modifier

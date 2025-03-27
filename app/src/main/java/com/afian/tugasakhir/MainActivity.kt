@@ -14,23 +14,16 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Controller.LoginViewModel
-import com.afian.tugasakhir.View.Screen.Navigation.NavGraph
 import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
 import com.afian.tugasakhir.View.Screen.Navigation.NavigationGraph
 import com.afian.tugasakhir.ui.theme.TugasAkhirTheme
 
 class MainActivity : ComponentActivity() {
-    private val loginViewModel: LoginViewModel by viewModels()
+    private val loginViewModel: LoginViewModel by viewModels { ViewModelFactory(applicationContext) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Mengatur fullscreen
         enableEdgeToEdge()
         setContent {
-            // Inisialisasi NavController
-//            val navController = rememberNavController()
-//            NavGraph(navController)
-
-//           DosenScreen()
             val navController = rememberNavController()
             NavigationGraph(navController, loginViewModel)
         }

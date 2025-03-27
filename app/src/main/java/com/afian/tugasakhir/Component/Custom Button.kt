@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -131,13 +132,14 @@ fun Header(username: String, identifier: String, profilePictureUrl: String) {
         }
 
         // Profile Image
-        Image(
-            painter = rememberImagePainter(profilePictureUrl ?: R.drawable.placeholder_image), // Use an image loading library like Coil or Glide
-            contentDescription = "Profile Picture",
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape) // Clip the image to a circle
-        )
+            Image(
+                painter = rememberImagePainter(profilePictureUrl ?: R.drawable.placeholder_image), // Use an image loading library like Coil or Glide
+                contentDescription = "Profile Picture",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape) // Clip the image to a circle
+            )
     }
 }
 

@@ -26,7 +26,7 @@ fun ScreenAdmin() {
 @Composable
 fun HomeAdminScreen(loginViewModel: LoginViewModel) {
     // Ambil data pengguna dari ViewModel
-    val user = loginViewModel.currentUser.value
+    val user = loginViewModel.getUserData()
 
     // Jika user tidak ada, tampilkan pesan atau tampilan default
     val username = user?.user_name ?: "Guest"

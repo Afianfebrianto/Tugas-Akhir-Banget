@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,6 +67,7 @@ fun DosenItem(dosen: Dosen) {
             Image(
                 painter = rememberImagePainter(dosen.foto_profile ?: R.drawable.placeholder_image), // Replace with your placeholder
                 contentDescription = "Profile Picture",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.size(40.dp).clip(CircleShape)
             )
             Spacer(modifier = Modifier.width(16.dp))

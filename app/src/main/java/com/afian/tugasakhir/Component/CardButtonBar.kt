@@ -23,10 +23,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.afian.tugasakhir.R
 
 @Composable
-fun CardButtonBar() {
+fun CardButtonBar(navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -60,6 +61,7 @@ fun CardButtonBar() {
             label = "Pengaturan",
             onClick = {
                 // TODO: Handle Pengaturan click
+                navController.navigate("user_settings")
             }
         )
     }
@@ -98,8 +100,8 @@ fun CardButton(iconRes: Int, label: String, onClick: () -> Unit) {
 }
 
 
-@Preview
-@Composable
-fun Preview1() {
-    CardButtonBar()
-}
+//@Preview
+//@Composable
+//fun Preview1() {
+//    CardButtonBar()
+//}

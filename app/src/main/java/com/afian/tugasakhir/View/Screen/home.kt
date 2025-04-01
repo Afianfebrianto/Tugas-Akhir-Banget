@@ -30,54 +30,54 @@ import com.afian.tugasakhir.Component.Header
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.afian.tugasakhir.R
 
-@Composable
-fun homeScreen1(){
-    val Username=""
-    val Identifier=""
-    val Fotoprofile=""
-    Column(modifier = Modifier.fillMaxSize().background(color = Color(0xFF1E3E62)).padding(top = 16.dp)) {
-        Header(Username, Identifier, Fotoprofile)
-        Card(
-//            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ) {
-            Column {
-                CardButtonBar()
-                DosenList()
-            }
-        }
-    }
-}
+//@Composable
+//fun homeScreen1(){
+//    val Username=""
+//    val Identifier=""
+//    val Fotoprofile=""
+//    Column(modifier = Modifier.fillMaxSize().background(color = Color(0xFF1E3E62)).padding(top = 16.dp)) {
+//        Header(Username, Identifier, Fotoprofile)
+//        Card(
+////            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+//            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+//            colors = CardDefaults.cardColors(containerColor = Color.White)
+//        ) {
+//            Column {
+//                CardButtonBar()
+//                DosenList()
+//            }
+//        }
+//    }
+//}
 
-@Composable
-fun HomeScreen(loginViewModel: LoginViewModel) {
-    // Ambil data pengguna dari ViewModel
-    val user = loginViewModel.currentUser.value
-
-    // Jika user tidak ada, tampilkan pesan atau tampilan default
-    val username = user?.user_name ?: "Guest"
-    val identifier = user?.identifier ?: "No Identifier"
-    val fotoProfile = user?.foto_profile ?: ""
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color(0xFF1E3E62))
-            .padding(top = 16.dp)
-    ) {
-        Header(username, identifier, fotoProfile) // Panggil Header dengan data pengguna
-        Card(
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ) {
-            Column {
-                CardButtonBar()
-                DosenList()
-            }
-        }
-    }
-}
+//@Composable
+//fun HomeScreen(loginViewModel: LoginViewModel) {
+//    // Ambil data pengguna dari ViewModel
+//    val user = loginViewModel.currentUser.value
+//
+//    // Jika user tidak ada, tampilkan pesan atau tampilan default
+//    val username = user?.user_name ?: "Guest"
+//    val identifier = user?.identifier ?: "No Identifier"
+//    val fotoProfile = user?.foto_profile ?: ""
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(color = Color(0xFF1E3E62))
+//            .padding(top = 16.dp)
+//    ) {
+//        Header(username, identifier, fotoProfile) // Panggil Header dengan data pengguna
+//        Card(
+//            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+//            colors = CardDefaults.cardColors(containerColor = Color.White)
+//        ) {
+//            Column {
+//                CardButtonBar()
+//                DosenList()
+//            }
+//        }
+//    }
+//}
 
 @Preview(showBackground = true)
 @Composable

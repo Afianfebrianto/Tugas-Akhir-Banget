@@ -172,4 +172,9 @@ class LoginViewModel(private val context: Context) : ViewModel() {
             null
         }
     }
+    fun logout() {
+        sharedPreferences.edit().clear().apply() // Menghapus semua data dari SharedPreferences
+        currentUser.value = null // Mengatur currentUser menjadi null
+    }
+
 }

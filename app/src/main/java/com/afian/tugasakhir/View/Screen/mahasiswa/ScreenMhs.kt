@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.afian.tugasakhir.Component.CardButtonBar
 import com.afian.tugasakhir.Component.DosenList
 import com.afian.tugasakhir.Component.Header
@@ -24,7 +25,7 @@ fun ScreenMhs() {
 }
 
 @Composable
-fun HomeMhsScreen(loginViewModel: LoginViewModel) {
+fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController) {
     // Ambil data pengguna dari ViewModel
     val user = loginViewModel.getUserData()
 
@@ -50,7 +51,7 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel) {
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column {
-                CardButtonBar()
+                CardButtonBar(navController)
                 DosenList()
             }
         }

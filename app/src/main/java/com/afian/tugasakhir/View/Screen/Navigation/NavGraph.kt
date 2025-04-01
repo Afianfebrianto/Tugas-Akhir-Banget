@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.afian.tugasakhir.Component.UserSettingsScreen
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.afian.tugasakhir.View.Screen.admin.ScreenAdmin
 import com.afian.tugasakhir.View.Screen.dosen.ScreenDosen
@@ -92,8 +93,9 @@ fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewM
         composable("welcome") { WelcomeScreen(navController) }
         composable("welcome1") { WelcomeScreen1(navController) }
         composable("login") { LoginScreen(loginViewModel, navController) }
-        composable("dosen") { HomeDosenScreen(loginViewModel) }
-        composable("mahasiswa") { HomeMhsScreen(loginViewModel) }
-        composable("admin") { HomeAdminScreen(loginViewModel) }
+        composable("dosen") { HomeDosenScreen(loginViewModel,navController) }
+        composable("mahasiswa") { HomeMhsScreen(loginViewModel,navController) }
+        composable("admin") { HomeAdminScreen(loginViewModel,navController) }
+        composable("user_settings") { UserSettingsScreen(loginViewModel,navController) }
     }
 }

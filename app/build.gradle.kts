@@ -1,7 +1,12 @@
+import org.gradle.kotlin.dsl.implementation
+import org.jetbrains.kotlin.gradle.idea.proto.com.google.protobuf.SourceCodeInfoKt.location
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+
 }
+
 
 android {
     namespace = "com.afian.tugasakhir"
@@ -47,6 +52,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
 }
 
 dependencies {
@@ -79,4 +85,10 @@ dependencies {
     implementation (libs.compose)
 
     implementation (libs.coil.compose)
+
+    implementation ("com.google.accompanist:accompanist-permissions:0.24.13-rc")
+
+    implementation ("com.google.maps.android:maps-compose:2.2.1")
+    implementation ("com.google.android.gms:play-services-maps:19.1.0")
+    implementation ("com.google.android.gms:play-services-location:21.3.0")
 }

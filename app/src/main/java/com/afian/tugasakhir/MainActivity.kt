@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import com.afian.tugasakhir.Component.GeofencingMap
 import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             NavigationGraph(navController, loginViewModel)
+//            GeofencingMap()
         }
     }
 }

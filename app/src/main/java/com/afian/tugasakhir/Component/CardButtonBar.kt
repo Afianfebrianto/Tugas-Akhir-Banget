@@ -65,7 +65,16 @@ fun CardButtonBar(navController: NavController) {
             }
         )
     }
+    CardButton(
+        iconRes = R.drawable.ic_map_24, // Replace with your icon resource
+        label = "Maps Debug",
+        onClick = {
+            // TODO: Handle Pengaturan click
+            navController.navigate("debug_maps")
+        }
+    )
 }
+
 
 @Composable
 fun CardButton(iconRes: Int, label: String, onClick: () -> Unit) {

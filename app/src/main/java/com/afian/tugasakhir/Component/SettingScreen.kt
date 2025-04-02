@@ -56,7 +56,7 @@ fun UserSettingsScreen(loginViewModel: LoginViewModel,navController: NavControll
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(top = 46.dp)
                 .background(Color.White),
             verticalAlignment = Alignment.CenterVertically
         ) {

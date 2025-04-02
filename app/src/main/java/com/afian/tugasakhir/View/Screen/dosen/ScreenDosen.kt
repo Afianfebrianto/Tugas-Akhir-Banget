@@ -23,7 +23,6 @@ import com.afian.tugasakhir.Component.DosenList
 import com.afian.tugasakhir.Component.Header
 import com.afian.tugasakhir.Controller.GeofenceMonitorEffect
 import com.afian.tugasakhir.Controller.LoginViewModel
-import com.afian.tugasakhir.Controller.createGeofence
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationServices

@@ -230,6 +230,7 @@ fun GeofenceMonitorEffect(
                             if(!hasLoggedDwelling) { // Hanya log dwell sekali
                                 Log.d(TAG, "EVENT: Dwelling inside Geofence detected.")
                                 hasLoggedDwelling = true
+                                //TODO: Funsi jika Dwelling
                             }
                             isDwelling = true
                             onStatusChange(currentStatus, isDwelling)
@@ -249,6 +250,7 @@ fun GeofenceMonitorEffect(
                     insideStartTime = null
                     isDwelling = false
                     onStatusChange(currentStatus, isDwelling)
+                    //TODO: fungsi jika outside
                 }
             }
         } else {

@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.location.Location
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresPermission
@@ -39,64 +40,8 @@ import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
+import java.util.concurrent.TimeUnit
 import kotlin.jvm.java
-
-//@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-//fun createGeofence(context: Context, geofencingClient: GeofencingClient,geofenceId: String) {
-//    val sharedPreferences: SharedPreferences = context.getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
-//    val geofencePoints = listOf(
-//        LatLng(-5.136154640871624, 119.44884939358585), // Pojok Atas Kiri
-//        LatLng(-5.136182976030469, 119.44912618581905), // Pojok Atas Kanan
-//        LatLng(-5.135779171177262, 119.44915940198575), // Pojok Bawah Kanan
-//        LatLng(-5.135758737671867, 119.44887608762276), // Pojok Bawah Kiri
-//        LatLng(-5.1359355261683906, 119.44895924980513) // Titik Tengah
-//    )
-//    if (sharedPreferences.getBoolean(geofenceId, false)) {
-//        Log.d("Geofence", "Geofence already registered.")
-//        return // Keluar jika geofence sudah terdaftar
-//    }
-//
-//    // Buat geofence untuk setiap titik
-//    val geofenceList = geofencePoints.map { point ->
-//        Geofence.Builder()
-//            .setRequestId("geofence_${point.latitude}_${point.longitude}")
-//            .setCircularRegion(
-//                point.latitude,
-//                point.longitude,
-//                40f // Radius dalam meter
-//            )
-//            .setExpirationDuration(Geofence.NEVER_EXPIRE)
-//            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
-//            .build()
-//    }
-//
-//    // Buat GeofencingRequest
-//    val geofencingRequest = GeofencingRequest.Builder()
-//        .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-//        .addGeofences(geofenceList)
-//        .build()
-//
-//    // Buat pending intent untuk menerima notifikasi geofencing
-//    val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
-//    val pendingIntent: PendingIntent = PendingIntent.getBroadcast(
-//        context,
-//        0,
-//        intent,
-//        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE // Tambahkan FLAG_IMMUTABLE
-//    )
-//    // Cek apakah geofence sudah terdaftar
-//
-//        // Tambahkan geofence
-//        geofencingClient.addGeofences(geofencingRequest,  pendingIntent)
-//            .addOnSuccessListener {
-//                Log.d("Geofence", "Geofence added successfully")
-//            }
-//            .addOnFailureListener {
-//                Log.e("Geofence", "Failed to add geofence: ${it.message}")
-//            }
-//
-//
-//}
 
 enum class GeofenceStatus {
     UNKNOWN, // Status awal atau saat tidak ada info lokasi
@@ -339,12 +284,240 @@ fun isPointInPolygon(point: LatLng, polygon: List<LatLng>): Boolean {
     return isInside
 }
 
-//private fun getPendingIntent(context: Context): PendingIntent {
-//    val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
-//    return PendingIntent.getBroadcast(
-//        context,
-//        0,
-//        intent,
-//        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//enum class GeofenceStatus {
+//    UNKNOWN, // Status awal atau saat tidak ada info lokasi
+//    INSIDE,
+//    OUTSIDE
+//}
+//
+//private const val TAG = "GeofenceMonitor"
+//private const val LOCATION_UPDATE_INTERVAL_MS = 10000L // Perbarui lokasi setiap 10 detik
+//private const val DWELL_THRESHOLD_MS = 30000L // Anggap "dwelling" jika di dalam selama 30 detik
+//
+//// --- Koordinat Geofence Anda (menggunakan LatLng GMS) ---
+//val cornerTopLeft = LatLng(-5.136154640871624, 119.44884939358585)
+//val cornerTopRight = LatLng(-5.136182976030469, 119.44912618581905)
+//val cornerBottomRight = LatLng(-5.135779171177262, 119.44915940198575)
+//val cornerBottomLeft = LatLng(-5.135758737671867, 119.44887608762276)
+//val geofencePolygon: List<LatLng> = listOf(
+//    cornerTopLeft, cornerTopRight, cornerBottomRight, cornerBottomLeft
+//)
+//// --- Akhir Koordinat Geofence ---
+//
+//
+//@SuppressLint("MissingPermission")
+//@OptIn(ExperimentalPermissionsApi::class)
+//@Composable
+//fun GeofenceMonitorEffect(
+//    polygon: List<LatLng> = geofencePolygon,
+//    // Modifikasi callback untuk menyertakan durasi dwell
+//    onStatusChange: (status: GeofenceStatus, isDwelling: Boolean, dwellDurationMs: Long) -> Unit =
+//        { status, dwelling, durationMs ->
+//            // Callback default yang diperbarui
+//            val durationStr = formatDuration(durationMs) // Format durasi agar mudah dibaca
+//            Log.d(TAG, "Default Callback: Status = $status, Dwelling = $dwelling, Duration = $durationStr ($durationMs ms)")
+//        }
+//) {
+//    val context = LocalContext.current
+//    val lifecycleOwner = LocalLifecycleOwner.current
+//    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+//
+//    var previousStatus by remember { mutableStateOf(GeofenceStatus.UNKNOWN) }
+//    var insideStartTime by remember { mutableStateOf<Long?>(null) }
+//    var isDwelling by remember { mutableStateOf(false) }
+//    // State baru untuk menyimpan durasi dwell/inside
+//    var dwellDurationMs by remember { mutableStateOf(0L) }
+//
+//    // Flag untuk logging (agar tidak berulang)
+//    var hasLoggedEntering by remember { mutableStateOf(false) }
+//    var hasLoggedDwelling by remember { mutableStateOf(false) }
+//    var hasLoggedExiting by remember { mutableStateOf(false) }
+//
+//    val locationPermissionsState = rememberMultiplePermissionsState(
+//        listOf(
+//            Manifest.permission.ACCESS_FINE_LOCATION,
+//            Manifest.permission.ACCESS_COARSE_LOCATION,
+//        )
 //    )
+//
+//    DisposableEffect(lifecycleOwner) {
+//        val observer = LifecycleEventObserver { _, event ->
+//            if (event == Lifecycle.Event.ON_START) {
+//                Log.d(TAG,"Lifecycle ON_START")
+//            } else if (event == Lifecycle.Event.ON_STOP) {
+//                Log.d(TAG,"Lifecycle ON_STOP")
+//            }
+//        }
+//        lifecycleOwner.lifecycle.addObserver(observer)
+//        onDispose {
+//            Log.d(TAG,"Composable Disposed")
+//            lifecycleOwner.lifecycle.removeObserver(observer)
+//        }
+//    }
+//
+//    LaunchedEffect(key1 = locationPermissionsState.allPermissionsGranted) {
+//        if (!locationPermissionsState.allPermissionsGranted) {
+//            Log.d(TAG, "Meminta izin lokasi...")
+//            locationPermissionsState.launchMultiplePermissionRequest()
+//        }
+//    }
+//
+//    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
+//        if (locationPermissionsState.allPermissionsGranted) {
+//            Log.d(TAG, "Izin lokasi diberikan. Memulai pemantauan lokasi...")
+//
+//            locationFlow(context, fusedLocationClient).collectLatest { location ->
+//                val currentLatLng = LatLng(location.latitude, location.longitude)
+//                val isInside = isPointInPolygon(currentLatLng, polygon)
+//                val currentStatus = if (isInside) GeofenceStatus.INSIDE else GeofenceStatus.OUTSIDE
+//                val now = System.currentTimeMillis()
+//                var currentDwellDurationMs = 0L // Durasi untuk callback saat ini
+//
+//                // --- Logika Transisi dan Dwell ---
+//
+//                if (currentStatus == GeofenceStatus.INSIDE) {
+//                    if (previousStatus != GeofenceStatus.INSIDE) { // Baru masuk (Entering)
+//                        if (!hasLoggedEntering) {
+//                            Log.i(TAG, "EVENT: Entering Geofence at $currentLatLng")
+//                            hasLoggedEntering = true
+//                            hasLoggedExiting = false
+//                            hasLoggedDwelling = false
+//                        }
+//                        previousStatus = GeofenceStatus.INSIDE
+//                        insideStartTime = now
+//                        isDwelling = false
+//                        dwellDurationMs = 0L // Reset durasi saat baru masuk
+//                        currentDwellDurationMs = 0L
+//                    } else { // Tetap di dalam
+//                        // Hitung durasi sejak masuk
+//                        val startTime = insideStartTime
+//                        if (startTime != null) {
+//                            dwellDurationMs = now - startTime
+//                            currentDwellDurationMs = dwellDurationMs // Gunakan durasi yang dihitung
+//                        }
+//
+//                        // Cek kondisi dwell
+//                        if (dwellDurationMs >= DWELL_THRESHOLD_MS && !isDwelling) {
+//                            if (!hasLoggedDwelling) {
+//                                val durationStr = formatDuration(dwellDurationMs)
+//                                Log.d(TAG, "EVENT: Dwelling inside Geofence detected after $durationStr.")
+//                                hasLoggedDwelling = true
+//                                //TODO: Fungsi jika Dwelling terdeteksi pertama kali
+//                            }
+//                            isDwelling = true
+//                        }
+//                    }
+//                    // Panggil callback saat INSIDE
+//                    onStatusChange(currentStatus, isDwelling, currentDwellDurationMs)
+//
+//                } else { // (currentStatus == GeofenceStatus.OUTSIDE)
+//                    if (previousStatus == GeofenceStatus.INSIDE) { // Baru keluar (Exiting)
+//                        if (!hasLoggedExiting) {
+//                            val finalDurationStr = formatDuration(dwellDurationMs) // Durasi terakhir saat di dalam
+//                            Log.w(TAG, "EVENT: Exiting Geofence from $currentLatLng after being inside for $finalDurationStr")
+//                            hasLoggedExiting = true
+//                            hasLoggedEntering = false
+//                        }
+//                        previousStatus = GeofenceStatus.OUTSIDE
+//                        insideStartTime = null
+//                        isDwelling = false
+//                        dwellDurationMs = 0L // Reset durasi
+//                        currentDwellDurationMs = 0L
+//                    } else { // Tetap di luar
+//                        // Tidak perlu update durasi jika memang sudah di luar
+//                        if (previousStatus != GeofenceStatus.OUTSIDE) hasLoggedExiting = false // Reset flag jika status sebelumnya tidak OUTSIDE
+//                        previousStatus = GeofenceStatus.OUTSIDE
+//                    }
+//                    // Panggil callback saat OUTSIDE
+//                    onStatusChange(currentStatus, isDwelling, currentDwellDurationMs) // Durasi 0 saat di luar
+//                    //TODO: fungsi jika outside
+//                }
+//            }
+//        } else {
+//            Log.w(TAG, "Izin lokasi tidak diberikan.")
+//            if (previousStatus != GeofenceStatus.UNKNOWN) {
+//                // Panggil callback hanya jika status berubah menjadi UNKNOWN
+//                onStatusChange(GeofenceStatus.UNKNOWN, false, 0L)
+//            }
+//            // Reset semua state jika izin dicabut
+//            previousStatus = GeofenceStatus.UNKNOWN
+//            insideStartTime = null
+//            isDwelling = false
+//            dwellDurationMs = 0L
+//            hasLoggedEntering = false
+//            hasLoggedDwelling = false
+//            hasLoggedExiting = false
+//        }
+//    }
+//}
+//
+//// --- Fungsi Flow Lokasi (Tidak berubah) ---
+//@SuppressLint("MissingPermission")
+//private fun locationFlow(context: Context, client: FusedLocationProviderClient) = callbackFlow<Location> {
+//    // ... (implementasi locationFlow sama seperti sebelumnya)
+//    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, LOCATION_UPDATE_INTERVAL_MS)
+//        .setWaitForAccurateLocation(false)
+//        .setMinUpdateIntervalMillis(LOCATION_UPDATE_INTERVAL_MS / 2)
+//        .setMaxUpdateDelayMillis(LOCATION_UPDATE_INTERVAL_MS * 2)
+//        .build()
+//
+//    val locationCallback = object : LocationCallback() {
+//        override fun onLocationResult(locationResult: LocationResult) {
+//            locationResult.lastLocation?.let {
+//                Log.v(TAG, "Lokasi baru diterima: Lat=${it.latitude}, Lon=${it.longitude}, Acc=${it.accuracy}")
+//                trySend(it).isSuccess
+//            } ?: Log.w(TAG, "Hasil lokasi null")
+//        }
+//        override fun onLocationAvailability(availability: LocationAvailability) {
+//            Log.d(TAG, "Location Availability: ${availability.isLocationAvailable}")
+//            if (!availability.isLocationAvailable) {
+//                Log.e(TAG, "Penyedia lokasi tidak tersedia!")
+//            }
+//        }
+//    }
+//
+//    Log.d(TAG, "Memulai request pembaruan lokasi...")
+//    client.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+//        .addOnFailureListener { e ->
+//            Log.e(TAG, "Gagal memulai pembaruan lokasi", e)
+//            close(e)
+//        }
+//        .addOnSuccessListener {
+//            Log.d(TAG, "Request pembaruan lokasi berhasil dimulai.")
+//        }
+//
+//    awaitClose {
+//        Log.d(TAG, "Menghentikan pembaruan lokasi...")
+//        client.removeLocationUpdates(locationCallback)
+//    }
+//}
+//
+//
+//// --- Algoritma Point-In-Polygon (Tidak berubah) ---
+//fun isPointInPolygon(point: LatLng, polygon: List<LatLng>): Boolean {
+//    // ... (implementasi isPointInPolygon sama seperti sebelumnya)
+//    if (polygon.size < 3) return false
+//    var isInside = false
+//    var i = 0
+//    var j = polygon.size - 1
+//    while (i < polygon.size) {
+//        val pi = polygon[i]
+//        val pj = polygon[j]
+//        val intersect = ((pi.latitude > point.latitude) != (pj.latitude > point.latitude)) &&
+//                (point.longitude < (pj.longitude - pi.longitude) * (point.latitude - pi.latitude) / (pj.latitude - pi.latitude) + pi.longitude)
+//        if (intersect) {
+//            isInside = !isInside
+//        }
+//        j = i++
+//    }
+//    return isInside
+//}
+//
+//// --- Fungsi Helper untuk Format Durasi ---
+//fun formatDuration(millis: Long): String {
+//    if (millis < 0) return "N/A"
+//    val minutes = TimeUnit.MILLISECONDS.toMinutes(millis)
+//    val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % 60
+//    //return String.format("%02d:%02d", minutes, seconds) // Format Menit:Detik
+//    return "$minutes menit $seconds detik"
 //}

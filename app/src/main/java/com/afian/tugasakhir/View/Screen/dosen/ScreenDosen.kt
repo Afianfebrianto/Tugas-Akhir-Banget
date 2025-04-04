@@ -25,6 +25,7 @@ import com.afian.tugasakhir.Controller.GeofenceMonitorEffect
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.LocationServices
 
 @Composable

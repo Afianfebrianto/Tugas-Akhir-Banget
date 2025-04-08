@@ -6,148 +6,144 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 
 object GeofenceHelper {
 
     private const val TAG = "GeofenceHelper"
-    const val GEOFENCE_ID = "AREA_TARGET_1" // ID unik untuk geofence Anda
-    private const val GEOFENCE_RADIUS_METERS = 50f // Radius dalam meter (perkiraan)
-    private const val DWELL_DELAY_MILLISECONDS = 1000 * 10 // 10 detik
+    // Radius default untuk setiap geofence target kecil (dalam meter)
+    private const val TARGET_GEOFENCE_RADIUS_METERS = 15f // Coba 20 meter, sesuaikan jika perlu
+    private const val DWELL_DELAY_MILLISECONDS = 1000 * 10 // 10 detik (jika DWELL diaktifkan)
 
-    // Koordinat tengah
-    private const val CENTER_LAT = -5.1359355261683906
-    private const val CENTER_LNG = 119.44895924980513
+    // Daftar koordinat target baru
+    private val TARGET_LOCATIONS = mapOf(
+        "TARGET_1" to LatLng(-5.1358417, 119.4489412),
+        "TARGET_2" to LatLng(-5.1358403, 119.4490958),
+        // Target 3 dilewati sesuai data Anda
+        "TARGET_4" to LatLng(-5.1360277, 119.4489348),
+        "TARGET_5" to LatLng(-5.1360271, 119.4490799),
+        "TARGET_6" to LatLng(-5.1361475, 119.4489108), // Koordinat Target 6 diperbarui
+        "TARGET_7" to LatLng(-5.1361669, 119.4490859)  // Koordinat Target 7 diperbarui
+        // Target 8 dilewati sesuai data Anda
+    )
 
-    // --- Koordinat sudut (untuk perhitungan radius jika diperlukan) ---
-    // private const val TL_LAT = -5.136154640871624
-    // private const val TL_LNG = 119.44884939358585
-    // private const val TR_LAT = -5.136182976030469
-    // private const val TR_LNG = 119.44912618581905
-    // private const val BR_LAT = -5.135779171177262
-    // private const val BR_LNG = 119.44915940198575
-    // private const val BL_LAT = -5.135758737671867
-    // private const val BL_LNG = 119.44887608762276
-
-    // Fungsi untuk menghitung jarak (Haversine) - jika ingin radius lebih akurat
-    // fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Float {
-    //     val R = 6371e3 // Radius bumi dalam meter
-    //     val phi1 = Math.toRadians(lat1)
-    //     val phi2 = Math.toRadians(lat2)
-    //     val deltaPhi = Math.toRadians(lat2 - lat1)
-    //     val deltaLambda = Math.toRadians(lon2 - lon1)
-    //
-    //     val a = sin(deltaPhi / 2) * sin(deltaPhi / 2) +
-    //             cos(phi1) * cos(phi2) *
-    //             sin(deltaLambda / 2) * sin(deltaLambda / 2)
-    //     val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    //
-    //     return (R * c).toFloat()
-    // }
-
-
-    // PendingIntent untuk BroadcastReceiver
+    // PendingIntent (logika tetap sama, flag MUTABLE disarankan dari tes sebelumnya)
     private fun getGeofencePendingIntent(context: Context): PendingIntent {
-        val intent = Intent(context.applicationContext, com.afian.tugasakhir.Controller.GeofenceBroadcastReceiver::class.java) // Bisa pakai application context juga
-        return PendingIntent.getBroadcast(
-            context.applicationContext, // Bisa pakai application context juga
-            0, // Request code (0 biasanya OK)
-            intent,
-            // V V V Ubah bagian ini V V V
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                // Untuk Android < S (12), UPDATE_CURRENT biasanya cukup
-                // atau bisa coba FLAG_CANCEL_CURRENT seperti contoh
-                PendingIntent.FLAG_UPDATE_CURRENT // atau coba PendingIntent.FLAG_CANCEL_CURRENT
-            } else {
-                // Untuk Android S (12) ke atas, coba MUTABLE
-                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT // <--- COBA INI
-            }
-        )
-    }
-
-    // Membuat objek Geofence
-    private fun buildGeofence(): Geofence {
-        // Hitung radius jika perlu, misal dari tengah ke pojok atas kiri
-        // val radius = calculateDistance(CENTER_LAT, CENTER_LNG, TL_LAT, TL_LNG)
-        // Log.d(TAG, "Calculated Radius: $radius meters") // Hasilnya sekitar 25-30m
-
-        return Geofence.Builder()
-            // Set ID unik untuk geofence ini
-            .setRequestId(GEOFENCE_ID)
-            // Tentukan area geofence (lingkaran)
-            .setCircularRegion(
-                CENTER_LAT,
-                CENTER_LNG,
-                GEOFENCE_RADIUS_METERS // Gunakan radius yang fix atau hasil perhitungan
-            )
-            // Tentukan durasi geofence (NEVER_EXPIRE berarti tak terbatas)
-            .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            // Tentukan tipe transisi yang ingin dipantau
-            .setTransitionTypes(
-                Geofence.GEOFENCE_TRANSITION_ENTER or
-                        Geofence.GEOFENCE_TRANSITION_EXIT or
-                        Geofence.GEOFENCE_TRANSITION_DWELL // Tambahkan DWELL
-            )
-            // Tentukan berapa lama (ms) pengguna harus berada di dalam sebelum DWELL terpicu
-            .setLoiteringDelay(DWELL_DELAY_MILLISECONDS)
-            .build()
-    }
-    // Fungsi utama untuk menambahkan geofence
-    @SuppressLint("MissingPermission") // Izin diperiksa sebelum pemanggilan
-    fun addGeofence(context: Context) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.w(TAG, "Fine location permission not granted.")
-            return // Jangan lanjutkan jika izin belum diberikan
+        val intent = Intent(context.applicationContext, GeofenceBroadcastReceiver::class.java)
+        // Disarankan menggunakan FLAG_MUTABLE atau FLAG_IMMUTABLE secara eksplisit untuk Android S+
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE // Coba MUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
         }
-
-        val geofencingClient = LocationServices.getGeofencingClient(context)
-        val geofence = buildGeofence()
-        val geofencingRequest = buildGeofencingRequest(geofence)
-        val pendingIntent = getGeofencePendingIntent(context)
-
-        geofencingClient.addGeofences(geofencingRequest, pendingIntent)?.run {
-            addOnSuccessListener {
-                Log.d(TAG, "Geofence added successfully: ${geofence.requestId}")
-            }
-            addOnFailureListener { exception ->
-                Log.e(TAG, "Failed to add geofence: ${geofence.requestId}", exception)
-                // Tambahan: Cek status code spesifik jika perlu
-                // if ((exception as? ApiException)?.statusCode == GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE) { ... }
-            }
-        }
+        return PendingIntent.getBroadcast(context.applicationContext, 0, intent, flags)
     }
 
-    // Membuat request untuk menambahkan geofence
-    private fun buildGeofencingRequest(geofence: Geofence): GeofencingRequest {
+    // Membuat LIST objek Geofence dari data target
+    private fun buildGeofencesList(): List<Geofence> {
+        val geofenceList = mutableListOf<Geofence>()
+        TARGET_LOCATIONS.forEach { (id, latLng) ->
+            geofenceList.add(
+                Geofence.Builder()
+                    .setRequestId(id) // Gunakan key map sebagai ID unik
+                    .setCircularRegion(
+                        latLng.latitude,
+                        latLng.longitude,
+                        TARGET_GEOFENCE_RADIUS_METERS
+                    )
+                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                    // Tentukan transisi (ENTER & EXIT direkomendasikan untuk awal)
+                    .setTransitionTypes(
+                        Geofence.GEOFENCE_TRANSITION_ENTER or
+                                Geofence.GEOFENCE_TRANSITION_EXIT
+                        // | Geofence.GEOFENCE_TRANSITION_DWELL // Aktifkan DWELL jika perlu
+                    )
+                    // .setLoiteringDelay(DWELL_DELAY_MILLISECONDS) // Aktifkan jika DWELL aktif
+                    .build()
+            )
+        }
+        return geofenceList
+    }
+
+    // Membuat request untuk menambahkan LIST Geofence
+    private fun buildGeofencingRequest(geofences: List<Geofence>): GeofencingRequest {
         return GeofencingRequest.Builder().apply {
-            // INITIAL_TRIGGER_ENTER akan memicu GEOFENCE_TRANSITION_ENTER jika perangkat
-            // sudah berada di dalam geofence saat ditambahkan.
-            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER or GeofencingRequest.INITIAL_TRIGGER_DWELL)
-            addGeofence(geofence)
+            // setInitialTrigger(0) direkomendasikan dari tes sebelumnya (tidak ada trigger awal)
+            setInitialTrigger(0)
+            // setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER) // Alternatif jika ingin trigger ENTER awal
+            addGeofences(geofences) // Tambahkan list geofence
         }.build()
     }
 
+    // Fungsi utama untuk menambahkan SEMUA geofence target
+    @SuppressLint("MissingPermission")
+    fun addGeofences(context: Context) { // Nama fungsi diubah sedikit
+        if (ContextCompat.checkSelfPermission(
+                context, Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.w(TAG, "Fine location permission not granted.")
+            return
+        }
 
+        val geofencesToAdd = buildGeofencesList() // Buat list geofence
 
-    // Fungsi untuk menghapus geofence (opsional)
-    fun removeGeofences(context: Context) {
+        if (geofencesToAdd.isEmpty()) {
+            Log.w(TAG, "Geofence list to add is empty.")
+            return
+        }
+
         val geofencingClient = LocationServices.getGeofencingClient(context)
+        val geofencingRequest = buildGeofencingRequest(geofencesToAdd) // Buat request dari list
         val pendingIntent = getGeofencePendingIntent(context)
 
-        geofencingClient.removeGeofences(pendingIntent)?.run {
+        Log.d(TAG, "Attempting to add ${geofencesToAdd.size} geofences...")
+
+        geofencingClient.addGeofences(geofencingRequest, pendingIntent)?.run {
             addOnSuccessListener {
-                Log.d(TAG, "Geofences removed successfully.")
+                Log.i(TAG, "${geofencesToAdd.size} Geofences added successfully.")
+                // Log ID geofence yang ditambahkan jika perlu
+                // Log.d(TAG, "Added IDs: ${geofencesToAdd.joinToString { it.requestId }}")
             }
             addOnFailureListener { exception ->
-                Log.e(TAG, "Failed to remove geofences.", exception)
+                Log.e(TAG, "Failed to add ${geofencesToAdd.size} geofences.", exception)
+                // Tambahan: Cek status code spesifik jika perlu
+                if ((exception as? ApiException)?.statusCode == GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE) {
+                    Log.e(TAG, "Error: Geofence service not available (1000). Check location settings/Play Services.")
+                } else if ((exception as? ApiException)?.statusCode == GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES) {
+                    Log.e(TAG, "Error: Exceeded maximum geofence limit (100).")
+                }
             }
         }
-        // Atau hapus berdasarkan ID:
-        // geofencingClient.removeGeofences(listOf(GEOFENCE_ID))
+    }
+
+    // Fungsi untuk menghapus SEMUA geofence yang terkait dengan PendingIntent ini
+    fun removeGeofences(context: Context) {
+        val geofencingClient = LocationServices.getGeofencingClient(context)
+        val pendingIntent = getGeofencePendingIntent(context) // Dapatkan PendingIntent yang sama
+
+        Log.d(TAG, "Attempting to remove all geofences associated with PendingIntent: ${pendingIntent.hashCode()}")
+
+        geofencingClient.removeGeofences(pendingIntent)?.run { // Hapus berdasarkan PendingIntent
+            addOnSuccessListener {
+                Log.i(TAG, "All geofences associated with the PendingIntent removed successfully.")
+            }
+            addOnFailureListener { exception ->
+                Log.e(TAG, "Failed to remove geofences by PendingIntent.", exception)
+            }
+        }
+        // Jika Anda ingin menghapus berdasarkan ID secara spesifik di masa depan:
+        // val geofenceIds = TARGET_LOCATIONS.keys.toList()
+        // geofencingClient.removeGeofences(geofenceIds).addOnCompleteListener { ... }
     }
 }
+

@@ -3,6 +3,8 @@ package com.afian.tugasakhir.Component
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color.parseColor
+import android.location.Location
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -33,56 +35,125 @@ import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.rememberCameraPositionState
 
 
-// --- Definisikan Koordinat Geofence (sebaiknya dari konstanta atau ViewModel) ---
-object GeofenceData {
-    val CENTER = LatLng(-5.1359355261683906, 119.44895924980513)
-    const val RADIUS_METERS = 50.0 // Gunakan Double untuk Circle
+// --- Definisikan Koordinat Target Baru & Logika Radius ---
+object NewGeofenceTargets {
+    private const val TAG = "NewGeofenceTargets" // Tag Log
 
-    // Koordinat sudut asli (untuk visualisasi Polygon)
-    val CORNERS = listOf(
-        LatLng(-5.136154640871624, 119.44884939358585), // TL
-        LatLng(-5.136182976030469, 119.44912618581905), // TR
-        LatLng(-5.135779171177262, 119.44915940198575), // BR
-        LatLng(-5.135758737671867, 119.44887608762276)  // BL
+    // Konstanta untuk perhitungan radius
+    internal const val DEFAULT_RADIUS_METERS = 30.0 // Gunakan Double
+    private const val OVERLAP_FACTOR = 1.1 // Double
+    private const val MINIMUM_RADIUS_METERS = 15.0 // Double
+
+    // Daftar koordinat target (sekarang Map agar ada ID)
+    val TARGET_LOCATIONS: Map<String, LatLng> = mapOf(
+        "TARGET_1" to LatLng(-5.1358417, 119.4489412),
+        "TARGET_2" to LatLng(-5.1358403, 119.4490958),
+        "TARGET_4" to LatLng(-5.1360277, 119.4489348),
+        "TARGET_5" to LatLng(-5.1360271, 119.4490799),
+        "TARGET_6" to LatLng(-5.1361475, 119.4489108),
+        "TARGET_7" to LatLng(-5.1361669, 119.4490859)
     )
-}
-// --- Akhir Definisi Koordinat ---
 
-
-@OptIn(ExperimentalMaterial3Api::class) // Untuk TopAppBar Material 3
-@Composable
-fun GeofencingMap() {
-
-    // State untuk mengontrol kamera map
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(GeofenceData.CENTER, 17f) // Zoom level 17f (bisa disesuaikan)
+    // Pusat perkiraan (tidak berubah)
+    val APPROX_CENTER: LatLng by lazy {
+        if (TARGET_LOCATIONS.isEmpty()) {
+            LatLng(-5.1359, 119.4490)
+        } else {
+            val avgLat = TARGET_LOCATIONS.values.map { it.latitude }.average()
+            val avgLng = TARGET_LOCATIONS.values.map { it.longitude }.average()
+            LatLng(avgLat, avgLng)
+        }
     }
 
-    // Pengaturan UI Map (opsional)
+    // Fungsi hitung jarak (pindah ke sini)
+    private fun calculateDistanceMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val results = FloatArray(1)
+        try {
+            Location.distanceBetween(lat1, lon1, lat2, lon2, results)
+            // Kembalikan sebagai Double untuk konsistensi radius
+            return results[0].toDouble()
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Error calculating distance: Invalid coordinates?", e)
+            return Double.MAX_VALUE
+        }
+    }
+
+    // Properti lazy untuk menyimpan hasil perhitungan radius dinamis
+    // Ini akan dihitung sekali saat pertama kali diakses
+    val dynamicRadii: Map<String, Double> by lazy {
+        Log.d(TAG, "Calculating dynamic radii...")
+        val radii = mutableMapOf<String, Double>()
+        val targetIds = TARGET_LOCATIONS.keys.toList()
+
+        if (targetIds.size <= 1) {
+            targetIds.forEach { id -> radii[id] = DEFAULT_RADIUS_METERS }
+            Log.d(TAG, "Only ${targetIds.size} target(s). Using default radius: $DEFAULT_RADIUS_METERS")
+            return@lazy radii // Kembali dari lazy block
+        }
+
+        for (i in targetIds.indices) {
+            val currentId = targetIds[i]
+            val currentLatLng = TARGET_LOCATIONS[currentId] ?: continue
+            var minDistance = Double.MAX_VALUE
+
+            for (j in targetIds.indices) {
+                if (i == j) continue
+                val otherId = targetIds[j]
+                val otherLatLng = TARGET_LOCATIONS[otherId] ?: continue
+                val distance = calculateDistanceMeters(
+                    currentLatLng.latitude, currentLatLng.longitude,
+                    otherLatLng.latitude, otherLatLng.longitude
+                )
+                minDistance = minOf(minDistance, distance)
+            }
+
+            var calculatedRadius = (minDistance / 2.0) * OVERLAP_FACTOR
+            calculatedRadius = maxOf(MINIMUM_RADIUS_METERS, calculatedRadius)
+            radii[currentId] = calculatedRadius
+            Log.d(TAG, "Radius for $currentId = $calculatedRadius meters (based on min neighbor distance: $minDistance)")
+        }
+        radii // Kembalikan map radius dari lazy block
+    }
+}
+// --- Akhir Definisi Koordinat Baru ---
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GeofencingMap() { // Nama fungsi mungkin perlu disesuaikan jika sudah ada
+
+    // State untuk mengontrol kamera map, arahkan ke pusat baru
+    val cameraPositionState = rememberCameraPositionState {
+        // Gunakan pusat perkiraan dari data baru
+        // Mungkin perlu zoom lebih dekat (misal 18f atau 19f) karena titiknya berdekatan
+        position = CameraPosition.fromLatLngZoom(NewGeofenceTargets.APPROX_CENTER, 18.5f)
+    }
+
+    // Pengaturan UI Map (tetap sama atau sesuaikan)
     val uiSettings = remember {
         MapUiSettings(
-            zoomControlsEnabled = true, // Tampilkan tombol zoom +/-
+            zoomControlsEnabled = true,
             compassEnabled = true,
-            myLocationButtonEnabled = true // Perlu izin lokasi untuk ini
+            myLocationButtonEnabled = true // Perlu izin lokasi
         )
     }
-    // Properti Map (opsional)
+    // Properti Map (tetap sama atau sesuaikan)
     val mapProperties = remember {
         MapProperties(
-            isMyLocationEnabled = true, // Tampilkan titik biru lokasi saat ini (perlu izin)
-            mapType = MapType.NORMAL // Bisa ganti ke HYBRID, SATELLITE, TERRAIN
+            isMyLocationEnabled = true, // Perlu izin lokasi
+            mapType = MapType.SATELLITE
         )
     }
-
+    val targetRadii = NewGeofenceTargets.dynamicRadii
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Peta Area Geofence") })
+            // Judul bisa disesuaikan
+            TopAppBar(title = { Text("Peta Target Geofence") })
         }
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues) // Terapkan padding dari Scaffold
+                .padding(paddingValues)
         ) {
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
@@ -90,65 +161,25 @@ fun GeofencingMap() {
                 uiSettings = uiSettings,
                 properties = mapProperties
             ) {
-                // 1. Tandai Titik Tengah Geofence
-                Marker(
-                    state = MarkerState(position = GeofenceData.CENTER),
-                    title = "Pusat Geofence",
-                    snippet = "Radius: ${GeofenceData.RADIUS_METERS}m"
-                )
+                // Loop melalui Map lokasi target
+                NewGeofenceTargets.TARGET_LOCATIONS.forEach { (id, targetLatLng) ->
+                    // Ambil radius dinamis untuk ID ini, atau gunakan default
+                    val radius = targetRadii[id] ?: NewGeofenceTargets.DEFAULT_RADIUS_METERS // Ambil radius dari map
 
-                // 2. Gambar Lingkaran Geofence (yang *sebenarnya* digunakan API)
-                Circle(
-                    center = GeofenceData.CENTER,
-                    radius = GeofenceData.RADIUS_METERS, // Radius dalam meter
-                    strokeColor = Color(parseColor("#FF4081")), // Warna garis tepi (misal: pink)
-                    strokeWidth = 5f, // Lebar garis tepi
-                    fillColor = Color(parseColor("#40FF4081")) // Warna isi (misal: pink transparan)
-                )
+                    Circle(
+                        center = targetLatLng,
+                        radius = radius, // <-- GUNAKAN RADIUS DINAMIS DARI MAP
+                        strokeWidth = 2f,
+                        strokeColor = Color.Cyan, // Warna disesuaikan agar kontras
+                        fillColor = Color.Cyan.copy(alpha = 0.3f)
+                    )
 
-                // 3. (Opsional) Gambar Polygon dari Sudut Asli yang Anda Berikan
-                Polygon(
-                    points = GeofenceData.CORNERS,
-                    strokeColor = Color(parseColor("#3F51B5")), // Warna garis tepi (misal: indigo)
-                    strokeWidth = 4f,
-                    fillColor = Color(parseColor("#403F51B5")) // Warna isi (misal: indigo transparan)
-                )
+                    Marker(
+                        state = MarkerState(position = targetLatLng),
+                        title = id // Gunakan ID dari map sebagai judul
+                    )
+                }
             }
         }
     }
 }
-
-
-//@Composable
-//fun GeofencingMap() {
-//    // Koordinat
-//    val coordinates = listOf(
-//        LatLng(-5.136154640871624, 119.44884939358585), // Pojok Atas Kiri
-//        LatLng(-5.136182976030469, 119.44912618581905), // Pojok Atas Kanan
-//        LatLng(-5.135779171177262, 119.44915940198575), // Pojok Bawah Kanan
-//        LatLng(-5.135758737671867, 119.44887608762276), // Pojok Bawah Kiri
-//        LatLng(-5.1359355261683906, 119.44895924980513) // Titik Tengah
-//    )
-//
-//    // Tentukan radius untuk lingkaran
-//    val radius = 40f // Radius dalam meter
-//
-//    // Tentukan posisi kamera
-//    val cameraPositionState = rememberCameraPositionState {
-//        position = CameraPosition.fromLatLngZoom(coordinates[4], 16f) // Pusatkan pada titik tengah
-//    }
-//
-//    GoogleMap(
-//        modifier = Modifier.fillMaxSize(),
-//        cameraPositionState = cameraPositionState,
-//        properties = MapProperties(isMyLocationEnabled = true)
-//    ) {
-//        // Gambar lingkaran di titik tengah
-//        Circle(
-//            center = coordinates[1], // Titik Tengah
-//            radius = radius.toDouble(), // Radius dalam meter
-//            strokeColor = Color.Red,
-//            fillColor = Color(0x2200FF00) // Warna transparan hijau
-//        )
-//    }
-//}

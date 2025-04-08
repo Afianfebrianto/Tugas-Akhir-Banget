@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Looper
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,8 +41,14 @@ import com.afian.tugasakhir.Controller.GeofenceMonitorEffect
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+
 
 @Composable
 fun ScreenDosen() {
@@ -87,6 +94,38 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
     var backgroundLocationPermissionGranted by remember { mutableStateOf(checkBackgroundLocationPermission(context)) }
     // State untuk melacak apakah geofence sudah coba ditambahkan
     var geofenceSetupAttempted by remember { mutableStateOf(false) }
+
+    // --- MULAI SETUP LOKASI AKTIF ---
+
+    // 1. Dapatkan FusedLocationProviderClient
+    val fusedLocationClient: FusedLocationProviderClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
+
+    // 2. Definisikan LocationRequest (Akurasi Tinggi)
+    val locationRequest = remember {
+        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000L) // Interval 10 detik
+            .setMinUpdateIntervalMillis(5000L) // Interval tercepat 5 detik
+            .build()
+    }
+
+    // 3. Definisikan LocationCallback (Hanya untuk logging/konfirmasi)
+    val locationCallback = remember {
+        object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult.lastLocation?.let { location ->
+                    Log.d(
+                        "HomeDosenScreen_GPS", // Tag log berbeda untuk GPS aktif
+                        "GPS Update Received: Lat=${location.latitude}, Lng=${location.longitude}"
+                    )
+                    // Tidak perlu melakukan apa-apa lagi, tujuannya hanya agar GPS aktif
+                }
+            }
+        }
+    }
+    // --- AKHIR SETUP LOKASI AKTIF ---
+
+
 // --- Pastikan backgroundLocationPermissionLauncher sudah didefinisikan ---
 // (Kode ini harus ada SEBELUM fineLocationPermissionLauncher atau di scope yang sama)
     val backgroundLocationPermissionLauncher = rememberLauncherForActivityResult(
@@ -99,7 +138,7 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
             // Pastikan Fine Location masih ada (seharusnya masih ada jika flow normal)
             if (fineLocationPermissionGranted) {
                 Log.d("HomeDosenScreen", "Background location granted. Attempting geofence setup.")
-                GeofenceHelper.addGeofence(context)
+                GeofenceHelper.addGeofences(context)
                 geofenceSetupAttempted = true
             } else {
                 // Kasus aneh jika fine permission dicabut antara permintaan fine dan background
@@ -112,7 +151,7 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
             // Geofence mungkin masih bisa berjalan di foreground jika fine permission ada
             if (fineLocationPermissionGranted) {
                 Log.d("HomeDosenScreen", "Background denied, attempting geofence setup for foreground use.")
-                GeofenceHelper.addGeofence(context) // Tetap coba setup untuk foreground
+                GeofenceHelper.addGeofences(context) // Tetap coba setup untuk foreground
             }
             geofenceSetupAttempted = true // Tandai sudah dicoba
         }
@@ -146,7 +185,7 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
                 backgroundLocationPermissionGranted = true // Pastikan state sesuai
                 // Langsung setup Geofence karena semua izin yang diperlukan sudah terpenuhi
                 Log.d("HomeDosenScreen", "All necessary permissions granted. Attempting geofence setup.")
-                GeofenceHelper.addGeofence(context)
+                GeofenceHelper.addGeofences(context)
                 geofenceSetupAttempted = true // Tandai sudah dicoba
             }
         } else {
@@ -174,7 +213,7 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
             } else {
                 // Semua izin sudah ada (atau tidak diperlukan)
                 Log.d("HomeDosenScreen", "All permissions already granted. Attempting geofence setup.")
-                GeofenceHelper.addGeofence(context)
+                GeofenceHelper.addGeofences(context)
                 geofenceSetupAttempted = true
             }
         } else {
@@ -183,6 +222,33 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
     }
 
     // --- Akhir Integrasi Geofencing ---
+
+    // --- MULAI EFEK UNTUK START/STOP LOKASI AKTIF ---
+    // DisposableEffect akan memulai saat Composable masuk & izin ada,
+    // dan membersihkan (menghentikan) saat Composable keluar atau izin dicabut.
+    DisposableEffect(fineLocationPermissionGranted) { // Key: agar dievaluasi ulang jika izin berubah
+        if (fineLocationPermissionGranted) {
+            Log.i("HomeDosenScreen_GPS", "Izin lokasi ada. Memulai pembaruan lokasi aktif...")
+            // Memulai pembaruan lokasi
+            // Anotasi diperlukan karena kita cek izin secara manual di dalam effect
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper() // Callback di main thread (aman untuk log)
+            )
+        } else {
+            Log.w("HomeDosenScreen_GPS", "Izin lokasi tidak ada. Tidak memulai pembaruan lokasi aktif.")
+        }
+
+        // onDispose akan dipanggil saat HomeDosenScreen meninggalkan komposisi
+        // atau saat fineLocationPermissionGranted berubah.
+        onDispose {
+            Log.i("HomeDosenScreen_GPS", "Menghentikan pembaruan lokasi aktif (onDispose)...")
+            // Sangat penting untuk menghentikan pembaruan agar hemat baterai!
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+        }
+    }
+    // --- AKHIR EFEK UNTUK START/STOP LOKASI AKTIF ---
 
 
     // --- Layout UI Asli Anda ---
@@ -196,14 +262,14 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
         Box(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
             Header(username, identifier, fotoProfile) // Panggil Header dengan data pengguna
         }
-        // Di dalam Column atau Box di HomeDosenScreen
-        Button(onClick = {
-            Log.d("HomeDosenScreen", "Mengirim manual broadcast test...")
-            val testIntent = Intent(context, com.afian.tugasakhir.Controller.GeofenceBroadcastReceiver::class.java)
-            // Beri action unik agar bisa dikenali di log receiver
-            testIntent.action = "com.afian.tugasakhir.MANUAL_BROADCAST_TEST"
-            context.sendBroadcast(testIntent)
-        }) { Text("Tes Manual Receiver") }
+//        // Di dalam Column atau Box di HomeDosenScreen
+//        Button(onClick = {
+//            Log.d("HomeDosenScreen", "Mengirim manual broadcast test...")
+//            val testIntent = Intent(context, com.afian.tugasakhir.Controller.GeofenceBroadcastReceiver::class.java)
+//            // Beri action unik agar bisa dikenali di log receiver
+//            testIntent.action = "com.afian.tugasakhir.MANUAL_BROADCAST_TEST"
+//            context.sendBroadcast(testIntent)
+//        }) { Text("Tes Manual Receiver") }
 
         // Card mengambil sisa ruang
         Card(

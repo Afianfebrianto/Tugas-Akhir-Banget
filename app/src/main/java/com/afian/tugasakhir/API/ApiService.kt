@@ -5,6 +5,7 @@ import com.afian.tugasakhir.Model.AddLocationResponse
 import com.afian.tugasakhir.Model.DosenResponse
 import com.afian.tugasakhir.Model.LoginRequest
 import com.afian.tugasakhir.Model.LoginResponse
+import com.afian.tugasakhir.Model.RegisterTokenRequest
 import com.afian.tugasakhir.Model.UpdateLocationRequest
 import com.afian.tugasakhir.Model.UpdateLocationResponse
 import com.afian.tugasakhir.Model.User
@@ -28,10 +29,16 @@ interface ApiService {
 
     @PUT("api/users/update-location")
     suspend fun updateLocation(@Body body: UpdateLocationRequest): UpdateLocationResponse // Gunakan suspend
+
+    @POST("api/users/register-fcm-token") // Sesuaikan path jika berbeda
+    suspend fun registerFcmToken(@Body body: RegisterTokenRequest): retrofit2.Response<Void> // Contoh Response, sesuaikan
+    // Atau bisa juga: suspend fun registerFcmToken(@Body body: Map<String, Any>): retrofit2.Response<Void>
+
+
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.1.60:3000/"
+    private const val BASE_URL = "http://192.168.1.7:3000/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())

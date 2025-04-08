@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.idea.proto.com.google.protobuf.SourceCodeInfo
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services")
 
 }
 
@@ -97,4 +98,10 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3") // Gunakan versi terbaru
 }

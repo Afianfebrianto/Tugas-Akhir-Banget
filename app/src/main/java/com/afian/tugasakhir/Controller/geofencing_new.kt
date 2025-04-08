@@ -21,19 +21,28 @@ object GeofenceHelper {
 
     private const val TAG = "GeofenceHelper"
     // Radius default untuk setiap geofence target kecil (dalam meter)
-    private const val TARGET_GEOFENCE_RADIUS_METERS = 15f // Coba 20 meter, sesuaikan jika perlu
+    private const val TARGET_GEOFENCE_RADIUS_METERS = 20f // Coba 20 meter, sesuaikan jika perlu
     private const val DWELL_DELAY_MILLISECONDS = 1000 * 10 // 10 detik (jika DWELL diaktifkan)
 
     // Daftar koordinat target baru
     private val TARGET_LOCATIONS = mapOf(
-        "TARGET_1" to LatLng(-5.1358417, 119.4489412),
-        "TARGET_2" to LatLng(-5.1358403, 119.4490958),
-        // Target 3 dilewati sesuai data Anda
-        "TARGET_4" to LatLng(-5.1360277, 119.4489348),
-        "TARGET_5" to LatLng(-5.1360271, 119.4490799),
-        "TARGET_6" to LatLng(-5.1361475, 119.4489108), // Koordinat Target 6 diperbarui
-        "TARGET_7" to LatLng(-5.1361669, 119.4490859)  // Koordinat Target 7 diperbarui
+//        "TARGET_1" to LatLng(-5.1358417, 119.4489412),
+//        "TARGET_2" to LatLng(-5.1358403, 119.4490958),
+//        // Target 3 dilewati sesuai data Anda
+//        "TARGET_4" to LatLng(-5.1360277, 119.4489348),
+//        "TARGET_5" to LatLng(-5.1360271, 119.4490799),
+//        "TARGET_6" to LatLng(-5.1361475, 119.4489108), // Koordinat Target 6 diperbarui
+//        "TARGET_7" to LatLng(-5.1361669, 119.4490859)  // Koordinat Target 7 diperbarui
         // Target 8 dilewati sesuai data Anda
+        "Belakang_R" to LatLng(-5.1358115,119.4489161),
+        "Corner_Samping_Belakang" to LatLng (-5.1358267,119.4491116),
+        "Corner_Samping_Depan" to LatLng (-5.1359155,119.4491038),
+        "Corner_Depan_R" to LatLng(-5.1361354,119.4488866),
+        "Corner_Depan_L" to LatLng(-5.1361372,119.4489829),
+//        "Corner_Belakang_L" to LatLng (-5.1359406,119.4490079),
+        "Mid_Belakang" to LatLng(-5.1358624,119.4490039),
+        "Mid_Belakang_R" to LatLng(-5.1359339,119.4489137),
+        "Tengah_Depan" to LatLng(-5.1360345,119.4489478)
     )
 
     // PendingIntent (logika tetap sama, flag MUTABLE disarankan dari tes sebelumnya)

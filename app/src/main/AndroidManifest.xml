@@ -38,7 +38,7 @@
             </intent-filter>
         </activity>
         <receiver
-            android:name="com.afian.tugasakhir.Controller.GeofenceBroadcastReceiver"
+            android:name="com.afian.tugasakhir.Service.GeofenceBroadcastReceiver"
             android:enabled="true"
             android:exported="false" />
 

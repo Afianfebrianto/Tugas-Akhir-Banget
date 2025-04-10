@@ -1,4 +1,4 @@
-package com.afian.tugasakhir.Controller
+package com.afian.tugasakhir.Service
 
 import android.content.BroadcastReceiver
 import android.content.Context

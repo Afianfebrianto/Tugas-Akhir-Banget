@@ -4,7 +4,9 @@ import org.jetbrains.kotlin.gradle.idea.proto.com.google.protobuf.SourceCodeInfo
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 
 }
 
@@ -55,6 +57,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    composeCompiler {
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
+        stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
+    }
 
 }
 
@@ -104,4 +110,10 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3") // Gunakan versi terbaru
+
+    implementation("androidx.room:room-runtime:2.7.0")
+    implementation("androidx.room:room-ktx:2.7.0")
+    ksp("androidx.room:room-compiler:2.7.0")
+
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
 }

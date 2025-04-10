@@ -1,4 +1,4 @@
-package com.afian.tugasakhir.Controller
+package com.afian.tugasakhir.Service
 
 // Di suatu tempat, misal file Constants.kt atau di dalam Receiver/ViewModel
 object LocationPrefsKeys {

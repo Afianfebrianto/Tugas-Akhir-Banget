@@ -46,7 +46,7 @@ fun CardButtonBar(navController: NavController) {
             iconRes = R.drawable.ic_notifications, // Replace with your icon resource
             label = "Pemberitahuan",
             onClick = {
-                // TODO: Handle Pemberitahuan click
+                navController.navigate("notification")
             }
         )
         CardButton(
@@ -65,14 +65,14 @@ fun CardButtonBar(navController: NavController) {
             }
         )
     }
-    CardButton(
-        iconRes = R.drawable.ic_map_24, // Replace with your icon resource
-        label = "Maps Debug",
-        onClick = {
-            // TODO: Handle Pengaturan click
-            navController.navigate("debug_maps")
-        }
-    )
+//    CardButton(
+//        iconRes = R.drawable.ic_map_24, // Replace with your icon resource
+//        label = "Maps Debug",
+//        onClick = {
+//            // TODO: Handle Pengaturan click
+//            navController.navigate("debug_maps")
+//        }
+//    )
 }
 
 

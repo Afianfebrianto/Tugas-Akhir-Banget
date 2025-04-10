@@ -1,16 +1,13 @@
-package com.afian.tugasakhir.View.Screen.Navigation
+package com.afian.tugasakhir.Controller
 
 import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.afian.tugasakhir.Component.GeofencingMap
-import com.afian.tugasakhir.Component.UserSettingsScreen
-import com.afian.tugasakhir.Controller.LoginViewModel
-import com.afian.tugasakhir.View.Screen.admin.ScreenAdmin
-import com.afian.tugasakhir.View.Screen.dosen.ScreenDosen
+import com.afian.tugasakhir.View.Screen.HelperScreen.NotificationScreen
+import com.afian.tugasakhir.View.Screen.HelperScreen.UserSettingsScreen
 import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
 import com.afian.tugasakhir.View.Screen.Splash.SplashScreen
 import com.afian.tugasakhir.View.Screen.Welcome.WelcomeScreen
@@ -18,8 +15,6 @@ import com.afian.tugasakhir.View.Screen.Welcome.WelcomeScreen1
 import com.afian.tugasakhir.View.Screen.admin.HomeAdminScreen
 import com.afian.tugasakhir.View.Screen.dosen.HomeDosenScreen
 import com.afian.tugasakhir.View.Screen.mahasiswa.HomeMhsScreen
-import com.afian.tugasakhir.View.Screen.mahasiswa.ScreenMhs
-
 
 
 //@Composable
@@ -99,5 +94,6 @@ fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewM
         composable("admin") { HomeAdminScreen(loginViewModel,navController) }
         composable("user_settings") { UserSettingsScreen(loginViewModel,navController) }
         composable ("debug_maps"){ GeofencingMap() }
+        composable ("notification"){ NotificationScreen() }
     }
 }

@@ -10,18 +10,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.afian.tugasakhir.Controller.NavigationGraph
 import com.afian.tugasakhir.ui.theme.TugasAkhirTheme
 
 class MainActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels { ViewModelFactory(applicationContext) }
+//    private val dosenViewModel: DosenViewModel
+
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            NavigationGraph(navController, loginViewModel)
+            NavigationGraph(navController, loginViewModel )
 //            GeofencingMap()
         }
     }

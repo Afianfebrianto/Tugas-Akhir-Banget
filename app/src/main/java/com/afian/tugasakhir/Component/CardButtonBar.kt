@@ -40,6 +40,7 @@ fun CardButtonBar(navController: NavController) {
             label = "Informasi Dosen",
             onClick = {
                 // TODO: Handle Informasi Dosen click
+                navController.navigate("informasi_dosen")
             }
         )
         CardButton(

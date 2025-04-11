@@ -2,6 +2,7 @@ package com.afian.tugasakhir.API
 
 import com.afian.tugasakhir.Model.AddLocationRequest
 import com.afian.tugasakhir.Model.AddLocationResponse
+import com.afian.tugasakhir.Model.DosenNotInCampusResponse
 import com.afian.tugasakhir.Model.DosenResponse
 import com.afian.tugasakhir.Model.LoginRequest
 import com.afian.tugasakhir.Model.LoginResponse
@@ -22,7 +23,7 @@ interface ApiService {
     suspend fun login(@Body body: LoginRequest): LoginResponse
 
     @GET("api/users/dosen-di-kampus")
-    fun getDosen(): Call<DosenResponse>
+    suspend fun getDosenOnCampus(): DosenResponse
 
     @POST("api/users/add-location")
     suspend fun addLocation(@Body body: AddLocationRequest): AddLocationResponse // Gunakan suspend
@@ -34,11 +35,14 @@ interface ApiService {
     suspend fun registerFcmToken(@Body body: RegisterTokenRequest): retrofit2.Response<Void> // Contoh Response, sesuaikan
     // Atau bisa juga: suspend fun registerFcmToken(@Body body: Map<String, Any>): retrofit2.Response<Void>
 
+    @GET("api/users/dosen-not-in-campus")
+    suspend fun getDosenNotInCampus(): DosenNotInCampusResponse //
+
 
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.1.7:3000/"
+    private const val BASE_URL = "http://192.168.8.103:3000/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())

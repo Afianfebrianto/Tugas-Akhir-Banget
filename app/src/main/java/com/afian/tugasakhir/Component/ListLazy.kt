@@ -1,7 +1,10 @@
 package com.afian.tugasakhir.Component
 
+import android.util.Log
 import android.widget.ImageView
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -52,14 +55,14 @@ import com.bumptech.glide.request.RequestOptions
 
 @Composable
 fun DosenList(viewModel: DosenViewModel = viewModel()) {
-    val dosenListState = viewModel.dosenList.collectAsState() // Ambil state flow
+    val dosenListState = viewModel.filteredDosenList.collectAsState()
     val dosenList = dosenListState.value // Ambil list dari state
 
     // State untuk menyimpan dosen yang dipilih (null jika tidak ada yg dipilih)
     var selectedDosen by remember { mutableStateOf<Dosen?>(null) }
 
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 4.dp)) { // Padding di Column utama
-        // Text(text = "Dosen on Campus", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp)) // Judul jika perlu
+         Text(text = "Dosen on Campus", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp)) // Judul jika perlu
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(4.dp) // Jarak antar card
@@ -82,7 +85,8 @@ fun DosenList(viewModel: DosenViewModel = viewModel()) {
     selectedDosen?.let { dosenData ->
         DosenDetailDialog(
             dosen = dosenData,
-            onDismissRequest = { selectedDosen = null } // Set state ke null untuk menutup dialog
+            onDismissRequest = {Log.d("PemanggilDialog", "onDismissRequest dipanggil, menutup dialog...")
+                selectedDosen = null } // Set state ke null untuk menutup dialog
         )
     }
 }
@@ -124,6 +128,59 @@ fun DosenItem(
     }
 }
 
+//@Composable
+//fun DosenItem(
+//    dosen: Dosen,
+//    isOnCampus: Boolean, // <-- Parameter BARU untuk status di kampus
+//    onClick: (Dosen) -> Unit
+//) {
+//    // Tentukan warna border berdasarkan status
+//    val borderColor = if (isOnCampus) Color.Green else Color.Red
+//    val borderWidth = 2.dp // Ketebalan border (bisa disesuaikan)
+//
+//    Card(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(vertical = 4.dp)
+//            .clickable { onClick(dosen) }
+//    ) {
+//        Row(
+//            modifier = Modifier.padding(16.dp),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Image(
+//                painter = rememberAsyncImagePainter(
+//                    model = dosen.foto_profile,
+//                    placeholder = painterResource(id = R.drawable.placeholder_image),
+//                    error = painterResource(id = R.drawable.placeholder_image)
+//                ),
+//                contentDescription = "Profile Picture",
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier
+//                    .size(50.dp)
+//                    // --- 👇 Tambahkan Border di sini 👇 ---
+//                    .border(
+//                        BorderStroke(borderWidth, borderColor), // Tentukan ketebalan & warna
+//                        CircleShape // Bentuk border mengikuti bentuk clip
+//                    )
+//                    // --- 👆 Akhir Border 👆 ---
+//                    .clip(CircleShape) // Clip gambar menjadi lingkaran
+//            )
+//            Spacer(modifier = Modifier.width(16.dp))
+//            Column {
+//                Text(text = dosen.user_name, style = MaterialTheme.typography.titleMedium)
+//                Text(text = dosen.identifier, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+//                // (Opsional) Tambahkan indikator teks kecil
+//                // Text(
+//                //     text = if (isOnCampus) "Di Kampus" else "Tidak di Kampus",
+//                //     style = MaterialTheme.typography.labelSmall,
+//                //     color = borderColor,
+//                //     modifier = Modifier.padding(top = 2.dp)
+//                // )
+//            }
+//        }
+//    }
+//}
 @Preview
 @Composable
 fun PreviewListDosen() {

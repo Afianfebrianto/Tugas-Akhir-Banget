@@ -63,7 +63,8 @@ fun DosenDetailDialog(
             Box(modifier = Modifier.fillMaxWidth()) {
                 // Tombol Close (X) di kanan atas
                 IconButton(
-                    onClick = onDismissRequest,
+                    onClick = {Log.d("DosenDetailDialog", "Tombol Close (X) diklik!")
+                        onDismissRequest() },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp) // Padding kecil untuk tombol close

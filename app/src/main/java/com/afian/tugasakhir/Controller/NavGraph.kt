@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.afian.tugasakhir.Component.GeofencingMap
+import com.afian.tugasakhir.View.Screen.HelperScreen.CombinedDosenListScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.NotificationScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.UserSettingsScreen
 import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
@@ -95,5 +96,7 @@ fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewM
         composable("user_settings") { UserSettingsScreen(loginViewModel,navController) }
         composable ("debug_maps"){ GeofencingMap() }
         composable ("notification"){ NotificationScreen() }
+        composable ("informasi_dosen"){ CombinedDosenListScreen(navController=navController) }
+
     }
 }

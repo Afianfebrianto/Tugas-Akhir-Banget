@@ -2,6 +2,8 @@ package com.afian.tugasakhir.Component
 
 import android.widget.ImageView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,7 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,12 +33,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.afian.tugasakhir.Controller.DosenViewModel
@@ -45,35 +52,73 @@ import com.bumptech.glide.request.RequestOptions
 
 @Composable
 fun DosenList(viewModel: DosenViewModel = viewModel()) {
-    // Fetch the list of Dosen
-    val dosenList = viewModel.dosenList.collectAsState(initial = emptyList())
+    val dosenListState = viewModel.dosenList.collectAsState() // Ambil state flow
+    val dosenList = dosenListState.value // Ambil list dari state
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(text = "Dosen on Campus", style = MaterialTheme.typography.titleLarge)
+    // State untuk menyimpan dosen yang dipilih (null jika tidak ada yg dipilih)
+    var selectedDosen by remember { mutableStateOf<Dosen?>(null) }
 
-        LazyColumn {
-            items(dosenList.value) { dosen ->
-                DosenItem(dosen)
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 4.dp)) { // Padding di Column utama
+        // Text(text = "Dosen on Campus", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp)) // Judul jika perlu
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(4.dp) // Jarak antar card
+        ) {
+            items(
+                items = dosenList,
+                key = { dosen -> dosen.identifier } // Gunakan identifier sebagai key
+            ) { dosen ->
+                DosenItem(
+                    dosen = dosen,
+                    onClick = { clickedDosen ->
+                        selectedDosen = clickedDosen // Update state saat item diklik
+                    }
+                )
             }
         }
+    }
+
+    // Tampilkan Dialog jika selectedDosen tidak null
+    selectedDosen?.let { dosenData ->
+        DosenDetailDialog(
+            dosen = dosenData,
+            onDismissRequest = { selectedDosen = null } // Set state ke null untuk menutup dialog
+        )
     }
 }
 
 @Composable
-fun DosenItem(dosen: Dosen) {
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        Row(modifier = Modifier.padding(16.dp)) {
-            // Load image using Coil or any other image loading library
+fun DosenItem(
+    dosen: Dosen,
+    onClick: (Dosen) -> Unit // <-- Tambahkan parameter onClick lambda
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable { onClick(dosen) } // <-- Tambahkan clickable di sini
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically // Ratakan vertikal
+        ) {
             Image(
-                painter = rememberImagePainter(dosen.foto_profile ?: R.drawable.placeholder_image), // Replace with your placeholder
+                // Gunakan rememberAsyncImagePainter untuk Coil versi baru
+                painter = rememberAsyncImagePainter(
+                    model = dosen.foto_profile, // URL dari Cloudinary
+                    placeholder = painterResource(id = R.drawable.placeholder_image), // Fallback placeholder
+                    error = painterResource(id = R.drawable.placeholder_image) // Gambar jika error load
+                ),
                 contentDescription = "Profile Picture",
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(40.dp).clip(CircleShape)
+                modifier = Modifier
+                    .size(50.dp) // Sedikit lebih besar mungkin?
+                    .clip(CircleShape)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(text = dosen.user_name, style = MaterialTheme.typography.labelLarge)
-                Text(text = dosen.identifier, style = MaterialTheme.typography.labelSmall)
+                Text(text = dosen.user_name, style = MaterialTheme.typography.titleMedium) // Gaya teks lebih besar
+                Text(text = dosen.identifier, style = MaterialTheme.typography.bodyMedium, color = Color.Gray) // Gaya teks lebih kecil, warna abu
             }
         }
     }

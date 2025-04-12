@@ -45,44 +45,54 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
         Log.d(TAG, "From: ${remoteMessage.from}")
 
-        var notificationTitle: String? = null
-        var notificationBody: String? = null
+        // Cek jika ini adalah notifikasi panggilan dosen
+        if (remoteMessage.data["type"] == "panggilan_dosen") {
+            val title = remoteMessage.data["title"] ?: "Panggilan Dosen"
+            val body = remoteMessage.data["body"] ?: "Seorang dosen mencari Anda."
+            val panggilanId = remoteMessage.data["panggilan_id"]
+            val dosenName = remoteMessage.data["dosen_name"]
 
-        // Prioritaskan ambil dari DATA payload
-        if (remoteMessage.data.isNotEmpty()) {
-            Log.d(TAG, "Message data payload: " + remoteMessage.data)
-            notificationTitle = remoteMessage.data["title"]
-            notificationBody = remoteMessage.data["body"]
-        }
-        // Fallback ke NOTIFICATION payload (jarang terjadi jika backend kirim data)
-        else {
-            remoteMessage.notification?.let {
-                notificationTitle = it.title
-                notificationBody = it.body
-            }
-        }
+            Log.i(TAG,"Panggilan Dosen received: ID=$panggilanId, From=$dosenName")
 
-        // Simpan ke DB dan tampilkan notifikasi jika ada data
-        if (!notificationTitle.isNullOrBlank() && !notificationBody.isNullOrBlank()) {
-            val receivedTimestamp = System.currentTimeMillis()
+            // 1. Simpan ke Riwayat Lokal (Room DB)
             val historyItem = NotificationHistoryItem(
-                title = notificationTitle,
-                body = notificationBody,
-                timestamp = receivedTimestamp
+                // Anda bisa modifikasi entity atau simpan data panggilan ini secara khusus
+                title = title,
+                body = body,
+                timestamp = System.currentTimeMillis() // Waktu terima notif
+                // Mungkin tambahkan field: type="panggilan", relatedId=panggilanId.toIntOrNull()
             )
-
-            // Simpan ke database
             serviceScope.launch {
                 try {
                     notificationDao.insert(historyItem)
-                    Log.d(TAG, "Notification saved to history database.")
-                } catch(e: Exception) {
-                    Log.e(TAG, "Error saving notification to DB: ${e.message}", e)
-                }
+                    Log.d(TAG, "Panggilan notification saved to history database.")
+                    // TODO: Mungkin trigger refresh di MahasiswaViewModel? (Use Flow/EventBus/etc.)
+                } catch (e:Exception){ Log.e(TAG, "Error saving call notification to DB", e) }
             }
 
-            // Tampilkan notifikasi lokal
-            sendLocalNotification(notificationTitle, notificationBody)
+            // 2. Tampilkan Notifikasi Sistem
+            // Intent saat notifikasi diklik -> buka layar riwayat panggilan
+            val intent = Intent(this, MainActivity::class.java).apply {
+                // Tambahkan extra untuk memberi tahu MainActivity/NavGraph tujuan navigasi
+                putExtra("navigateTo", "riwayat_panggilan") // Definisikan konstanta
+                putExtra("panggilan_id", panggilanId) // Opsional: bawa ID panggilan
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            // Buat PendingIntent yang unik untuk setiap notifikasi panggilan
+            val requestCode = panggilanId?.toIntOrNull() ?: Random().nextInt()
+            val pendingIntent = PendingIntent.getActivity(this, requestCode, intent,
+                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+
+            // Buat dan tampilkan notifikasi seperti di fungsi sendLocalNotification
+            // Gunakan title dan body yang diterima dari data payload
+            // Pastikan notificationId unik jika ada beberapa panggilan masuk
+            sendLocalNotification(title, body, pendingIntent, notificationId = requestCode) // Modif sendLocalNotification
+
+        }
+        // Handle notifikasi tipe lain jika ada
+        else {
+            // ... Logika notifikasi sebelumnya (misal dari notif FCM biasa) ...
+            Log.d(TAG, "Received standard FCM notification or unknown data message.")
         }
     }
 
@@ -106,38 +116,68 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    // Fungsi tampilkan notifikasi lokal
-    private fun sendLocalNotification(title: String?, messageBody: String?) {
+    // Modifikasi sendLocalNotification untuk menerima PendingIntent & ID
+    private fun sendLocalNotification(
+        title: String?,
+        messageBody: String?,
+        pendingIntent: PendingIntent, // Terima PendingIntent
+        notificationId: Int = Random().nextInt() // Terima ID unik
+    ) {
         if (title.isNullOrBlank() || messageBody.isNullOrBlank()) return
         val channelId = getString(R.string.default_notification_channel_id)
-        val notificationId = Random().nextInt()
-
-        val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(
-            this, notificationId, intent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
-        )
-
+        // Buat Notifikasi
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.mipmap.ic_launcher) // Ganti icon
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(messageBody)
             .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH) // Tinggikan prioritas untuk panggilan?
+            .setContentIntent(pendingIntent) // Gunakan PendingIntent yang diberikan
 
         val notificationManager = NotificationManagerCompat.from(this)
-        createNotificationChannel(notificationManager, channelId) // Buat channel jika perlu
+        createNotificationChannel(notificationManager, channelId)
 
-        // Tampilkan Notifikasi (cek izin Android 13+)
+        // Tampilkan Notifikasi (cek izin)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            Log.w(TAG, "POST_NOTIFICATIONS permission not granted. Cannot show notification.")
+            Log.w(TAG, "POST_NOTIFICATIONS permission not granted.")
             return
         }
-        notificationManager.notify(notificationId, notificationBuilder.build())
+        notificationManager.notify(notificationId, notificationBuilder.build()) // Gunakan ID unik
     }
+
+//    // Fungsi tampilkan notifikasi lokal
+//    private fun sendLocalNotification(title: String?, messageBody: String?) {
+//        if (title.isNullOrBlank() || messageBody.isNullOrBlank()) return
+//        val channelId = getString(R.string.default_notification_channel_id)
+//        val notificationId = Random().nextInt()
+//
+//        val intent = Intent(this, MainActivity::class.java)
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//        val pendingIntent = PendingIntent.getActivity(
+//            this, notificationId, intent,
+//            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+//        )
+//
+//        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+//            .setSmallIcon(R.mipmap.ic_launcher) // Ganti icon
+//            .setContentTitle(title)
+//            .setContentText(messageBody)
+//            .setAutoCancel(true)
+//            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//            .setContentIntent(pendingIntent)
+//
+//        val notificationManager = NotificationManagerCompat.from(this)
+//        createNotificationChannel(notificationManager, channelId) // Buat channel jika perlu
+//
+//        // Tampilkan Notifikasi (cek izin Android 13+)
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+//            ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+//            Log.w(TAG, "POST_NOTIFICATIONS permission not granted. Cannot show notification.")
+//            return
+//        }
+//        notificationManager.notify(notificationId, notificationBuilder.build())
+//    }
 
     // Fungsi buat channel notifikasi
     private fun createNotificationChannel(notificationManager: NotificationManagerCompat, channelId: String) {

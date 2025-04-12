@@ -30,7 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.afian.tugasakhir.Component.CardButtonBar
+import com.afian.tugasakhir.Component.CardButtonBarDosen
 import com.afian.tugasakhir.Component.DosenList
 import com.afian.tugasakhir.Component.Header
 import com.afian.tugasakhir.Service.GeofenceHelper
@@ -266,7 +266,7 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column(modifier = Modifier.fillMaxSize()) { // Pastikan Column di dalam Card mengisi Card
-                CardButtonBar(navController)
+                CardButtonBarDosen(navController)
                 // DosenList mungkin perlu weight jika ingin scrollable dan mengisi sisa ruang Card
                 Box(modifier = Modifier.weight(1f)) { // Beri DosenList sisa ruang
                     DosenList()

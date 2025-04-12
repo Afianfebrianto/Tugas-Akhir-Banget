@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.afian.tugasakhir.Component.GeofencingMap
 import com.afian.tugasakhir.View.Screen.HelperScreen.CombinedDosenListScreen
+import com.afian.tugasakhir.View.Screen.HelperScreen.DosenPanggilMahasiswaScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.NotificationScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.UserSettingsScreen
 import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
@@ -69,7 +70,7 @@ import com.afian.tugasakhir.View.Screen.mahasiswa.HomeMhsScreen
 //}
 
 @Composable
-fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewModel) {
+fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewModel, dosenViewModel: DosenViewModel) {
     val isLoggedIn = loginViewModel.isLoggedIn()
     Log.d("NavigationGraph", "Is user logged in: $isLoggedIn") // Log status login
     val userRole = loginViewModel.getUserRole()
@@ -97,6 +98,7 @@ fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewM
         composable ("debug_maps"){ GeofencingMap() }
         composable ("notification"){ NotificationScreen() }
         composable ("informasi_dosen"){ CombinedDosenListScreen(navController=navController) }
+        composable ("cari_mahasiswa"){  DosenPanggilMahasiswaScreen(navController = navController,loginViewModel,dosenViewModel) }
 
     }
 }

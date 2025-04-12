@@ -13,16 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.afian.tugasakhir.Component.CardButtonBar
+import com.afian.tugasakhir.Component.CardButtonBarAdmin
 import com.afian.tugasakhir.Component.DosenList
 import com.afian.tugasakhir.Component.Header
 import com.afian.tugasakhir.Controller.LoginViewModel
 
-
-@Composable
-fun ScreenAdmin() {
-    Text("Admin")
-}
 
 @Composable
 fun HomeAdminScreen(loginViewModel: LoginViewModel, navController: NavController) {
@@ -46,7 +41,7 @@ fun HomeAdminScreen(loginViewModel: LoginViewModel, navController: NavController
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column {
-                CardButtonBar(navController)
+                CardButtonBarAdmin(navController)
                 DosenList()
             }
         }

@@ -43,7 +43,7 @@ fun UserSettingsScreen(loginViewModel: LoginViewModel,navController: NavControll
     // Jika user tidak ada, tampilkan pesan atau tampilan default
     val username = user?.user_name ?: "Guest"
     val identifier = user?.identifier ?: "No Identifier"
-    val fotoProfile = user?.foto_profile ?: R.drawable.placeholder_image // Ganti dengan placeholder jika tidak ada foto
+    val fotoProfile = user?.foto_profile ?: R.drawable.placeholder_image_24 // Ganti dengan placeholder jika tidak ada foto
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Header Kustom

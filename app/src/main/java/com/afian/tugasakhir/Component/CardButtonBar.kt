@@ -27,7 +27,49 @@ import androidx.navigation.NavController
 import com.afian.tugasakhir.R
 
 @Composable
-fun CardButtonBar(navController: NavController) {
+fun CardButtonBarDosen(navController: NavController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        CardButton(
+            iconRes = R.drawable.ic_group_search, // Replace with your icon resource
+            label = "Informasi Dosen",
+            onClick = {
+                // TODO: Handle Informasi Dosen click
+                navController.navigate("informasi_dosen")
+            }
+        )
+        CardButton(
+            iconRes = R.drawable.ic_notifications, // Replace with your icon resource
+            label = "Pemberitahuan",
+            onClick = {
+                navController.navigate("notification")
+            }
+        )
+        CardButton(
+            iconRes = R.drawable.ic_id_card, // Replace with your icon resource
+            label = "Cari Mahasiswa",
+            onClick = {
+                // TODO: Handle KTM Digital click
+            }
+        )
+        CardButton(
+            iconRes = R.drawable.ic_settings, // Replace with your icon resource
+            label = "Pengaturan",
+            onClick = {
+                // TODO: Handle Pengaturan click
+                navController.navigate("user_settings")
+            }
+        )
+    }
+}
+
+@Composable
+fun CardButtonBarMhs(navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -66,14 +108,48 @@ fun CardButtonBar(navController: NavController) {
             }
         )
     }
-//    CardButton(
-//        iconRes = R.drawable.ic_map_24, // Replace with your icon resource
-//        label = "Maps Debug",
-//        onClick = {
-//            // TODO: Handle Pengaturan click
-//            navController.navigate("debug_maps")
-//        }
-//    )
+}
+
+@Composable
+fun CardButtonBarAdmin(navController: NavController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        CardButton(
+            iconRes = R.drawable.ic_group_search, // Replace with your icon resource
+            label = "Informasi Dosen",
+            onClick = {
+                // TODO: Handle Informasi Dosen click
+                navController.navigate("informasi_dosen")
+            }
+        )
+        CardButton(
+            iconRes = R.drawable.ic_notifications, // Replace with your icon resource
+            label = "Pemberitahuan",
+            onClick = {
+                navController.navigate("notification")
+            }
+        )
+        CardButton(
+            iconRes = R.drawable.ic_id_card, // Replace with your icon resource
+            label = "KTM Digital",
+            onClick = {
+                // TODO: Handle KTM Digital click
+            }
+        )
+        CardButton(
+            iconRes = R.drawable.ic_settings, // Replace with your icon resource
+            label = "Pengaturan",
+            onClick = {
+                // TODO: Handle Pengaturan click
+                navController.navigate("user_settings")
+            }
+        )
+    }
 }
 
 

@@ -22,7 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.afian.tugasakhir.Component.CardButtonBar
+import com.afian.tugasakhir.Component.CardButtonBarMhs
 import com.afian.tugasakhir.Component.DosenList
 import com.afian.tugasakhir.Component.Header
 import com.afian.tugasakhir.Controller.LoginViewModel
@@ -83,7 +83,7 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController) {
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column {
-                CardButtonBar(navController)
+                CardButtonBarMhs(navController)
                 DosenList()
             }
         }

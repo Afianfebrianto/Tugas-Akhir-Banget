@@ -17,7 +17,7 @@ import com.afian.tugasakhir.ui.theme.TugasAkhirTheme
 
 class MainActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels { ViewModelFactory(applicationContext) }
-//    private val dosenViewModel: DosenViewModel
+    private val dosenViewModel: DosenViewModel by viewModels()
 
 
 
@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            NavigationGraph(navController, loginViewModel )
+            NavigationGraph(navController, loginViewModel,dosenViewModel )
 //            GeofencingMap()
         }
     }

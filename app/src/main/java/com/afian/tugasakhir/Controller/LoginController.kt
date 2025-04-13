@@ -30,10 +30,17 @@ class LoginViewModel(private val context: Context) : ViewModel() {
                     currentUser.value = response.user
                     saveLoginStatus(true,response.user) // Simpan semua data pengguna
                     onSuccess(response.user)
-                }
-                if (loggedInUser.role == "mhs") {
-                    Log.d("LoginViewModel", "User is a student. Attempting to register FCM token...")
-                    registerAndSendFcmToken(loggedInUser.user_id) // Panggil fungsi pendaftaran token
+                    // --- 👇 MODIFIKASI: DAFTARKAN TOKEN UNTUK SEMUA ROLE (DOSEN & MHS) 👇 ---
+                    // Pastikan user ID valid sebelum mendaftarkan token
+                    // (Asumsi ID 0 atau -1 tidak valid)
+                    if (loggedInUser.user_id != -1 && loggedInUser.user_id != 0) {
+                        Log.d("LoginViewModel", "User logged in (Role: ${loggedInUser.role}). Attempting to register FCM token...")
+                        // Panggil fungsi yang sama, tidak perlu cek role lagi di sini
+                        registerAndSendFcmToken(loggedInUser.user_id)
+                    } else {
+                        Log.w("LoginViewModel", "Invalid user_id (${loggedInUser.user_id}) after login. Cannot register FCM token.")
+                    }
+                    // --- 👆 AKHIR MODIFIKASI 👆 ---
                 }
                 else {
                     loginStatus.value = response.message

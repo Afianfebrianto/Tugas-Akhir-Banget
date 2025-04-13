@@ -1,6 +1,5 @@
 package com.afian.tugasakhir.Component
 
-import android.R
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.afian.tugasakhir.Model.Dosen
+import com.afian.tugasakhir.R
 import java.net.URLEncoder
 
 @Composable
@@ -87,8 +87,8 @@ fun DosenDetailDialog(
                     Image(
                         painter = rememberAsyncImagePainter(
                             model = dosen.foto_profile,
-                            placeholder = painterResource(id = R.drawable.ic_dialog_info),
-                            error = painterResource(id = R.drawable.ic_dialog_email)
+                            placeholder = painterResource(id = R.drawable.placeholder_image),
+                            error = painterResource(id = R.drawable.placeholder_image)
                         ),
                         contentDescription = "Profile Picture",
                         contentScale = ContentScale.Crop,
@@ -206,7 +206,7 @@ fun DosenDetailDialog(
                         ) {
                             // Ganti R.drawable.ic_whatsapp dengan resource icon WhatsApp Anda
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_dialog_map), // GANTI DENGAN ICON WHATSAPP
+                                painter = painterResource(id = R.drawable.ic_settings), // GANTI DENGAN ICON WHATSAPP
                                 contentDescription = "WhatsApp Icon",
                                 tint = Color(0xFF25D366), // Warna hijau WhatsApp
                                 modifier = Modifier.size(18.dp) // Ukuran ikon kecil

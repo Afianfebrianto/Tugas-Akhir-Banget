@@ -47,13 +47,14 @@ fun CardButtonBarDosen(navController: NavController) {
             iconRes = R.drawable.ic_notifications, // Replace with your icon resource
             label = "Pemberitahuan",
             onClick = {
-                navController.navigate("notification")
+                navController.navigate("riwayat_panggilan_dosen")
             }
         )
         CardButton(
             iconRes = R.drawable.ic_id_card, // Replace with your icon resource
             label = "Cari Mahasiswa",
             onClick = {
+                navController.navigate("cari_mahasiswa")
                 // TODO: Handle KTM Digital click
             }
         )

@@ -8,6 +8,7 @@ import com.afian.tugasakhir.API.RetrofitClient
 import com.afian.tugasakhir.Model.Dosen
 import com.afian.tugasakhir.Model.DosenResponse
 import androidx.compose.runtime.State
+import com.afian.tugasakhir.Model.PanggilanHistoryDosenItem
 import com.afian.tugasakhir.Model.RequestPanggilanBody
 import kotlinx.coroutines.async // Import async
 import kotlinx.coroutines.awaitAll // Import awaitAll
@@ -36,6 +37,18 @@ class DosenViewModel : ViewModel() {
     // --- State Internal untuk loading dan error (private) ---
     private val _isLoading = mutableStateOf(false)
     private val _errorMessage = mutableStateOf<String?>(null)
+
+
+    // --- 👇 STATE BARU UNTUK RIWAYAT PANGGILAN DOSEN 👇 ---
+    private val _dosenPanggilanHistory = MutableStateFlow<List<PanggilanHistoryDosenItem>>(emptyList())
+    val dosenPanggilanHistory: StateFlow<List<PanggilanHistoryDosenItem>> = _dosenPanggilanHistory.asStateFlow()
+
+    private val _isLoadingHistory = mutableStateOf(false) // Loading khusus riwayat
+    val isLoadingHistory: State<Boolean> = _isLoadingHistory
+
+    private val _errorHistory = mutableStateOf<String?>(null) // Error khusus riwayat
+    val errorHistory: State<String?> = _errorHistory
+    // --- 👆 AKHIR STATE BARU 👆 ---
 
     // === 👇 State Publik (Read-Only) untuk UI 👇 ===
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -82,7 +95,37 @@ class DosenViewModel : ViewModel() {
         loadInitialDosenData()
         fetchAllMahasiswa()
     }
+    // --- 👇 FUNGSI BARU UNTUK FETCH RIWAYAT DOSEN 👇 ---
+    fun fetchDosenHistory(dosenUserId: Int) {
+        if (dosenUserId == -1) {
+            _errorHistory.value = "ID Dosen tidak valid untuk memuat riwayat."
+            return
+        }
+        if (_isLoadingHistory.value) return // Hindari fetch ganda
 
+        _isLoadingHistory.value = true
+        _errorHistory.value = null
+        Log.d("DosenViewModel", "Fetching call history for Dosen ID: $dosenUserId")
+
+        viewModelScope.launch {
+            try {
+                // Panggil API getDosenPanggilanHistory
+                val response = RetrofitClient.apiService.getDosenPanggilanHistory(dosenUserId)
+                _dosenPanggilanHistory.value = response.history ?: emptyList()
+                Log.d("DosenViewModel", "Fetched ${response.history?.size ?: 0} history items for Dosen.")
+            } catch (e: CancellationException) {
+                Log.i("DosenViewModel", "Fetch Dosen history cancelled.")
+                // Tidak set error
+            } catch (e: Exception) {
+                Log.e("DosenViewModel", "Failure fetching Dosen history", e)
+                _errorHistory.value = "Gagal memuat riwayat: ${e.message ?: "Error tidak diketahui"}"
+                _dosenPanggilanHistory.value = emptyList()
+            } finally {
+                _isLoadingHistory.value = false
+            }
+        }
+    }
+    // --- 👆 AKHIR FUNGSI BARU 👆 ---
     // --- Logika Fetch Dosen On/Off Campus (sudah ada, disatukan di loadInitialDosenData) ---
     private fun loadInitialDosenData() {
         if (_isLoadingDosen.value) return

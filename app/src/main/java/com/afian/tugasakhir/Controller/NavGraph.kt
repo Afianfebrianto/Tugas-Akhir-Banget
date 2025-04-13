@@ -2,13 +2,15 @@ package com.afian.tugasakhir.Controller
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.afian.tugasakhir.Component.GeofencingMap
 import com.afian.tugasakhir.View.Screen.HelperScreen.CombinedDosenListScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.DosenPanggilMahasiswaScreen
-import com.afian.tugasakhir.View.Screen.HelperScreen.NotificationScreen
+import com.afian.tugasakhir.View.Screen.HelperScreen.DosenRiwayatPanggilanScreen
+import com.afian.tugasakhir.View.Screen.HelperScreen.NotificationMhsScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.UserSettingsScreen
 import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
 import com.afian.tugasakhir.View.Screen.Splash.SplashScreen
@@ -96,9 +98,17 @@ fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewM
         composable("admin") { HomeAdminScreen(loginViewModel,navController) }
         composable("user_settings") { UserSettingsScreen(loginViewModel,navController) }
         composable ("debug_maps"){ GeofencingMap() }
-        composable ("notification"){ NotificationScreen() }
+        composable ("notification"){ NotificationMhsScreen() }
         composable ("informasi_dosen"){ CombinedDosenListScreen(navController=navController) }
-        composable ("cari_mahasiswa"){  DosenPanggilMahasiswaScreen(navController = navController,loginViewModel,dosenViewModel) }
+        composable ("cari_mahasiswa"){  DosenPanggilMahasiswaScreen(navController = navController,dosenViewModel,loginViewModel) }
+        composable("riwayat_panggilan_dosen") { // Nama route baru
+            val dosenViewModel: DosenViewModel = viewModel() // Bisa juga begini jika scopetable
+            DosenRiwayatPanggilanScreen(
+                navController = navController,
+                dosenViewModel = dosenViewModel, // Teruskan instance yang sesuai
+                loginViewModel = loginViewModel // Tetap teruskan loginViewModel
+            )
+        }
 
     }
 }

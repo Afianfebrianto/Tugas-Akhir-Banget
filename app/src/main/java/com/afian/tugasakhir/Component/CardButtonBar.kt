@@ -121,30 +121,37 @@ fun CardButtonBarAdmin(navController: NavController) {
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         CardButton(
-            iconRes = R.drawable.ic_group_search, // Replace with your icon resource
-            label = "Informasi Dosen",
+            iconRes = R.drawable.co_present_24px, // Replace with your icon resource
+            label = "Monitoring Dosen",
+            onClick = {
+                navController.navigate("monitoring_dosen")
+                // TODO: Handle Informasi Dosen click
+            }
+        )
+        CardButton(
+            iconRes = R.drawable.person_add_24px, // Replace with your icon resource
+            label = "User Add",
             onClick = {
                 // TODO: Handle Informasi Dosen click
-                navController.navigate("informasi_dosen")
             }
         )
         CardButton(
-            iconRes = R.drawable.ic_notifications, // Replace with your icon resource
-            label = "Pemberitahuan",
-            onClick = {
-                navController.navigate("notification")
-            }
-        )
-        CardButton(
-            iconRes = R.drawable.ic_id_card, // Replace with your icon resource
-            label = "KTM Digital",
+            iconRes = R.drawable.manage_accounts_24px, // Replace with your icon resource
+            label = "Recovery Account",
             onClick = {
                 // TODO: Handle KTM Digital click
             }
         )
         CardButton(
+            iconRes = R.drawable.description_24px, // Replace with your icon resource
+            label = "Download Report",
+            onClick = {
+                // TODO: Handle Pengaturan click
+            }
+        )
+        CardButton(
             iconRes = R.drawable.ic_settings, // Replace with your icon resource
-            label = "Pengaturan",
+            label = "Download Report",
             onClick = {
                 // TODO: Handle Pengaturan click
                 navController.navigate("user_settings")

@@ -9,6 +9,7 @@ import com.afian.tugasakhir.Model.LoginRequest
 import com.afian.tugasakhir.Model.LoginResponse
 import com.afian.tugasakhir.Model.MahasiswaHistoryResponse
 import com.afian.tugasakhir.Model.MahasiswaListResponse
+import com.afian.tugasakhir.Model.PeringkatResponse
 import com.afian.tugasakhir.Model.RegisterTokenRequest
 import com.afian.tugasakhir.Model.RequestPanggilanBody
 import com.afian.tugasakhir.Model.RequestPanggilanResponse
@@ -26,6 +27,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @POST("api/users/login")
@@ -67,10 +69,16 @@ interface ApiService {
     @GET("api/panggilan/history/mahasiswa/{mahasiswa_user_id}") // Gunakan Path parameter
     suspend fun getMahasiswaPanggilanHistory(@Path("mahasiswa_user_id") mahasiswaUserId: Int): MahasiswaHistoryResponse
 
+    @GET("api/users/peringkat-dosen-durasi") // Sesuaikan path jika berbeda
+    suspend fun getPeringkatDurasiDosen(
+        @Query("month") month: Int,
+        @Query("year") year: Int
+    ): PeringkatResponse
+
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.2.77:3000/"
+    private const val BASE_URL = "http://192.168.1.40:3000/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())

@@ -12,19 +12,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.State
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.flow.* // Import Flow operators
+import kotlinx.coroutines.launch
 
 class UserManagementViewModel : ViewModel() {
     private val TAG = "UserManagementVM"
     private val apiService = RetrofitClient.apiService
 
+
     // State untuk daftar semua user
     private val _allUserList = MutableStateFlow<List<User>>(emptyList())
     val allUserList: StateFlow<List<User>> = _allUserList.asStateFlow()
 
-    // State untuk filter/pencarian (jika mau ditambahkan)
-    // private val _searchQuery = MutableStateFlow("")
-    // val filteredUserList: StateFlow<List<User>> = combine(...)
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     // State loading dan error untuk list user
     private val _isLoadingUsers = mutableStateOf(false)
@@ -38,9 +43,37 @@ class UserManagementViewModel : ViewModel() {
     private val _recoveryResult = mutableStateOf<RecoveryResult?>(null) // Hasil recovery terakhir
     val recoveryResult: State<RecoveryResult?> = _recoveryResult
 
+    // --- 👇 State Flow BARU untuk list user yang SUDAH DIFILTER (Publik) 👇 ---
+    val filteredUserList: StateFlow<List<User>> =
+        combine(_allUserList, searchQuery) { list, query -> // Gunakan searchQuery publik
+            if (query.isBlank()) {
+                list // Tampilkan semua jika query kosong
+            } else {
+                list.filter { user ->
+                    // Filter berdasarkan nama atau identifier (case insensitive)
+                    // Tambahkan null check pada user_name
+                    (user.user_name ?: "").contains(query, ignoreCase = true) ||
+                            user.identifier.contains(query, ignoreCase = true)
+                }
+            }
+        }
+            .stateIn( // Konversi ke StateFlow
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(500L),
+                initialValue = emptyList()
+            )
+    // --- 👆 Akhir StateFlow Filter 👆 ---
+
     init {
         fetchAllUsers() // Muat daftar user saat init
     }
+
+    // --- 👇 Fungsi BARU untuk update query dari UI 👇 ---
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
+        Log.d(TAG, "User search query updated: $query")
+    }
+    // --- 👆 Akhir Fungsi Update Query 👆 ---
 
     fun fetchAllUsers() {
         if (_isLoadingUsers.value) return
@@ -122,4 +155,7 @@ class UserManagementViewModel : ViewModel() {
 
     // Fungsi helper stateIn (jika pakai combine untuk filter)
     // private fun <T> Flow<T>.stateInViewModel(...) { ... }
+    // Helper stateIn (jika pakai)
+    private fun <T> Flow<T>.stateInViewModel(initialValue: T): StateFlow<T> =
+        this.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), initialValue)
 }

@@ -2,6 +2,8 @@ package com.afian.tugasakhir.API
 
 import com.afian.tugasakhir.Model.AddLocationRequest
 import com.afian.tugasakhir.Model.AddLocationResponse
+import com.afian.tugasakhir.Model.AllUsersResponse
+import com.afian.tugasakhir.Model.BulkUploadResponse
 import com.afian.tugasakhir.Model.DosenHistoryResponse
 import com.afian.tugasakhir.Model.DosenNotInCampusResponse
 import com.afian.tugasakhir.Model.DosenResponse
@@ -15,19 +17,25 @@ import com.afian.tugasakhir.Model.RequestPanggilanBody
 import com.afian.tugasakhir.Model.RequestPanggilanResponse
 import com.afian.tugasakhir.Model.RespondPanggilanBody
 import com.afian.tugasakhir.Model.RespondPanggilanResponse
+import com.afian.tugasakhir.Model.SimpleStatusResponse
 import com.afian.tugasakhir.Model.UpdateLocationRequest
 import com.afian.tugasakhir.Model.UpdateLocationResponse
 import com.afian.tugasakhir.Model.User
+import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Streaming
 
 interface ApiService {
     @POST("api/users/login")
@@ -75,14 +83,43 @@ interface ApiService {
         @Query("year") year: Int
     ): PeringkatResponse
 
+    @Multipart // Tandai sebagai multipart request
+    @POST("api/users/generate/bulk-excel") // Sesuaikan path jika perlu
+    suspend fun uploadUserExcel(
+        @Part file: MultipartBody.Part // File yang diupload
+        // Anda bisa tambahkan @Part lain jika perlu kirim data tambahan
+        // @Part("deskripsi") description: RequestBody
+    ): Response<BulkUploadResponse> // Sesuaikan response model
+
+    // Endpoint untuk mengambil semua user (hanya Admin)
+    @GET("api/users/all")
+    suspend fun getAllUsers(): AllUsersResponse // Perlu Auth Header Admin
+
+    // Endpoint untuk recover password user (hanya Admin)
+    @PUT("api/users/recover-password/{user_id}") // <-- Perhatikan PUT dan Path param
+    suspend fun recoverUserPassword(
+        @Path("user_id") userId: Int
+        // Tambahkan @Header("Authorization") jika perlu token admin
+    ): Response<SimpleStatusResponse> // Response sederhana
+
+    @Streaming // Penting untuk download file agar tidak load semua ke memori
+    @GET("api/reports/dosen-durasi-harian.xlsx") // Download Report Excel
+    suspend fun downloadDosenHarianReport(
+        @Query("month") month: Int,
+        @Query("year") year: Int
+        // Tambahkan @Header jika perlu token Auth Admin/Dosen
+    ): Response<ResponseBody> // <-- Return type ResponseBody untuk file
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.1.40:3000/"
+    private const val BASE_URL = "http://192.168.1.8:3000/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
     val apiService: ApiService = retrofit.create(ApiService::class.java)
+    val getBaseUrl = "http://192.168.1.8:3000/"
+
+
 }

@@ -44,7 +44,7 @@ class PeringkatDosenViewModel : ViewModel() {
 
     init {
         // Ambil data untuk bulan dan tahun saat ini saat ViewModel dibuat
-        fetchPeringkat()
+        fetchPeringkat(_selectedMonth.intValue, _selectedYear.intValue)
     }
 
     /** Dipanggil UI saat tahun dipilih */
@@ -62,16 +62,30 @@ class PeringkatDosenViewModel : ViewModel() {
             fetchPeringkat() // Ambil data baru
         }
     }
+    // === 👇 FUNGSI BARU UNTUK UPDATE PERIODE 👇 ===
+    /** Dipanggil oleh Dialog saat user konfirmasi pilihan baru */
+    fun updatePeriod(month: Int, year: Int) {
+        // Hanya fetch jika periode benar-benar berubah
+        if (month != _selectedMonth.intValue || year != _selectedYear.intValue) {
+            _selectedMonth.intValue = month
+            _selectedYear.intValue = year
+            Log.d("PeringkatVM", "Period updated by dialog to $month/$year. Fetching...")
+            fetchPeringkat(month, year) // Panggil fetch dengan nilai baru
+        } else {
+            Log.d("PeringkatVM", "Period not changed ($month/$year). Skipping fetch.")
+        }
+    }
+    // === 👆 AKHIR FUNGSI BARU 👆 ===
 
     /** Mengambil data peringkat dari API */
-    fun fetchPeringkat() {
+    fun fetchPeringkat(month: Int = _selectedMonth.intValue, year: Int = _selectedYear.intValue) {
         // Batalkan job fetch sebelumnya jika sedang berjalan
         fetchJob?.cancel()
 
         _isLoading.value = true
         _errorMessage.value = null
-        val month = _selectedMonth.intValue
-        val year = _selectedYear.intValue
+//        val month = _selectedMonth.intValue
+//        val year = _selectedYear.intValue
         Log.d("PeringkatVM", "Fetching peringkat for $month/$year")
 
         fetchJob = viewModelScope.launch {

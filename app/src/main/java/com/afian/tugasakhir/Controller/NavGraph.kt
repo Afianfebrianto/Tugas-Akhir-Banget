@@ -12,6 +12,8 @@ import com.afian.tugasakhir.View.Screen.HelperScreen.DosenPanggilMahasiswaScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.DosenRiwayatPanggilanScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.MonitoringDosenScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.NotificationMhsScreen
+import com.afian.tugasakhir.View.Screen.HelperScreen.UserAddScreen
+import com.afian.tugasakhir.View.Screen.HelperScreen.UserRecoveryScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.UserSettingsScreen
 import com.afian.tugasakhir.View.Screen.LoginScreen.LoginScreen
 import com.afian.tugasakhir.View.Screen.Splash.SplashScreen
@@ -111,6 +113,8 @@ fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewM
             )
         }
         composable("monitoring_dosen") { MonitoringDosenScreen(navController) }
+        composable ("add_user"){ UserAddScreen(navController) }
+        composable ("user_recovery"){ UserRecoveryScreen(navController) }
 
     }
 }

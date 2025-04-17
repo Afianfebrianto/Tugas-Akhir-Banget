@@ -132,6 +132,7 @@ fun CardButtonBarAdmin(navController: NavController) {
             iconRes = R.drawable.person_add_24px, // Replace with your icon resource
             label = "User Add",
             onClick = {
+                navController.navigate("add_user")
                 // TODO: Handle Informasi Dosen click
             }
         )
@@ -139,19 +140,20 @@ fun CardButtonBarAdmin(navController: NavController) {
             iconRes = R.drawable.manage_accounts_24px, // Replace with your icon resource
             label = "Recovery Account",
             onClick = {
+                navController.navigate("user_recovery")
                 // TODO: Handle KTM Digital click
             }
         )
-        CardButton(
-            iconRes = R.drawable.description_24px, // Replace with your icon resource
-            label = "Download Report",
-            onClick = {
-                // TODO: Handle Pengaturan click
-            }
-        )
+//        CardButton(
+//            iconRes = R.drawable.description_24px, // Replace with your icon resource
+//            label = "Download Report",
+//            onClick = {
+//                // TODO: Handle Pengaturan click
+//            }
+//        )
         CardButton(
             iconRes = R.drawable.ic_settings, // Replace with your icon resource
-            label = "Download Report",
+            label = "Settings",
             onClick = {
                 // TODO: Handle Pengaturan click
                 navController.navigate("user_settings")

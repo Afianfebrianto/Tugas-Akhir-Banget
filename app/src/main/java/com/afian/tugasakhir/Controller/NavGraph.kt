@@ -10,6 +10,7 @@ import com.afian.tugasakhir.Component.GeofencingMap
 import com.afian.tugasakhir.View.Screen.HelperScreen.CombinedDosenListScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.DosenPanggilMahasiswaScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.DosenRiwayatPanggilanScreen
+import com.afian.tugasakhir.View.Screen.HelperScreen.KtmScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.MonitoringDosenScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.NotificationMhsScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.UserAddScreen
@@ -115,6 +116,7 @@ fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewM
         composable("monitoring_dosen") { MonitoringDosenScreen(navController) }
         composable ("add_user"){ UserAddScreen(navController) }
         composable ("user_recovery"){ UserRecoveryScreen(navController) }
+        composable ("ktm_digital") { KtmScreen(navController,loginViewModel) }
 
     }
 }

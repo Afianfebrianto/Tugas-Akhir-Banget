@@ -98,6 +98,7 @@ fun CardButtonBarMhs(navController: NavController) {
             label = "KTM Digital",
             onClick = {
                 // TODO: Handle KTM Digital click
+                navController.navigate("ktm_digital")
             }
         )
         CardButton(

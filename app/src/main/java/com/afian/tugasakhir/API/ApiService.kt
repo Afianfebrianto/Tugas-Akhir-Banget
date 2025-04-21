@@ -112,14 +112,15 @@ interface ApiService {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.1.8:3000/"
+//    private const val BASE_URL = "http://192.168.1.8:3000/"
+    private const val BASE_URL = "https://d871-36-93-21-250.ngrok-free.app/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
     val apiService: ApiService = retrofit.create(ApiService::class.java)
-    val getBaseUrl = "http://192.168.1.8:3000/"
+    val getBaseUrl = "https://d871-36-93-21-250.ngrok-free.app/"
 
 
 }

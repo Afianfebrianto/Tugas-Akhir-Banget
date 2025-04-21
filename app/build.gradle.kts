@@ -116,4 +116,7 @@ dependencies {
     ksp("androidx.room:room-compiler:2.7.0")
 
     implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+
+    // ZXing Core untuk generate barcode
+    implementation ("com.google.zxing:core:3.5.3")
 }

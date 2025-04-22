@@ -132,7 +132,7 @@ fun Header(username: String, identifier: String, profilePictureUrl: String) {
 
         // Profile Image
             Image(
-                painter = rememberImagePainter(profilePictureUrl ?: R.drawable.placeholder_image_24), // Use an image loading library like Coil or Glide
+                painter = rememberImagePainter(profilePictureUrl ?: R.drawable.placeholder_image), // Use an image loading library like Coil or Glide
                 contentDescription = "Profile Picture",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

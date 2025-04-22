@@ -1,10 +1,12 @@
 package com.afian.tugasakhir.Component
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +17,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,51 +41,121 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Model.Dosen
 import com.afian.tugasakhir.R
 
 @Composable
-fun DosenList(viewModel: DosenViewModel = viewModel()) {
-    val dosenListState = viewModel.filteredDosenList.collectAsState()
-    val dosenList = dosenListState.value // Ambil list dari state
+fun DosenList( // Ini adalah versi PRATINJAU
+    modifier: Modifier = Modifier,
+    navController: NavController, // <-- Parameter NavController diperlukan
+    viewModel: DosenViewModel = viewModel() // Bisa juga diteruskan dari parent
+) {
+    // Ambil list dosen di kampus yang sudah terfilter
+    val dosenListFiltered by viewModel.filteredDosenList.collectAsState()
+    val isLoading by viewModel.isLoadingDosen
 
-    // State untuk menyimpan dosen yang dipilih (null jika tidak ada yg dipilih)
+    // State untuk dialog detail dosen (tetap)
     var selectedDosen by remember { mutableStateOf<Dosen?>(null) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 4.dp)) { // Padding di Column utama
-         Text(text = "Dosen on Campus", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp)) // Judul jika perlu
+    // Jumlah item yang ditampilkan di pratinjau
+    val previewItemCount = 4
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(4.dp) // Jarak antar card
+    // Ambil N item pertama untuk ditampilkan
+    val displayedDosenList = dosenListFiltered.take(previewItemCount)
+
+    Column(modifier = modifier.fillMaxWidth()) {
+
+        // --- Baris Judul dengan Refresh ---
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            items(
-                items = dosenList,
-                key = { dosen -> dosen.identifier } // Gunakan identifier sebagai key
-            ) { dosen ->
-                DosenItem(
-                    dosen = dosen,
-                    onClick = { clickedDosen ->
-                        selectedDosen = clickedDosen // Update state saat item diklik
-                    }
-                )
+            Text(
+                text = "Dosen di Kampus (${dosenListFiltered.size})", // Tetap tampilkan jumlah total
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            // Tombol Refresh
+            IconButton(
+                onClick = { viewModel.refreshData() }, // Asumsi fungsi ini ada
+                enabled = !isLoading
+            ) {
+                // Tampilkan loading hanya jika list kosong dan sedang fetch
+                if (isLoading && dosenListFiltered.isEmpty()) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Muat Ulang Daftar"
+                    )
+                }
+            }
+        } // --- Akhir Row Judul ---
+
+        // --- Daftar Ringkasan Dosen (Max 4 item) ---
+        // Tampilkan pesan jika list kosong (setelah difilter)
+        if (displayedDosenList.isEmpty() && !isLoading) {
+            val searchQuery by viewModel.searchQuery.collectAsState()
+//            val searchQuery by viewModel.searchQueryDosen.collectAsState()
+            Text(
+                text = if(searchQuery.isBlank()) "Tidak ada dosen di kampus saat ini." else "Dosen \"$searchQuery\" tidak ditemukan di kampus.",
+                modifier = Modifier.padding(start=16.dp, top=8.dp, bottom=8.dp),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        } else {
+            // Gunakan Column biasa karena item terbatas
+            Column(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // Hanya tampilkan N item pertama
+                displayedDosenList.forEach { dosen ->
+                    DosenItem(
+                        dosen = dosen,
+//                        isOnCampus = true, // Selalu true untuk list ini
+                        onClick = { selectedDosen = it } // Tetap bisa buka dialog dari pratinjau
+                    )
+                }
             }
         }
-    }
+        // --- Akhir Daftar Ringkasan ---
 
-    // Tampilkan Dialog jika selectedDosen tidak null
+
+        // --- Tombol "Lihat Semua" ---
+        // Tampilkan hanya jika jumlah total > jumlah yang ditampilkan di pratinjau
+        if (dosenListFiltered.size > previewItemCount) {
+            TextButton(
+                // Navigasi ke layar baru saat diklik
+                onClick = { navController.navigate("informasi_dosen") }, // <-- Ganti "list_dosen_screen" dengan nama route Anda
+                modifier = Modifier.align(Alignment.End).padding(end = 8.dp, top = 4.dp)
+            ) {
+                Text("Lihat Semua")
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+            }
+        }
+        // --- Akhir Tombol "Lihat Semua" ---
+
+    } // Akhir Column Utama
+
+    // Tampilkan Dialog jika selectedDosen tidak null (tidak berubah)
     selectedDosen?.let { dosenData ->
         DosenDetailDialog(
             dosen = dosenData,
-            onDismissRequest = {Log.d("PemanggilDialog", "onDismissRequest dipanggil, menutup dialog...")
-                selectedDosen = null } // Set state ke null untuk menutup dialog
+            onDismissRequest = { selectedDosen = null }
         )
     }
 }
+
 
 @Composable
 fun DosenItem(
@@ -111,63 +192,4 @@ fun DosenItem(
             }
         }
     }
-}
-
-//@Composable
-//fun DosenItem(
-//    dosen: Dosen,
-//    isOnCampus: Boolean, // <-- Parameter BARU untuk status di kampus
-//    onClick: (Dosen) -> Unit
-//) {
-//    // Tentukan warna border berdasarkan status
-//    val borderColor = if (isOnCampus) Color.Green else Color.Red
-//    val borderWidth = 2.dp // Ketebalan border (bisa disesuaikan)
-//
-//    Card(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(vertical = 4.dp)
-//            .clickable { onClick(dosen) }
-//    ) {
-//        Row(
-//            modifier = Modifier.padding(16.dp),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Image(
-//                painter = rememberAsyncImagePainter(
-//                    model = dosen.foto_profile,
-//                    placeholder = painterResource(id = R.drawable.placeholder_image),
-//                    error = painterResource(id = R.drawable.placeholder_image)
-//                ),
-//                contentDescription = "Profile Picture",
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier
-//                    .size(50.dp)
-//                    // --- 👇 Tambahkan Border di sini 👇 ---
-//                    .border(
-//                        BorderStroke(borderWidth, borderColor), // Tentukan ketebalan & warna
-//                        CircleShape // Bentuk border mengikuti bentuk clip
-//                    )
-//                    // --- 👆 Akhir Border 👆 ---
-//                    .clip(CircleShape) // Clip gambar menjadi lingkaran
-//            )
-//            Spacer(modifier = Modifier.width(16.dp))
-//            Column {
-//                Text(text = dosen.user_name, style = MaterialTheme.typography.titleMedium)
-//                Text(text = dosen.identifier, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-//                // (Opsional) Tambahkan indikator teks kecil
-//                // Text(
-//                //     text = if (isOnCampus) "Di Kampus" else "Tidak di Kampus",
-//                //     style = MaterialTheme.typography.labelSmall,
-//                //     color = borderColor,
-//                //     modifier = Modifier.padding(top = 2.dp)
-//                // )
-//            }
-//        }
-//    }
-//}
-@Preview
-@Composable
-fun PreviewListDosen() {
-    DosenList()
 }

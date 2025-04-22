@@ -97,9 +97,9 @@ fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewM
         composable("welcome") { WelcomeScreen(navController) }
         composable("welcome1") { WelcomeScreen1(navController) }
         composable("login") { LoginScreen(loginViewModel, navController) }
-        composable("dosen") { HomeDosenScreen(loginViewModel,navController) }
-        composable("mahasiswa") { HomeMhsScreen(loginViewModel,navController) }
-        composable("admin") { HomeAdminScreen(loginViewModel,navController) }
+        composable("dosen") { HomeDosenScreen(loginViewModel,navController, dosenViewModel) }
+        composable("mahasiswa") { HomeMhsScreen(loginViewModel,navController, dosenViewModel) }
+        composable("admin") { HomeAdminScreen(loginViewModel,navController, dosenViewModel) }
         composable("user_settings") { UserSettingsScreen(loginViewModel,navController) }
         composable ("debug_maps"){ GeofencingMap() }
         composable ("notification"){ NotificationMhsScreen() }

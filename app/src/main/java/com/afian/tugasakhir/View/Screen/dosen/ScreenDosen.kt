@@ -9,32 +9,45 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.afian.tugasakhir.Component.CardButtonBarDosen
 import com.afian.tugasakhir.Component.DosenList
 import com.afian.tugasakhir.Component.Header
+import com.afian.tugasakhir.Component.PeringkatDosenItem
+import com.afian.tugasakhir.Component.TopDosenLeaderboard
+import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Service.GeofenceHelper
 import com.afian.tugasakhir.Controller.LoginViewModel
+import com.afian.tugasakhir.Controller.PeringkatDosenViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -66,7 +79,7 @@ private fun checkBackgroundLocationPermission(context: Context): Boolean {
 // Opt-in tidak wajib untuk ActivityResultContracts, tapi tidak masalah jika ada
 // @OptIn(ExperimentalPermissionsApi::class) // Hapus jika tidak pakai Accompanist
 @Composable
-fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController) {
+fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController, dosenViewModel: DosenViewModel, peringkatViewModel: PeringkatDosenViewModel = viewModel()) {
     // Ambil data pengguna dari ViewModel
     val user = loginViewModel.getUserData()
     val username = user?.user_name ?: "Guest"
@@ -80,6 +93,15 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
     var backgroundLocationPermissionGranted by remember { mutableStateOf(checkBackgroundLocationPermission(context)) }
     // State untuk melacak apakah geofence sudah coba ditambahkan
     var geofenceSetupAttempted by remember { mutableStateOf(false) }
+
+    // --- Ambil State Peringkat dari ViewModel Peringkat ---
+    val peringkatList by peringkatViewModel.peringkatList.collectAsState()
+    val isLoadingPeringkat by peringkatViewModel.isLoading
+    val errorPeringkat by peringkatViewModel.errorMessage
+    val selectedMonthPeringkat by peringkatViewModel.selectedMonth
+    val selectedYearPeringkat by peringkatViewModel.selectedYear
+    // Ambil 3 data teratas
+    // --- Akhir State Peringkat ---
 
     // --- MULAI SETUP LOKASI AKTIF ---
 
@@ -248,16 +270,6 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
         Box(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
             Header(username, identifier, fotoProfile) // Panggil Header dengan data pengguna
         }
-//        // Di dalam Column atau Box di HomeDosenScreen
-//        Button(onClick = {
-//            Log.d("HomeDosenScreen", "Mengirim manual broadcast test...")
-//            val testIntent = Intent(context, com.afian.tugasakhir.Service.GeofenceBroadcastReceiver::class.java)
-//            // Beri action unik agar bisa dikenali di log receiver
-//            testIntent.action = "com.afian.tugasakhir.MANUAL_BROADCAST_TEST"
-//            context.sendBroadcast(testIntent)
-//        }) { Text("Tes Manual Receiver") }
-
-        // Card mengambil sisa ruang
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -265,35 +277,23 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
+            CardButtonBarDosen(navController)
             Column(modifier = Modifier.fillMaxSize()) { // Pastikan Column di dalam Card mengisi Card
-                CardButtonBarDosen(navController)
+                TopDosenLeaderboard(
+                    modifier = Modifier.padding(horizontal = 8.dp), // Beri padding section
+                    // Teruskan state dari peringkatViewModel sebagai parameter
+                    peringkatList = peringkatList,
+                    isLoading = isLoadingPeringkat,
+                    errorMessage = errorPeringkat,
+                    selectedMonth = selectedMonthPeringkat,
+                    selectedYear = selectedYearPeringkat
+                )
                 // DosenList mungkin perlu weight jika ingin scrollable dan mengisi sisa ruang Card
                 Box(modifier = Modifier.weight(1f)) { // Beri DosenList sisa ruang
-                    DosenList()
+                    DosenList(modifier = Modifier,navController,dosenViewModel)
                 }
-
-                // (Opsional) Tampilkan status geofence/izin di UI jika perlu
-                // Misalnya di bagian bawah Card atau sebagai status bar kecil
-                // Row(Modifier.padding(8.dp)) {
-                //    Text("FineLoc: ${if(fineLocationPermissionGranted) "OK" else "X"}", style = MaterialTheme.typography.labelSmall)
-                //    Spacer(Modifier.width(8.dp))
-                //    Text("BgLoc: ${if(backgroundLocationPermissionGranted) "OK" else "X/NA"}", style = MaterialTheme.typography.labelSmall)
-                //    Spacer(Modifier.width(8.dp))
-                //    Text("Geofence Attempted: ${if(geofenceSetupAttempted) "Yes" else "No"}", style = MaterialTheme.typography.labelSmall)
-                // }
             }
         }
     }
     // --- Akhir Layout UI Asli Anda ---
-
-    // Cleanup saat Composable dihancurkan (opsional tapi bagus)
-    DisposableEffect(Unit) {
-        onDispose {
-            // Pertimbangkan apakah Anda ingin menghapus geofence saat layar ini hilang
-            // Jika geofence harus tetap aktif bahkan setelah user meninggalkan layar ini,
-            // JANGAN hapus di sini. Jika hanya aktif selama layar ini ada, maka hapus.
-            // Log.d("HomeDosenScreen", "Disposing - considering geofence removal")
-            // GeofenceHelper.removeGeofences(context) // Hapus komentar jika perlu
-        }
-    }
 }

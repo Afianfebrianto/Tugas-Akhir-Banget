@@ -16,16 +16,22 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.afian.tugasakhir.Component.CardButtonBarMhs
 import com.afian.tugasakhir.Component.DosenList
 import com.afian.tugasakhir.Component.Header
+import com.afian.tugasakhir.Component.TopDosenLeaderboard
+import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Controller.LoginViewModel
+import com.afian.tugasakhir.Controller.PeringkatDosenViewModel
 
 @Composable
 fun ScreenMhs() {
@@ -33,7 +39,7 @@ fun ScreenMhs() {
 }
 
 @Composable
-fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController) {
+fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController, dosenViewModel : DosenViewModel, peringkatViewModel: PeringkatDosenViewModel = viewModel()) {
     // Ambil data pengguna dari ViewModel
     val user = loginViewModel.getUserData()
 
@@ -42,6 +48,13 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController) {
     val identifier = user?.identifier ?: "No Identifier"
     val fotoProfile = user?.foto_profile ?: ""
     val context = LocalContext.current
+
+    // --- Ambil State Peringkat dari ViewModel Peringkat ---
+    val peringkatList by peringkatViewModel.peringkatList.collectAsState()
+    val isLoadingPeringkat by peringkatViewModel.isLoading
+    val errorPeringkat by peringkatViewModel.errorMessage
+    val selectedMonthPeringkat by peringkatViewModel.selectedMonth
+    val selectedYearPeringkat by peringkatViewModel.selectedYear
 
     // Tambahkan log untuk mencetak informasi pengguna
     Log.d("HomeMhsScreen", "Username: $username")
@@ -84,7 +97,16 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController) {
         ) {
             Column {
                 CardButtonBarMhs(navController)
-                DosenList()
+                TopDosenLeaderboard(
+                    modifier = Modifier.padding(horizontal = 8.dp), // Beri padding section
+                    // Teruskan state dari peringkatViewModel sebagai parameter
+                    peringkatList = peringkatList,
+                    isLoading = isLoadingPeringkat,
+                    errorMessage = errorPeringkat,
+                    selectedMonth = selectedMonthPeringkat,
+                    selectedYear = selectedYearPeringkat
+                )
+                DosenList(modifier = Modifier,navController,dosenViewModel)
             }
         }
     }

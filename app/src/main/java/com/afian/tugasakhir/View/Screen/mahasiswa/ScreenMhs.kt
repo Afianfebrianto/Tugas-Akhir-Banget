@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -91,7 +92,9 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController, d
             .padding(top = 16.dp)
     ) {
         Header(username, identifier, fotoProfile) // Panggil Header dengan data pengguna
-        Card(
+        Card(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {

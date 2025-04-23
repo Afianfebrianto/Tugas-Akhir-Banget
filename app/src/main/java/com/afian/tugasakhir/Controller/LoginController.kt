@@ -3,7 +3,9 @@ package com.afian.tugasakhir.Controller
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.afian.tugasakhir.API.RetrofitClient
@@ -12,44 +14,98 @@ import com.afian.tugasakhir.Model.User
 import com.afian.tugasakhir.Service.FcmRepository
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+
+
+// Enum atau Sealed Class untuk representasi state login yg lebih jelas (opsional tapi bagus)
+sealed class LoginUiState {
+    object Idle : LoginUiState() // Kondisi awal, form ditampilkan
+    object Loading : LoginUiState() // Sedang proses login
+    data class Success(val user: User) : LoginUiState() // Login berhasil
+    data class Error(val message: String) : LoginUiState() // Login gagal
+}
+
 
 class LoginViewModel(private val context: Context) : ViewModel() {
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
-    var loginStatus = mutableStateOf("")
-    var currentUser = mutableStateOf<User?>(null)
+    // Gunakan delegasi untuk akses lebih mudah di Composable
+    private val _loginUiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
+    val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
 
-    fun login(username: String, password: String, onSuccess: (User) -> Unit) {
+
+
+    var currentUser by mutableStateOf<User?>(null)
+        private set // Hanya bisa diubah dari dalam ViewModel
+
+    init {
+        // Muat data user saat init jika perlu (misal untuk cek auto login)
+        currentUser = getUserData()
+        // _loginUiState.value = if (isLoggedIn()) LoginUiState.Success(currentUser!!) else LoginUiState.Idle // Opsional: set state awal jika sudah login?
+    }
+
+
+    fun login(username: String, password: String) { // Hapus parameter onSuccess
+        // Hindari login ganda jika sedang loading
+        if (_loginUiState.value is LoginUiState.Loading) {
+            Log.w("LoginViewModel", "Login attempt ignored, already loading.")
+            return
+        }
+
+        _loginUiState.value = LoginUiState.Loading // 1. Set state Loading
+        Log.d("LoginViewModel", "Attempting login...")
+
         viewModelScope.launch {
             try {
                 val response = RetrofitClient.apiService.login(LoginRequest(username, password))
-                val loggedInUser = response.user
-                if (response.status) {
-                    currentUser.value = response.user
-                    saveLoginStatus(true,response.user) // Simpan semua data pengguna
-                    onSuccess(response.user)
-                    // --- 👇 MODIFIKASI: DAFTARKAN TOKEN UNTUK SEMUA ROLE (DOSEN & MHS) 👇 ---
-                    // Pastikan user ID valid sebelum mendaftarkan token
-                    // (Asumsi ID 0 atau -1 tidak valid)
+
+                if (response.status && response.user != null) { // Pastikan user tidak null
+                    val loggedInUser = response.user
+                    Log.i("LoginViewModel", "Login API successful for ${loggedInUser.user_name}")
+                    currentUser = loggedInUser // Tetap update currentUser jika perlu
+                    saveLoginStatus(true, loggedInUser)
+
+                    // Daftarkan FCM Token (tetap sama)
                     if (loggedInUser.user_id != -1 && loggedInUser.user_id != 0) {
-                        Log.d("LoginViewModel", "User logged in (Role: ${loggedInUser.role}). Attempting to register FCM token...")
-                        // Panggil fungsi yang sama, tidak perlu cek role lagi di sini
                         registerAndSendFcmToken(loggedInUser.user_id)
+                        // Tidak perlu delay di sini, biarkan UI yg delay navigasi
                     } else {
-                        Log.w("LoginViewModel", "Invalid user_id (${loggedInUser.user_id}) after login. Cannot register FCM token.")
+                        Log.w("LoginViewModel", "Invalid user_id (${loggedInUser.user_id}). Cannot register FCM token.")
                     }
-                    // --- 👆 AKHIR MODIFIKASI 👆 ---
-                }
-                else {
-                    loginStatus.value = response.message
+
+                    // 2a. Set state Sukses dengan data user
+                    _loginUiState.value = LoginUiState.Success(loggedInUser)
+
+                } else {
+                    // 2b. Set state Error dengan pesan dari API
+                    val errorMsg = response.message ?: "Username atau password salah"
+                    Log.w("LoginViewModel", "Login API failed: $errorMsg")
+                    _loginUiState.value = LoginUiState.Error(errorMsg)
                 }
             } catch (e: Exception) {
-                loginStatus.value = "Login failed: ${e.message}"
+                // 2c. Set state Error dengan pesan exception
+                val errorMsg = "Gagal terhubung: ${e.message}"
+                Log.e("LoginViewModel", "Login exception", e)
+                _loginUiState.value = LoginUiState.Error(errorMsg)
             }
+            // Tidak perlu set loading false, karena state sudah jadi Success atau Error
         }
     }
+
+    // --- 👇 Fungsi BARU untuk reset state dari UI 👇 ---
+    /** Dipanggil dari UI (misal setelah animasi error) untuk kembali ke form login */
+    fun resetLoginStateToIdle() {
+        // Hanya reset jika state saat ini bukan Idle atau Loading
+        if (_loginUiState.value !is LoginUiState.Idle && _loginUiState.value !is LoginUiState.Loading) {
+            _loginUiState.value = LoginUiState.Idle
+            Log.d("LoginViewModel", "Login state reset to Idle.")
+        }
+    }
+    // --- 👆 ---
 
     private fun saveLoginStatus(isLoggedIn: Boolean, user: User) {
         with(sharedPreferences.edit()) {
@@ -59,6 +115,7 @@ class LoginViewModel(private val context: Context) : ViewModel() {
             putString("user_identifier", user.identifier)
             putString("user_photo", user.foto_profile)
             putInt("user_id", user.user_id) // Simpan user_id jika diperlukan
+            putInt("update_password", user.update_password)
             apply()
         }
     }
@@ -106,10 +163,11 @@ class LoginViewModel(private val context: Context) : ViewModel() {
             }
         }
     }
-    // --- 👆 AKHIR FUNGSI BARU 👆 ---
     fun logout() {
+        Log.d("LoginViewModel", "Logging out user...")
         sharedPreferences.edit().clear().apply() // Menghapus semua data dari SharedPreferences
-        currentUser.value = null // Mengatur currentUser menjadi null
+        currentUser = null // Mengatur currentUser menjadi null
+        Log.d("LoginViewModel", "User logged out, currentUser set to null.")
     }
 
 }

@@ -20,8 +20,11 @@ import com.afian.tugasakhir.Model.RespondPanggilanResponse
 import com.afian.tugasakhir.Model.SimpleStatusResponse
 import com.afian.tugasakhir.Model.UpdateLocationRequest
 import com.afian.tugasakhir.Model.UpdateLocationResponse
+import com.afian.tugasakhir.Model.UpdateProfileResponse
 import com.afian.tugasakhir.Model.User
+import com.afian.tugasakhir.Model.UserProfileResponse
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
@@ -109,6 +112,21 @@ interface ApiService {
         @Query("year") year: Int
         // Tambahkan @Header jika perlu token Auth Admin/Dosen
     ): Response<ResponseBody> // <-- Return type ResponseBody untuk file
+
+    @GET("api/users/profile/{user_id}")
+    suspend fun getUserProfile(@Path("user_id") userId: Int): UserProfileResponse // Ganti T dgn UserProfileResponse
+
+    @Multipart // Untuk update profile (karena ada kemungkinan file)
+    @PUT("api/users/update-profile/{identifier}")
+    suspend fun updateUserProfile(
+        @Path("identifier") identifier: String,
+        // Kirim file sebagai Part jika ada
+        @Part photo: MultipartBody.Part?,
+        // Kirim teks sebagai RequestBody Part jika ada
+        @Part("no_hp") noHp: RequestBody?,
+        @Part("informasi") informasi: RequestBody?
+        // Tambahkan @Header jika perlu Auth Token
+    ): Response<UpdateProfileResponse> // Kembalikan Response untuk cek status
 }
 
 object RetrofitClient {

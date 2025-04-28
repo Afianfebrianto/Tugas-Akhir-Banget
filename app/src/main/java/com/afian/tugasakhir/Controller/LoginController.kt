@@ -14,11 +14,13 @@ import com.afian.tugasakhir.Model.User
 import com.afian.tugasakhir.Service.FcmRepository
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 
 // Enum atau Sealed Class untuk representasi state login yg lebih jelas (opsional tapi bagus)
@@ -29,14 +31,25 @@ sealed class LoginUiState {
     data class Error(val message: String) : LoginUiState() // Login gagal
 }
 
+sealed interface UiState<out T> {
+    object Idle : UiState<Nothing>
+    object Loading : UiState<Nothing>
+    data class Success<T>(val data: T) : UiState<T>
+    data class Error(val message: String) : UiState<Nothing>
+}
+
 
 class LoginViewModel(private val context: Context) : ViewModel() {
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-
+    private val TAG = "LoginViewModel"
     // Gunakan delegasi untuk akses lebih mudah di Composable
     private val _loginUiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
 
+    // --- 👇 State BARU untuk proses LOGOUT 👇 ---
+    private val _logoutState = MutableStateFlow<UiState<Unit>>(UiState.Idle) // Tipe data sukses bisa Unit
+    val logoutState: StateFlow<UiState<Unit>> = _logoutState.asStateFlow()
+    // --- 👆 ---
 
 
     var currentUser by mutableStateOf<User?>(null)
@@ -45,6 +58,7 @@ class LoginViewModel(private val context: Context) : ViewModel() {
     init {
         // Muat data user saat init jika perlu (misal untuk cek auto login)
         currentUser = getUserData()
+        Log.d(TAG, "init: currentUser set to $currentUser")
         // _loginUiState.value = if (isLoggedIn()) LoginUiState.Success(currentUser!!) else LoginUiState.Idle // Opsional: set state awal jika sudah login?
     }
 
@@ -52,7 +66,7 @@ class LoginViewModel(private val context: Context) : ViewModel() {
     fun login(username: String, password: String) { // Hapus parameter onSuccess
         // Hindari login ganda jika sedang loading
         if (_loginUiState.value is LoginUiState.Loading) {
-            Log.w("LoginViewModel", "Login attempt ignored, already loading.")
+            Log.w(TAG, "Login attempt ignored, already loading.")
             return
         }
 
@@ -103,6 +117,8 @@ class LoginViewModel(private val context: Context) : ViewModel() {
         if (_loginUiState.value !is LoginUiState.Idle && _loginUiState.value !is LoginUiState.Loading) {
             _loginUiState.value = LoginUiState.Idle
             Log.d("LoginViewModel", "Login state reset to Idle.")
+        } else {
+            Log.d(TAG, "resetLoginStateToIdle: Already Idle.")
         }
     }
     // --- 👆 ---
@@ -164,10 +180,43 @@ class LoginViewModel(private val context: Context) : ViewModel() {
         }
     }
     fun logout() {
+        if (_logoutState.value is UiState.Loading) return
+        _logoutState.value = UiState.Loading
         Log.d("LoginViewModel", "Logging out user...")
-        sharedPreferences.edit().clear().apply() // Menghapus semua data dari SharedPreferences
-        currentUser = null // Mengatur currentUser menjadi null
-        Log.d("LoginViewModel", "User logged out, currentUser set to null.")
+        viewModelScope.launch(Dispatchers.IO) {
+            var success = false
+            var errorMsg: String? = null
+            try {
+                sharedPreferences.edit().clear().apply()
+                success = true
+            } catch(e: Exception) {
+                Log.e("LoginViewModel", "Error clearing SharedPreferences", e)
+                errorMsg = "Gagal membersihkan sesi: ${e.message}"
+            }
+
+            withContext(Dispatchers.Main) {
+                if(success) {
+                    currentUser = null
+                    _logoutState.value = UiState.Success(Unit) // Set Sukses
+                    _loginUiState.value = LoginUiState.Idle
+                    viewModelScope.launch {
+                        delay(500L) // Beri jeda SANGAT SINGKAT (0.5 detik), cukup untuk UI bereaksi
+                        resetLogoutStateToIdle() // Panggil fungsi reset
+                    }
+                    Log.d("LoginViewModel", "User logged out successfully. State set to Success.")
+                } else {
+                    _logoutState.value = UiState.Error(errorMsg ?: "Logout gagal.")
+                }
+            }
+        }
+    }
+
+    // Fungsi ini tetap ada, bisa dipanggil UI jika perlu reset manual
+    fun resetLogoutStateToIdle() {
+        if (_logoutState.value !is UiState.Idle) {
+            _logoutState.value = UiState.Idle
+            Log.d("LoginViewModel", "Logout state reset to Idle by UI.")
+        }
     }
 
 }

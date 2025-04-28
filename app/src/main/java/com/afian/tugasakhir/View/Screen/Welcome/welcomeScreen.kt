@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.afian.tugasakhir.Controller.Screen
 import com.afian.tugasakhir.R
 import com.afian.tugasakhir.View.Screen.Splash.MyLottie
 import com.afian.tugasakhir.View.Screen.Splash.SplashScreen
@@ -134,7 +135,7 @@ fun WelcomeScreen1(navController: NavController) {
             Button(
                 onClick = {
                     //todo next page Login
-                    navController.navigate("login")
+                    navController.navigate(Screen.Login.route)
                 },
                 colors = ButtonDefaults.buttonColors(Color(0xFFFFD369)),
                 modifier = Modifier.fillMaxWidth(0.6f) // Atur lebar tombol

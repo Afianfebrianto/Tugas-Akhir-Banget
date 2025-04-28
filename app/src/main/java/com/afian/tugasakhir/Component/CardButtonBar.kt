@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.afian.tugasakhir.Controller.Screen
 import com.afian.tugasakhir.R
 
 @Composable
@@ -90,7 +91,7 @@ fun CardButtonBarMhs(navController: NavController) {
             iconRes = R.drawable.ic_notifications, // Replace with your icon resource
             label = "Pemberitahuan",
             onClick = {
-                navController.navigate("notification")
+                navController.navigate(Screen.NotificationMhs.route)
             }
         )
         CardButton(

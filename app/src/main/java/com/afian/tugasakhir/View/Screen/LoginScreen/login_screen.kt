@@ -66,10 +66,11 @@ import com.afian.tugasakhir.Component.LottieFailAnimation
 import com.afian.tugasakhir.Component.LottieSuccessAnimation
 import com.afian.tugasakhir.Controller.LoginUiState
 import kotlinx.coroutines.delay
-
+private const val LOGIN_TAG = "LoginScreen"
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
+    Log.d(LOGIN_TAG, "Composing...")
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -94,9 +95,11 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
 
     // --- Efek untuk Navigasi Setelah Sukses ---
     LaunchedEffect(loginUiState) {
+        Log.d(LOGIN_TAG, "LaunchedEffect: loginUiState changed to -> $loginUiState")
         if (loginUiState is LoginUiState.Success) {
+            Log.i(LOGIN_TAG, "LaunchedEffect: Success state detected. Starting 2s delay for navigation...")
             // Tunggu animasi sukses selesai (misal 2 detik)
-            delay(2000L)
+            delay(6000L)
             val user = (loginUiState as LoginUiState.Success).user
             // Lakukan navigasi berdasarkan role
             val destination = when (user.role) {
@@ -106,13 +109,14 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
                 else -> null // Role tidak dikenal, mungkin kembali ke login?
             }
             if (destination != null) {
-                Log.i("LoginScreen", "Navigating to $destination")
+                Log.i(LOGIN_TAG, "LaunchedEffect: Delay finished. Navigating to '$destination'")
                 navController.navigate(destination) {
                     // Hapus stack login agar tidak bisa kembali dengan back button
                     popUpTo("welcome") { inclusive = true } // Asumsi route sebelum login adalah 'welcome'
                     launchSingleTop = true // Hindari instance ganda
                 }
             } else {
+                Log.e(LOGIN_TAG, "LaunchedEffect: Delay finished. Unknown role '${user.role}'. Resetting state.")
                 Log.e("LoginScreen", "Unknown user role: ${user.role}. Cannot navigate.")
                 // Mungkin tampilkan pesan error atau reset state
                 viewModel.resetLoginStateToIdle() // Kembali ke form?
@@ -121,6 +125,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
         }
         // Efek untuk reset state error setelah beberapa detik (opsional)
         else if (loginUiState is LoginUiState.Error) {
+            Log.w(LOGIN_TAG, "LaunchedEffect: Error state detected. Starting 4s delay for reset...")
             delay(4000L) // Tunggu 4 detik setelah error tampil
             viewModel.resetLoginStateToIdle() // Kembali ke state Idle (form)
         }
@@ -275,22 +280,6 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
             )
 
             Spacer(modifier = Modifier.height(26.dp))
-
-//            // Tampilkan pesan error di bawah password field jika ada error
-//            if (isError) {
-//                Text(
-//                    text = loginErrorMessage,
-//                    color = MaterialTheme.colorScheme.error, // Gunakan warna error dari tema
-//                    style = MaterialTheme.typography.bodySmall,
-//                    modifier = Modifier
-//                        .padding(start = 16.dp, top = 0.dp, bottom = 10.dp) // Padding kecil
-//                        .fillMaxWidth() // Agar rata kiri
-//                )
-//            } else {
-//                // Beri sedikit ruang kosong agar layout tidak lompat saat error muncul/hilang
-//                Spacer(modifier = Modifier.height(10.dp + (MaterialTheme.typography.bodySmall.fontSize.value).dp)) // Sesuaikan tinggi
-//            }
-
             // Button "Masuk" di sebelah kanan
             Row(
                 modifier = Modifier.fillMaxWidth()

@@ -28,6 +28,7 @@ sealed class LoginUiState {
     object Idle : LoginUiState() // Kondisi awal, form ditampilkan
     object Loading : LoginUiState() // Sedang proses login
     data class Success(val user: User) : LoginUiState() // Login berhasil
+    data class PasswordUpdateRequired(val user: User) : LoginUiState() // Login sukses TAPI password perlu diupdate
     data class Error(val message: String) : LoginUiState() // Login gagal
 }
 
@@ -87,12 +88,18 @@ class LoginViewModel(private val context: Context) : ViewModel() {
                     if (loggedInUser.user_id != -1 && loggedInUser.user_id != 0) {
                         registerAndSendFcmToken(loggedInUser.user_id)
                         // Tidak perlu delay di sini, biarkan UI yg delay navigasi
+                    }
+                    // === 👇 CEK STATUS UPDATE PASSWORD 👇 ===
+                    if (loggedInUser.update_password == 0) { // Asumsi 0 = false = perlu update
+                        Log.i("LoginViewModel", "Password update required for user.")
+                        _loginUiState.value = LoginUiState.PasswordUpdateRequired(loggedInUser) // State baru
                     } else {
+                        _loginUiState.value = LoginUiState.Success(loggedInUser)
                         Log.w("LoginViewModel", "Invalid user_id (${loggedInUser.user_id}). Cannot register FCM token.")
                     }
 
                     // 2a. Set state Sukses dengan data user
-                    _loginUiState.value = LoginUiState.Success(loggedInUser)
+//                    _loginUiState.value = LoginUiState.Success(loggedInUser)
 
                 } else {
                     // 2b. Set state Error dengan pesan dari API
@@ -109,6 +116,16 @@ class LoginViewModel(private val context: Context) : ViewModel() {
             // Tidak perlu set loading false, karena state sudah jadi Success atau Error
         }
     }
+
+    // Fungsi ini mungkin perlu dipanggil setelah password berhasil diupdate
+    fun markPasswordAsActionRequired(isRequired: Boolean) {
+        val user = currentUser ?: return // Butuh user data saat ini
+        val updatedUser = user.copy(update_password = if(isRequired) 0 else 1)
+        saveLoginStatus(true, updatedUser) // Update SharedPreferences
+        currentUser = updatedUser // Update state ViewModel
+        Log.d("LoginViewModel", "Password update status manually set to: ${!isRequired}")
+    }
+
 
     // --- 👇 Fungsi BARU untuk reset state dari UI 👇 ---
     /** Dipanggil dari UI (misal setelah animasi error) untuk kembali ke form login */

@@ -1,14 +1,12 @@
 package com.afian.tugasakhir.Controller
 
 import android.util.Log
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -30,9 +28,11 @@ import com.afian.tugasakhir.View.Screen.Welcome.WelcomeScreen1
 import com.afian.tugasakhir.View.Screen.admin.HomeAdminScreen
 import com.afian.tugasakhir.View.Screen.dosen.HomeDosenScreen
 import com.afian.tugasakhir.View.Screen.mahasiswa.HomeMhsScreen
-import androidx.compose.runtime.remember
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.afian.tugasakhir.Model.User
+import com.afian.tugasakhir.View.Screen.HelperScreen.UpdatePasswordScreen
 import com.afian.tugasakhir.View.Screen.HelperScreen.UserProfileEditScreen
 
 
@@ -57,6 +57,7 @@ sealed class Screen(val route: String) {
     object KtmDigital : Screen("ktm_digital")
     object ListDosen : Screen("list_dosen_screen")
     object UserProfileEdit : Screen("profile_edit")
+    object UpdatePassword : Screen("update_password/{identifier}") // Route dengan argumen
 }
 
 @Composable
@@ -94,38 +95,77 @@ fun NavigationGraph(
 
     // Ambil state terkini untuk dipantau
     val currentUser: User? = loginViewModel.currentUser
-
     LaunchedEffect(currentUser) { // Bereaksi saat user state berubah
         val currentRoute = navController.currentBackStackEntry?.destination?.route
-        val userIsCurrentlyLoggedIn = currentUser != null // Cek login dari state terkini
+        val userIsCurrentlyLoggedIn = currentUser != null
+        Log.d("navgraph", "Auth State Changed Effect Triggered: LoggedIn=$userIsCurrentlyLoggedIn, CurrentRoute=$currentRoute")
 
-        Log.d("NavigationGraph", "Auth State Changed Effect: LoggedIn=$userIsCurrentlyLoggedIn, CurrentRoute=$currentRoute")
-
-        if (!userIsCurrentlyLoggedIn && currentRoute != null && currentRoute != Screen.Welcome.route && currentRoute != Screen.Login.route) {
-            // Jika user BARU SAJA logout DAN sedang TIDAK di Welcome/Login -> paksa ke Welcome
-            Log.i("NavigationGraph", "EFFECT: User logged out, not on auth screen ($currentRoute). Forcing Welcome.")
-            navController.navigate(Screen.Welcome.route) { // Ganti ke Screen.Login.route jika perlu
-                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                launchSingleTop = true
+        if (!userIsCurrentlyLoggedIn) { // JIKA USER BARU SAJA LOGOUT
+            // Jika kita TIDAK sedang di layar Welcome atau Login
+            if (currentRoute != null && currentRoute != Screen.Welcome.route && currentRoute != Screen.Login.route) {
+                Log.i("Navgraph", "EFFECT Action: User logged out, NOT on auth screen ($currentRoute). Forcing Welcome.")
+                // Lakukan navigasi paksa ke Welcome dan clear stack
+                navController.navigate(Screen.Welcome.route) {
+                    popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                    launchSingleTop = true
+                }
+                // Reset state login di ViewModel SETELAH navigasi dipicu
+                loginViewModel.resetLoginStateToIdle()
+            } else {
+                Log.d("Navgraph", "EFFECT Action: User logged out, but already on auth screen ($currentRoute). No navigation needed.")
+                // Tetap reset state login jika mendarat di sini setelah logout
+                loginViewModel.resetLoginStateToIdle()
             }
-        } else if (userIsCurrentlyLoggedIn && (currentRoute == Screen.Welcome.route || currentRoute == Screen.Login.route)) {
-            // Jika user BARU SAJA login DAN sedang di Welcome/Login -> paksa ke Home
-            val role = loginViewModel.getUserRole() // Dapatkan role terkini
-            val homeRoute = when (role) {
-                "dosen" -> Screen.HomeDosen.route
-                "mhs" -> Screen.HomeMahasiswa.route
-                "admin" -> Screen.HomeAdmin.route
-                else -> Screen.Welcome.route // Fallback jika role aneh
-            }
-            Log.i("NavigationGraph", "EFFECT: User logged in, on auth screen ($currentRoute). Forcing $homeRoute.")
-            navController.navigate(homeRoute) {
-                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                launchSingleTop = true
-            }
-        } else {
-            Log.d("NavigationGraph", "EFFECT: Auth state matches current location ($currentRoute, loggedIn=$userIsCurrentlyLoggedIn). No navigation needed by effect.")
         }
-    }
+        // --- 👇 HAPUS BLOK ELSE IF INI 👇 ---
+        // HAPUS logika yang memaksa navigasi DARI Welcome/Login KE Home.
+        // Biarkan LoginScreen yang menanganinya berdasarkan LoginUiState.
+        /* HAPUS MULAI DARI SINI
+        else if (userIsCurrentlyLoggedIn && (currentRoute == Screen.Welcome.route || currentRoute == Screen.Login.route)) {
+             // Jika user login TAPI masih di Welcome/Login -> JANGAN paksa ke Home dari sini
+             Log.w(NAV_GRAPH_TAG, "EFFECT Action: User logged in, but on auth screen ($currentRoute). Navigation handled by LoginScreen.")
+             // val role = loginViewModel.getUserRole()
+             // val homeRoute = when (role) { ... }
+             // navController.navigate(homeRoute) { ... }
+         }
+        HAPUS SAMPAI SINI */
+        else { // User logged in dan tidak di welcome/login
+            Log.d("Navgraph", "EFFECT Action: User logged in and on main screen ($currentRoute). No navigation needed by this effect.")
+        }
+        // --- 👆 AKHIR BLOK HAPUS 👆 ---
+    } // Akhir LaunchedEffect
+
+//    LaunchedEffect(currentUser) { // Bereaksi saat user state berubah
+//        val currentRoute = navController.currentBackStackEntry?.destination?.route
+//        val userIsCurrentlyLoggedIn = currentUser != null // Cek login dari state terkini
+//
+//        Log.d("NavigationGraph", "Auth State Changed Effect: LoggedIn=$userIsCurrentlyLoggedIn, CurrentRoute=$currentRoute")
+//
+//        if (!userIsCurrentlyLoggedIn && currentRoute != null && currentRoute != Screen.Welcome.route && currentRoute != Screen.Login.route) {
+//            // Jika user BARU SAJA logout DAN sedang TIDAK di Welcome/Login -> paksa ke Welcome
+//            Log.i("NavigationGraph", "EFFECT: User logged out, not on auth screen ($currentRoute). Forcing Welcome.")
+//            navController.navigate(Screen.Welcome.route) { // Ganti ke Screen.Login.route jika perlu
+//                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+//                launchSingleTop = true
+//            }
+//        } else if (userIsCurrentlyLoggedIn && (currentRoute == Screen.Welcome.route || currentRoute == Screen.Login.route)) {
+//            // Jika user BARU SAJA login DAN sedang di Welcome/Login -> paksa ke Home
+//            val role = loginViewModel.getUserRole() // Dapatkan role terkini
+//            val homeRoute = when (role) {
+//                "dosen" -> Screen.HomeDosen.route
+//                "mhs" -> Screen.HomeMahasiswa.route
+//                "admin" -> Screen.HomeAdmin.route
+//                else -> Screen.Welcome.route // Fallback jika role aneh
+//            }
+//            Log.i("NavigationGraph", "EFFECT: User logged in, on auth screen ($currentRoute). Forcing $homeRoute.")
+//            navController.navigate(homeRoute) {
+//                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+//                launchSingleTop = true
+//            }
+//        } else {
+//            Log.d("NavigationGraph", "EFFECT: Auth state matches current location ($currentRoute, loggedIn=$userIsCurrentlyLoggedIn). No navigation needed by effect.")
+//        }
+//    }
 
 
     NavHost(navController = navController, startDestination = startDestination) {
@@ -241,51 +281,29 @@ fun NavigationGraph(
                 viewModel = userProfileViewModel
             )
         }
+
+        composable(
+            route = Screen.UpdatePassword.route, // Contoh: "update_password/{identifier}"
+            arguments = listOf(navArgument("identifier") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val identifier = backStackEntry.arguments?.getString("identifier")
+            if (identifier != null) {
+                // Buat instance ViewModel baru khusus layar ini
+                val updatePasswordViewModel: UpdatePasswordViewModel = viewModel(
+                    // Jika ViewModel butuh SavedStateHandle, factory default akan memberikannya
+                )
+                UpdatePasswordScreen(
+                    navController = navController,
+                    identifier = identifier, // Teruskan identifier
+                    loginViewModel = loginViewModel, // Untuk dapat role setelah sukses
+                    viewModel = updatePasswordViewModel
+                )
+            } else {
+                // Handle jika identifier null (seharusnya tidak terjadi jika navigasi benar)
+                Text("Error: Identifier pengguna tidak ditemukan.")
+                // Mungkin navigasi kembali ke login?
+                // LaunchedEffect(Unit){ navController.popBackStack() }
+            }
+        }
     } // Akhir NavHost
 }
-
-//@Composable
-//fun NavigationGraph(navController: NavHostController, loginViewModel: LoginViewModel, dosenViewModel: DosenViewModel) {
-//    val isLoggedIn = loginViewModel.isLoggedIn()
-//    Log.d("NavigationGraph", "Is user logged in: $isLoggedIn") // Log status login
-//    val userRole = loginViewModel.getUserRole()
-//    Log.d("NavigationGraph", "User role: $userRole")
-//    NavHost(navController, startDestination = if (isLoggedIn) {
-//        when (userRole) {
-//            "dosen" -> "dosen"
-//            "mhs" -> "mahasiswa"
-//            "admin" -> "admin"
-//            else -> "splash"
-//        }
-//    } else {
-//        "splash"
-//    })
-//    {
-//        composable("splash") { SplashScreen(navController) }
-//        composable("welcome") { WelcomeScreen(navController) }
-//        composable("welcome1") { WelcomeScreen1(navController) }
-//        composable("login") { LoginScreen(loginViewModel, navController)
-//        }
-//        composable("dosen") { HomeDosenScreen(loginViewModel,navController, dosenViewModel) }
-//        composable("mahasiswa") { HomeMhsScreen(loginViewModel,navController, dosenViewModel) }
-//        composable("admin") { HomeAdminScreen(loginViewModel,navController, dosenViewModel) }
-//        composable("user_settings") { UserSettingsScreen(loginViewModel,navController) }
-//        composable ("debug_maps"){ GeofencingMap() }
-//        composable ("notification"){ NotificationMhsScreen() }
-//        composable ("informasi_dosen"){ CombinedDosenListScreen(navController=navController) }
-//        composable ("cari_mahasiswa"){  DosenPanggilMahasiswaScreen(navController = navController,dosenViewModel,loginViewModel) }
-//        composable("riwayat_panggilan_dosen") { // Nama route baru
-//            val dosenViewModel: DosenViewModel = viewModel() // Bisa juga begini jika scopetable
-//            DosenRiwayatPanggilanScreen(
-//                navController = navController,
-//                dosenViewModel = dosenViewModel, // Teruskan instance yang sesuai
-//                loginViewModel = loginViewModel // Tetap teruskan loginViewModel
-//            )
-//        }
-//        composable("monitoring_dosen") { MonitoringDosenScreen(navController) }
-//        composable ("add_user"){ UserAddScreen(navController) }
-//        composable ("user_recovery"){ UserRecoveryScreen(navController) }
-//        composable ("ktm_digital") { KtmScreen(navController,loginViewModel) }
-//
-//    }
-//}

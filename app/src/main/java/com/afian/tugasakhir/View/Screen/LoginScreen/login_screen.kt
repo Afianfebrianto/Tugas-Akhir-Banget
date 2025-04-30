@@ -62,9 +62,11 @@ import androidx.compose.material3.* // Import Material 3
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.afian.tugasakhir.Component.LottieFailAnimation
 import com.afian.tugasakhir.Component.LottieSuccessAnimation
 import com.afian.tugasakhir.Controller.LoginUiState
+import com.afian.tugasakhir.Controller.Screen
 import kotlinx.coroutines.delay
 private const val LOGIN_TAG = "LoginScreen"
 
@@ -93,44 +95,106 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
     val isError = errorMessage != null
     val context = LocalContext.current
 
-    // --- Efek untuk Navigasi Setelah Sukses ---
+    // --- Efek untuk Navigasi atau Reset State ---
     LaunchedEffect(loginUiState) {
         Log.d(LOGIN_TAG, "LaunchedEffect: loginUiState changed to -> $loginUiState")
-        if (loginUiState is LoginUiState.Success) {
-            Log.i(LOGIN_TAG, "LaunchedEffect: Success state detected. Starting 2s delay for navigation...")
-            // Tunggu animasi sukses selesai (misal 2 detik)
-            delay(6000L)
-            val user = (loginUiState as LoginUiState.Success).user
-            // Lakukan navigasi berdasarkan role
-            val destination = when (user.role) {
-                "dosen" -> "dosen"
-                "mhs" -> "mahasiswa"
-                "admin" -> "admin"
-                else -> null // Role tidak dikenal, mungkin kembali ke login?
-            }
-            if (destination != null) {
-                Log.i(LOGIN_TAG, "LaunchedEffect: Delay finished. Navigating to '$destination'")
-                navController.navigate(destination) {
-                    // Hapus stack login agar tidak bisa kembali dengan back button
-                    popUpTo("welcome") { inclusive = true } // Asumsi route sebelum login adalah 'welcome'
-                    launchSingleTop = true // Hindari instance ganda
+
+        // Gunakan 'when' untuk menangani semua kemungkinan state
+        when (val state = loginUiState) { // Assign state ke variabel lokal 'state'
+
+            is LoginUiState.PasswordUpdateRequired -> {
+                Log.i(LOGIN_TAG, "State is PasswordUpdateRequired. Preparing navigation...")
+                val user = state.user // Akses user dari 'state'
+                // Validasi identifier sebelum navigasi
+                if (user.identifier.isBlank()) {
+                    Log.e(LOGIN_TAG, "Cannot navigate to update password: Identifier is blank!")
+                    Toast.makeText(context, "Error: Identifier pengguna tidak valid.", Toast.LENGTH_LONG).show()
+                    viewModel.resetLoginStateToIdle() // Reset state jika identifier tidak valid
+                    return@LaunchedEffect // Hentikan efek ini
                 }
-            } else {
-                Log.e(LOGIN_TAG, "LaunchedEffect: Delay finished. Unknown role '${user.role}'. Resetting state.")
-                Log.e("LoginScreen", "Unknown user role: ${user.role}. Cannot navigate.")
-                // Mungkin tampilkan pesan error atau reset state
-                viewModel.resetLoginStateToIdle() // Kembali ke form?
-                Toast.makeText(context, "Role pengguna tidak dikenal.", Toast.LENGTH_SHORT).show()
+
+                // Pastikan route update password Anda didefinisikan dengan argumen
+                // Contoh: Screen.UpdatePassword.route = "update_password/{identifier}"
+                val baseRoute = Screen.UpdatePassword.route
+                if (!baseRoute.contains("{identifier}")) {
+                    Log.e(LOGIN_TAG,"Route ${Screen.UpdatePassword.route} harus mengandung {identifier}!")
+                    Toast.makeText(context, "Error: Konfigurasi route salah.", Toast.LENGTH_LONG).show()
+                    viewModel.resetLoginStateToIdle()
+                    return@LaunchedEffect
+                }
+                // Buat route tujuan dengan mengganti placeholder
+                val destinationRoute = baseRoute.replace("{identifier}", user.identifier)
+                Log.d(LOGIN_TAG, "Calculated Destination Route for UpdatePassword: $destinationRoute")
+
+                // Dapatkan ID start destination untuk popUpTo
+                val startDestinationId = navController.graph.findStartDestination().id
+                Log.d(LOGIN_TAG, "Navigating to UpdatePassword. Popping up to Start Destination ID: $startDestinationId")
+
+                try {
+                    // Langsung navigasi ke layar update password
+                    navController.navigate(destinationRoute) {
+                        // Hapus semua backstack sampai ke awal NavGraph
+                        popUpTo(startDestinationId) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                    Log.i(LOGIN_TAG, "Navigation to UpdatePassword attempted.")
+                } catch (e: Exception) {
+                    Log.e(LOGIN_TAG, "Error during navigation to UpdatePassword: ${e.message}", e)
+                    Toast.makeText(context, "Gagal membuka halaman update password.", Toast.LENGTH_LONG).show()
+                    viewModel.resetLoginStateToIdle() // Reset jika navigasi gagal
+                }
+                // JANGAN reset state UI login di sini, biarkan UpdatePasswordScreen yang aktif
             }
-        }
-        // Efek untuk reset state error setelah beberapa detik (opsional)
-        else if (loginUiState is LoginUiState.Error) {
-            Log.w(LOGIN_TAG, "LaunchedEffect: Error state detected. Starting 4s delay for reset...")
-            delay(4000L) // Tunggu 4 detik setelah error tampil
-            viewModel.resetLoginStateToIdle() // Kembali ke state Idle (form)
-        }
-    }
+
+            is LoginUiState.Success -> {
+                Log.i(LOGIN_TAG, "State is Success. Starting 6s delay for navigation...") // Delay 6 detik
+                delay(6000L) // Tunggu animasi sukses
+                val user = state.user // Akses user dari 'state'
+                // Tentukan tujuan berdasarkan role menggunakan Screen object
+                val destination = when (user.role) {
+                    "dosen" -> Screen.HomeDosen.route
+                    "mhs" -> Screen.HomeMahasiswa.route
+                    "admin" -> Screen.HomeAdmin.route // Pastikan Screen.HomeAdmin.route ada
+                    else -> null
+                }
+
+                if (destination != null) {
+                    Log.i(LOGIN_TAG, "Delay finished. Navigating to '$destination'")
+                    val startDestinationId = navController.graph.findStartDestination().id
+                    navController.navigate(destination) {
+                        // Hapus semua backstack sampai ke awal NavGraph
+                        popUpTo(startDestinationId) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                    // Anda bisa reset state login di sini jika mau, atau biarkan sampai logout
+                    // viewModel.resetLoginStateToIdle()
+                } else {
+                    Log.e(LOGIN_TAG, "Delay finished. Unknown role '${user.role}'. Resetting state.")
+                    Toast.makeText(context, "Role pengguna tidak dikenal.", Toast.LENGTH_SHORT).show()
+                    viewModel.resetLoginStateToIdle() // Kembali ke form jika role aneh
+                }
+            }
+
+            is LoginUiState.Error -> {
+                Log.w(LOGIN_TAG, "State is Error. Starting 4s delay for reset...")
+                delay(4000L) // Tunggu animasi error / pesan tampil
+                Log.d(LOGIN_TAG, "Error reset delay finished. Calling resetLoginStateToIdle().")
+                viewModel.resetLoginStateToIdle() // Kembali ke state Idle (form)
+            }
+
+            is LoginUiState.Idle -> {
+                Log.d(LOGIN_TAG, "State is Idle. No navigation/reset effect.")
+                // Tidak melakukan apa-apa
+            }
+
+            is LoginUiState.Loading -> {
+                Log.d(LOGIN_TAG, "State is Loading. No navigation/reset effect.")
+                // Tidak melakukan apa-apa
+            }
+        } // Akhir when
+    } // Akhir LaunchedEffect
     // --- Akhir Efek Navigasi ---
+
 
     Box(
         modifier = Modifier
@@ -140,6 +204,9 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
     ) {
         // Gunakan when untuk menampilkan UI berdasarkan state
         when (loginUiState) {
+            is LoginUiState.PasswordUpdateRequired ->{
+                Text("Update Password Require")
+            }
             is LoginUiState.Loading -> {
                 // Tampilkan Indikator Loading
                 CircularProgressIndicator(color = Color(0xFF1E3E62))

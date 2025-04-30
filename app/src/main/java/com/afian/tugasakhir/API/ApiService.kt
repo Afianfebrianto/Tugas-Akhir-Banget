@@ -20,6 +20,7 @@ import com.afian.tugasakhir.Model.RespondPanggilanResponse
 import com.afian.tugasakhir.Model.SimpleStatusResponse
 import com.afian.tugasakhir.Model.UpdateLocationRequest
 import com.afian.tugasakhir.Model.UpdateLocationResponse
+import com.afian.tugasakhir.Model.UpdatePasswordRequest
 import com.afian.tugasakhir.Model.UpdateProfileResponse
 import com.afian.tugasakhir.Model.User
 import com.afian.tugasakhir.Model.UserProfileResponse
@@ -127,6 +128,9 @@ interface ApiService {
         @Part("informasi") informasi: RequestBody?
         // Tambahkan @Header jika perlu Auth Token
     ): Response<UpdateProfileResponse> // Kembalikan Response untuk cek status
+    // Endpoint untuk update password
+    @PUT("api/users/update-password") // Gunakan PUT
+    suspend fun updatePassword(@Body body: UpdatePasswordRequest): Response<SimpleStatusResponse> // Gunakan Response dan model status sederhana
 }
 
 object RetrofitClient {

@@ -43,11 +43,13 @@ import com.afian.tugasakhir.Component.CardButtonBarDosen
 import com.afian.tugasakhir.Component.DosenList
 import com.afian.tugasakhir.Component.Header
 import com.afian.tugasakhir.Component.PeringkatDosenItem
+import com.afian.tugasakhir.Component.ProfilePromptDialog
 import com.afian.tugasakhir.Component.TopDosenLeaderboard
 import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Service.GeofenceHelper
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.afian.tugasakhir.Controller.PeringkatDosenViewModel
+import com.afian.tugasakhir.Controller.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -116,7 +118,21 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
             .setMinUpdateIntervalMillis(5000L) // Interval tercepat 5 detik
             .build()
     }
-
+// --- 👇 State & Efek untuk Dialog Prompt Profil 👇 ---
+    var showProfileDialog by remember { mutableStateOf(false) }
+    // Gunakan Unit sebagai key agar hanya cek sekali saat user data pertama kali valid
+    LaunchedEffect(key1 = user) {
+        if (user != null) {
+            // Cek apakah profil perlu dilengkapi
+            val needsUpdate = user.foto_profile.isNullOrBlank() || user.no_hp.isNullOrBlank()
+            if (needsUpdate) {
+                Log.d("HomeDosenScreen", "Profile needs update (Photo: ${user.foto_profile}, HP: ${user.no_hp}). Showing prompt.")
+                showProfileDialog = true // Tampilkan dialog jika perlu update
+            } else {
+                Log.d("HomeDosenScreen", "Profile seems complete. No prompt needed.")
+            }
+        }
+    }
     // 3. Definisikan LocationCallback (Hanya untuk logging/konfirmasi)
     val locationCallback = remember {
         object : LocationCallback() {
@@ -258,7 +274,27 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
     }
     // --- AKHIR EFEK UNTUK START/STOP LOKASI AKTIF ---
 
-
+// --- Tampilkan Dialog Secara Kondisional ---
+    if (showProfileDialog) {
+        ProfilePromptDialog(
+            onDismissRequest = { showProfileDialog = false }, // Tutup dialog
+            onConfirm = {
+                showProfileDialog = false // Tutup dialog
+                // Navigasi ke layar edit profil
+                // Pastikan route dan cara passing argumen sesuai definisi NavGraph Anda
+                if (user?.identifier != null) {
+                    // Asumsi route = "profile_edit/{identifier}/{role}"
+                    val route = Screen.UserProfileEdit.route // Ambil route dari sealed class
+                        .replace("{identifier}", user.identifier)
+                        .replace("{role}", user.role) // Kirim role juga
+                    navController.navigate(route)
+                } else {
+                    Log.e("HomeDosenScreen", "Cannot navigate to edit profile, user identifier is null")
+                    // Tampilkan Toast error?
+                }
+            }
+        )
+    }
     // --- Layout UI Asli Anda ---
     Column(
         modifier = Modifier

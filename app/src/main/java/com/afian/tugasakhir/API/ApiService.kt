@@ -142,7 +142,7 @@ object RetrofitClient {
         .build()
 
     val apiService: ApiService = retrofit.create(ApiService::class.java)
-    val getBaseUrl = "https://dosentracker.kebunrayabundahayati.com/"
+    val getBaseUrl = BASE_URL
 
 
 }

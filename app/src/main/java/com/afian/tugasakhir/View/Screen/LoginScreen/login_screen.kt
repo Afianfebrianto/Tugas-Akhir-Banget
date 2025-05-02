@@ -106,7 +106,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
                 Log.i(LOGIN_TAG, "State is PasswordUpdateRequired. Preparing navigation...")
                 val user = state.user // Akses user dari 'state'
                 // Validasi identifier sebelum navigasi
-                if (user.identifier.isBlank()) {
+                if (user.identifier.isBlank() && user.role.isBlank()) {
                     Log.e(LOGIN_TAG, "Cannot navigate to update password: Identifier is blank!")
                     Toast.makeText(context, "Error: Identifier pengguna tidak valid.", Toast.LENGTH_LONG).show()
                     viewModel.resetLoginStateToIdle() // Reset state jika identifier tidak valid
@@ -130,10 +130,17 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
                 val startDestinationId = navController.graph.findStartDestination().id
                 Log.d(LOGIN_TAG, "Navigating to UpdatePassword. Popping up to Start Destination ID: $startDestinationId")
 
+                if (user.identifier.isNotBlank() && user.role.isNotBlank()) { // Pastikan role juga tidak blank
+                    val destinationRoute = Screen.UpdatePassword.route
+                        .replace("{identifier}", user.identifier)
+                        .replace("{role}", user.role)
+
+
                 try {
                     // Langsung navigasi ke layar update password
                     navController.navigate(destinationRoute) {
                         // Hapus semua backstack sampai ke awal NavGraph
+//                        viewModel.resetLoginStateToIdle()
                         popUpTo(startDestinationId) { inclusive = true }
                         launchSingleTop = true
                     }
@@ -143,6 +150,8 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
                     Toast.makeText(context, "Gagal membuka halaman update password.", Toast.LENGTH_LONG).show()
                     viewModel.resetLoginStateToIdle() // Reset jika navigasi gagal
                 }
+                    viewModel.resetLoginStateToIdle()
+                } else {Log.e("LoginScreen","elses identifiernull and role null")}
                 // JANGAN reset state UI login di sini, biarkan UpdatePasswordScreen yang aktif
             }
 

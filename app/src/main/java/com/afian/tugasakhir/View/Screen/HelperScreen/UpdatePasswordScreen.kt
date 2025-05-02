@@ -52,6 +52,7 @@ fun UpdatePasswordScreen(
     navController: NavController,
     identifier: String, // Terima identifier dari NavGraph
     loginViewModel: LoginViewModel, // Untuk dapat role setelah sukses update
+    role: String,
     viewModel: UpdatePasswordViewModel = viewModel() // Gunakan ViewModel baru
 ) {
     val context = LocalContext.current
@@ -73,7 +74,7 @@ fun UpdatePasswordScreen(
             // Ambil role dari LoginViewModel menggunakan identifier yg disimpan
             // atau idealnya, API update password mengembalikan data user lengkap
             val user = loginViewModel.getUserData() // Ambil data user terakhir yg login
-            val role = if (user?.identifier == identifier) user.role else loginViewModel.getUserRole() // Dapatkan role
+//            val role = if (user?.identifier == identifier) user.role else loginViewModel.getUserRole() // Dapatkan role
 
             val destination = when (role) { // Navigasi ke home sesuai role
                 "dosen" -> Screen.HomeDosen.route
@@ -86,6 +87,17 @@ fun UpdatePasswordScreen(
                 // Hapus semua backstack sampai awal grafik
                 popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
                 launchSingleTop = true
+            }
+            if (destination != Screen.Login.route) { // Jangan navigasi ke login lagi
+                val startDestinationId = navController.graph.findStartDestination().id
+                Log.d("UpdatePasswordScreen", "Navigating to '$destination', popping up to ID $startDestinationId")
+                navController.navigate(destination) { // Navigasi ke home
+                    popUpTo(startDestinationId) { inclusive = true } // Clear semua stack
+                    launchSingleTop = true
+                }
+            } else {
+                Log.e("UpdatePasswordScreen", "Cannot determine home destination, navigating back to Login. Role: $role")
+                navController.navigate(destination) { /* popUpTo */ }
             }
         } else if (updateState is UiState.Error) {
             // Tampilkan error API menggunakan Toast

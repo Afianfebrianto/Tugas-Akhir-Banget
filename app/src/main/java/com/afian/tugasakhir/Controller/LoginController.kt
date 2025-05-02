@@ -149,6 +149,7 @@ class LoginViewModel(private val context: Context) : ViewModel() {
             putString("user_photo", user.foto_profile)
             putInt("user_id", user.user_id) // Simpan user_id jika diperlukan
             putInt("update_password", user.update_password)
+            putString("no_hp", user.no_hp)
             apply()
         }
     }
@@ -169,7 +170,8 @@ class LoginViewModel(private val context: Context) : ViewModel() {
                 user_name = sharedPreferences.getString("user_name", "") ?: "",
                 role = sharedPreferences.getString("role", "") ?: "",
                 foto_profile = sharedPreferences.getString("user_photo", "") ?: "",
-                update_password = sharedPreferences.getInt("update_password", 0)
+                update_password = sharedPreferences.getInt("update_password", 0),
+                no_hp = sharedPreferences.getString("no_hp","") ?: ""
             )
         } else {
             null

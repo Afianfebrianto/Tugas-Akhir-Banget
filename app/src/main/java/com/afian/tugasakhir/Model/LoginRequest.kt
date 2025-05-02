@@ -17,5 +17,6 @@ data class User(
     val user_name: String,
     val role: String,
     val foto_profile: String,
-    val update_password: Int
+    val update_password: Int,
+    val no_hp: String
 )

@@ -57,7 +57,7 @@ sealed class Screen(val route: String) {
     object KtmDigital : Screen("ktm_digital")
     object ListDosen : Screen("list_dosen_screen")
     object UserProfileEdit : Screen("profile_edit")
-    object UpdatePassword : Screen("update_password/{identifier}") // Route dengan argumen
+    object UpdatePassword : Screen("update_password/{identifier}/{role}") // Route dengan argumen
 }
 
 @Composable
@@ -284,10 +284,14 @@ fun NavigationGraph(
 
         composable(
             route = Screen.UpdatePassword.route, // Contoh: "update_password/{identifier}"
-            arguments = listOf(navArgument("identifier") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("identifier") { type = NavType.StringType },
+                navArgument("role") { type = NavType.StringType } // <-- Definisikan argumen role
+            )
         ) { backStackEntry ->
             val identifier = backStackEntry.arguments?.getString("identifier")
-            if (identifier != null) {
+            val role = backStackEntry.arguments?.getString("role")
+            if (identifier != null  && role != null) {
                 // Buat instance ViewModel baru khusus layar ini
                 val updatePasswordViewModel: UpdatePasswordViewModel = viewModel(
                     // Jika ViewModel butuh SavedStateHandle, factory default akan memberikannya
@@ -295,6 +299,7 @@ fun NavigationGraph(
                 UpdatePasswordScreen(
                     navController = navController,
                     identifier = identifier, // Teruskan identifier
+                    role = role,
                     loginViewModel = loginViewModel, // Untuk dapat role setelah sukses
                     viewModel = updatePasswordViewModel
                 )

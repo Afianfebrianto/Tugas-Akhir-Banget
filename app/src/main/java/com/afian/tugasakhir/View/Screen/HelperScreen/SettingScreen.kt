@@ -109,27 +109,27 @@ fun UserSettingsScreen(
                 loginViewModel.resetLogoutStateToIdle()
                 Log.d("UserSettingsScreen", "[Effect] ViewModel state reset.")
 
-                // --- 👇 NAVIGASI & CLEAR STACK 👇 ---
-                Log.i("UserSettingsScreen", "[Effect] Preparing navigation and stack clearing...")
-                // Ganti Screen.Welcome.route jika perlu
-                val initialScreenRoute = Screen.Login.route // <<< PASTIKAN ROUTE INI BENAR
-                Log.d("UserSettingsScreen", "[Effect] Target route: '$initialScreenRoute'")
-                try {
-                    // <<< PERBAIKI popUpTo dengan inclusive = true >>>
-                    navController.navigate(initialScreenRoute) {
-                        Log.d("UserSettingsScreen", "[Effect] Configuring navigate options: popUpTo(0){inclusive=true}, launchSingleTop=true")
-                        popUpTo(navController.graph.id) {
-                            inclusive = true // <-- PENTING: Hapus semua termasuk index 0
-                        }
-                        launchSingleTop = true
-                    }
-                    // Log ini mungkin tidak menjamin navigasi visual berhasil, hanya panggilannya tidak error
-                    Log.i("UserSettingsScreen", "[Effect] navController.navigate('$initialScreenRoute') called successfully.")
-                } catch (e: Exception) {
-                    Log.e("UserSettingsScreen", "[Effect] !!! Navigation failed after logout !!!", e)
-                    Toast.makeText(context, "Gagal kembali ke halaman awal.", Toast.LENGTH_SHORT).show()
-                }
-                // --- 👆 ---
+//                // --- 👇 NAVIGASI & CLEAR STACK 👇 ---
+//                Log.i("UserSettingsScreen", "[Effect] Preparing navigation and stack clearing...")
+//                // Ganti Screen.Welcome.route jika perlu
+//                val initialScreenRoute = Screen.Login.route // <<< PASTIKAN ROUTE INI BENAR
+//                Log.d("UserSettingsScreen", "[Effect] Target route: '$initialScreenRoute'")
+//                try {
+//                    // <<< PERBAIKI popUpTo dengan inclusive = true >>>
+//                    navController.navigate(initialScreenRoute) {
+//                        Log.d("UserSettingsScreen", "[Effect] Configuring navigate options: popUpTo(0){inclusive=true}, launchSingleTop=true")
+//                        popUpTo(navController.graph.id) {
+//                            inclusive = true // <-- PENTING: Hapus semua termasuk index 0
+//                        }
+//                        launchSingleTop = true
+//                    }
+//                    // Log ini mungkin tidak menjamin navigasi visual berhasil, hanya panggilannya tidak error
+//                    Log.i("UserSettingsScreen", "[Effect] navController.navigate('$initialScreenRoute') called successfully.")
+//                } catch (e: Exception) {
+//                    Log.e("UserSettingsScreen", "[Effect] !!! Navigation failed after logout !!!", e)
+//                    Toast.makeText(context, "Gagal kembali ke halaman awal.", Toast.LENGTH_SHORT).show()
+//                }
+//                // --- 👆 ---
             }
             is UiState.Error -> {
                 Log.w("UserSettingsScreen", "[Effect] Logout Error state received: ${(logoutState as UiState.Error).message}")

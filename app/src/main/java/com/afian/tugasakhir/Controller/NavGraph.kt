@@ -101,34 +101,30 @@ fun NavigationGraph(
         Log.d("navgraph", "Auth State Changed Effect Triggered: LoggedIn=$userIsCurrentlyLoggedIn, CurrentRoute=$currentRoute")
 
         if (!userIsCurrentlyLoggedIn) { // JIKA USER BARU SAJA LOGOUT
+            val isAuthScreen = currentRoute == Screen.Welcome.route ||
+                    currentRoute == Screen.Login.route ||
+                    currentRoute == Screen.Splash.route // Tambahkan layar non-login lain jika ada
             // Jika kita TIDAK sedang di layar Welcome atau Login
-            if (currentRoute != null && currentRoute != Screen.Welcome.route && currentRoute != Screen.Login.route) {
-                Log.i("Navgraph", "EFFECT Action: User logged out, NOT on auth screen ($currentRoute). Forcing Welcome.")
-                // Lakukan navigasi paksa ke Welcome dan clear stack
-                navController.navigate(Screen.Welcome.route) {
-                    popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                    launchSingleTop = true
+            if (!isAuthScreen && currentRoute != null) {
+                Log.i("NavigationGraph", "[AuthEffect] User logged out, NOT on auth screen ($currentRoute). Forcing LOGIN screen.")
+                // Navigasi ke LAYAR LOGIN dan clear stack total
+                try { // Tambahkan try-catch di sini juga
+                    navController.navigate(Screen.Login.route) { // <-- TARGET: Login Screen
+                        Log.d("NavigationGraph", "[AuthEffect] Configuring navigate options: popUpTo(0){inclusive=true}, launchSingleTop=true")
+                        popUpTo(0) { inclusive = true } // <-- CLEAR STACK TOTAL
+                        launchSingleTop = true
+                    }
+                    Log.i("NavigationGraph", "[AuthEffect] Navigation to Login successful.")
+                } catch (e: Exception) {
+                    Log.e("NavigationGraph", "[AuthEffect] !!! Navigation to Login failed !!!", e)
+                    // Mungkin tampilkan Toast atau log error kritis
                 }
-                // Reset state login di ViewModel SETELAH navigasi dipicu
-                loginViewModel.resetLoginStateToIdle()
+                // JANGAN reset state ViewModel di sini, biarkan UserSettingsScreen yg melakukannya
+                // loginViewModel.resetLoginStateToIdle()
             } else {
-                Log.d("Navgraph", "EFFECT Action: User logged out, but already on auth screen ($currentRoute). No navigation needed.")
-                // Tetap reset state login jika mendarat di sini setelah logout
-                loginViewModel.resetLoginStateToIdle()
+                Log.d("NavigationGraph", "[AuthEffect] User logged out, but already on auth screen ($currentRoute) or currentRoute is null. No navigation needed by this effect.")
             }
         }
-        // --- 👇 HAPUS BLOK ELSE IF INI 👇 ---
-        // HAPUS logika yang memaksa navigasi DARI Welcome/Login KE Home.
-        // Biarkan LoginScreen yang menanganinya berdasarkan LoginUiState.
-        /* HAPUS MULAI DARI SINI
-        else if (userIsCurrentlyLoggedIn && (currentRoute == Screen.Welcome.route || currentRoute == Screen.Login.route)) {
-             // Jika user login TAPI masih di Welcome/Login -> JANGAN paksa ke Home dari sini
-             Log.w(NAV_GRAPH_TAG, "EFFECT Action: User logged in, but on auth screen ($currentRoute). Navigation handled by LoginScreen.")
-             // val role = loginViewModel.getUserRole()
-             // val homeRoute = when (role) { ... }
-             // navController.navigate(homeRoute) { ... }
-         }
-        HAPUS SAMPAI SINI */
         else { // User logged in dan tidak di welcome/login
             Log.d("Navgraph", "EFFECT Action: User logged in and on main screen ($currentRoute). No navigation needed by this effect.")
         }

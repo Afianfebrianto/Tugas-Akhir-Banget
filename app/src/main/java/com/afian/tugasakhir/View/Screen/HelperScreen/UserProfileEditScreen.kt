@@ -53,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import com.afian.tugasakhir.Controller.Screen
 import com.afian.tugasakhir.R
 import com.afian.tugasakhir.Controller.UserProfileViewModel
 
@@ -96,6 +97,54 @@ fun UserProfileEditScreen(
                 // Opsional: Kembali ke layar sebelumnya setelah sukses?
                 // navController.navigateUp()
             }
+        }
+    }
+
+    // --- 👇 REAKSI TERHADAP EVENT SUKSES UPDATE 👇 ---
+    LaunchedEffect(Unit) { // Cukup subscribe sekali
+        Log.d("UserProfileEditScreen", ">>> [CollectEffect] Mulai setup collection untuk updateSuccessEvent...") // Log setup
+        try {
+            viewModel.updateSuccessEvent.collect { updatedProfileData ->
+                Log.i("UserProfileEditScreen", ">>> [CollectEffect] BERHASIL COLLECT event! Data: $updatedProfileData") // Log event diterima
+
+                // 1. Panggil fungsi di LoginViewModel
+                Log.d("UserProfileEditScreen", ">>> [CollectEffect] Memanggil updateLocalUserData...")
+                loginViewModel.updateLocalUserData(updatedProfileData)
+                Log.d("UserProfileEditScreen", ">>> [CollectEffect] Selesai updateLocalUserData.")
+
+                // --- Tentukan Route Tujuan ---
+                val userRole = loginViewModel.getUserData()?.role
+                Log.d("UserProfileEditScreen", ">>> [CollectEffect] Role dari LoginViewModel: $userRole") // Log role
+
+                val destinationRoute = when (userRole?.lowercase()) {
+                    "admin" -> Screen.HomeAdmin.route
+                    "dosen" -> Screen.HomeDosen.route
+                    "mhs" -> Screen.HomeMahasiswa.route
+                    else -> {
+                        Log.e("UserProfileEditScreen", ">>> [CollectEffect] Role tidak dikenali: '$userRole'. Navigasi ke login.")
+                        Screen.Login.route
+                    }
+                }
+                Log.d("UserProfileEditScreen", ">>> [CollectEffect] Ditentukan Destination Route: $destinationRoute") // Log route
+
+                // 2. Navigasi
+                Log.d("UserProfileEditScreen", ">>> [CollectEffect] Mencoba navigasi ke: $destinationRoute") // Log sebelum navigasi
+                try {
+                    navController.navigate(destinationRoute) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    Log.i("UserProfileEditScreen", ">>> [CollectEffect] Panggilan navigasi ke '$destinationRoute' berhasil.") // Log setelah panggil navigate
+                } catch (navError: Exception) {
+                    // Log error navigasi secara spesifik
+                    Log.e("UserProfileEditScreen", "!!! [CollectEffect] GAGAL NAVIGASI ke '$destinationRoute' !!!", navError)
+                }
+            }
+        } catch (collectError: Exception) {
+            // Log jika ada error saat proses collect itu sendiri
+            Log.e("UserProfileEditScreen", "!!! [CollectEffect] Error saat collect updateSuccessEvent !!!", collectError)
         }
     }
 

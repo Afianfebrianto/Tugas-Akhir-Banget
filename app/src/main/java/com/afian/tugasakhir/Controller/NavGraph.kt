@@ -135,37 +135,6 @@ fun NavigationGraph(
         // --- 👆 AKHIR BLOK HAPUS 👆 ---
     } // Akhir LaunchedEffect
 
-//    LaunchedEffect(currentUser) { // Bereaksi saat user state berubah
-//        val currentRoute = navController.currentBackStackEntry?.destination?.route
-//        val userIsCurrentlyLoggedIn = currentUser != null // Cek login dari state terkini
-//
-//        Log.d("NavigationGraph", "Auth State Changed Effect: LoggedIn=$userIsCurrentlyLoggedIn, CurrentRoute=$currentRoute")
-//
-//        if (!userIsCurrentlyLoggedIn && currentRoute != null && currentRoute != Screen.Welcome.route && currentRoute != Screen.Login.route) {
-//            // Jika user BARU SAJA logout DAN sedang TIDAK di Welcome/Login -> paksa ke Welcome
-//            Log.i("NavigationGraph", "EFFECT: User logged out, not on auth screen ($currentRoute). Forcing Welcome.")
-//            navController.navigate(Screen.Welcome.route) { // Ganti ke Screen.Login.route jika perlu
-//                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-//                launchSingleTop = true
-//            }
-//        } else if (userIsCurrentlyLoggedIn && (currentRoute == Screen.Welcome.route || currentRoute == Screen.Login.route)) {
-//            // Jika user BARU SAJA login DAN sedang di Welcome/Login -> paksa ke Home
-//            val role = loginViewModel.getUserRole() // Dapatkan role terkini
-//            val homeRoute = when (role) {
-//                "dosen" -> Screen.HomeDosen.route
-//                "mhs" -> Screen.HomeMahasiswa.route
-//                "admin" -> Screen.HomeAdmin.route
-//                else -> Screen.Welcome.route // Fallback jika role aneh
-//            }
-//            Log.i("NavigationGraph", "EFFECT: User logged in, on auth screen ($currentRoute). Forcing $homeRoute.")
-//            navController.navigate(homeRoute) {
-//                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-//                launchSingleTop = true
-//            }
-//        } else {
-//            Log.d("NavigationGraph", "EFFECT: Auth state matches current location ($currentRoute, loggedIn=$userIsCurrentlyLoggedIn). No navigation needed by effect.")
-//        }
-//    }
 
 
     NavHost(navController = navController, startDestination = startDestination) {

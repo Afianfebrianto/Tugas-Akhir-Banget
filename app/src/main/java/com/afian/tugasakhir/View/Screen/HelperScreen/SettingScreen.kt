@@ -58,6 +58,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import com.afian.tugasakhir.Component.LogoutConfirmationDialog
 import com.afian.tugasakhir.Component.LottieSuccessAnimation
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.afian.tugasakhir.Controller.Screen
@@ -84,31 +85,85 @@ fun UserSettingsScreen(
 
     // State contoh untuk toggle notifikasi
     var notificationEnabled by remember { mutableStateOf(true) }
+    var showLogoutConfirmationDialog by remember { mutableStateOf(false) }
 
     // LaunchedEffect untuk handle logout (Tidak Berubah - Sudah Benar)
+    // LaunchedEffect untuk handle logout state
+    // LaunchedEffect untuk menangani perubahan state logout
     LaunchedEffect(logoutState) {
+        Log.d("UserSettingsScreen", "[Effect] Detected logoutState change: $logoutState") // Log setiap perubahan state
         when (logoutState) {
             is UiState.Success -> {
-                showLogoutLottie = true // Tampilkan animasi
-                Log.d("UserSettingsScreen", "Logout Success state detected. Showing Lottie...")
-                // Tunggu animasi selesai, lalu reset state logout di ViewModel
-                delay(2500L) // Beri waktu sedikit lebih lama untuk Lottie
-                Log.d("UserSettingsScreen", "Lottie delay finished. Resetting logout state.")
-                loginViewModel.resetLogoutStateToIdle() // Reset state logout
-                // --- HAPUS SEMUA NAVIGASI DARI SINI ---
-                // loginViewModel.resetLoginStateToIdle() // Reset login state bisa dipindah ke NavGraph jika perlu
-                showLogoutLottie = false // Sembunyikan Lottie setelah reset state
+                Log.i("UserSettingsScreen", "[Effect] Logout Success state received!")
+                // 1. Tampilkan Animasi
+                if (!showLogoutLottie) {
+                    showLogoutLottie = true
+                    Log.d("UserSettingsScreen", "[Effect] Showing Lottie animation...")
+                    delay(2500L)
+                    Log.d("UserSettingsScreen", "[Effect] Lottie delay finished.")
+                    showLogoutLottie = false
+                }
+
+                // 2. Reset State ViewModel
+                Log.d("UserSettingsScreen", "[Effect] Calling resetLogoutStateToIdle in ViewModel...")
+                loginViewModel.resetLogoutStateToIdle()
+                Log.d("UserSettingsScreen", "[Effect] ViewModel state reset.")
+
+                // --- 👇 NAVIGASI & CLEAR STACK 👇 ---
+                Log.i("UserSettingsScreen", "[Effect] Preparing navigation and stack clearing...")
+                // Ganti Screen.Welcome.route jika perlu
+                val initialScreenRoute = Screen.Login.route // <<< PASTIKAN ROUTE INI BENAR
+                Log.d("UserSettingsScreen", "[Effect] Target route: '$initialScreenRoute'")
+                try {
+                    // <<< PERBAIKI popUpTo dengan inclusive = true >>>
+                    navController.navigate(initialScreenRoute) {
+                        Log.d("UserSettingsScreen", "[Effect] Configuring navigate options: popUpTo(0){inclusive=true}, launchSingleTop=true")
+                        popUpTo(navController.graph.id) {
+                            inclusive = true // <-- PENTING: Hapus semua termasuk index 0
+                        }
+                        launchSingleTop = true
+                    }
+                    // Log ini mungkin tidak menjamin navigasi visual berhasil, hanya panggilannya tidak error
+                    Log.i("UserSettingsScreen", "[Effect] navController.navigate('$initialScreenRoute') called successfully.")
+                } catch (e: Exception) {
+                    Log.e("UserSettingsScreen", "[Effect] !!! Navigation failed after logout !!!", e)
+                    Toast.makeText(context, "Gagal kembali ke halaman awal.", Toast.LENGTH_SHORT).show()
+                }
+                // --- 👆 ---
             }
             is UiState.Error -> {
+                Log.w("UserSettingsScreen", "[Effect] Logout Error state received: ${(logoutState as UiState.Error).message}")
                 showLogoutLottie = false
                 val errorMessage = (logoutState as UiState.Error).message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                loginViewModel.resetLogoutStateToIdle() // Reset state error logout
+                Toast.makeText(context, "Logout Gagal: $errorMessage", Toast.LENGTH_LONG).show()
+                loginViewModel.resetLogoutStateToIdle()
             }
-            is UiState.Idle -> { showLogoutLottie = false }
-            is UiState.Loading -> { showLogoutLottie = false }
+            is UiState.Idle -> {
+                Log.d("UserSettingsScreen", "[Effect] Logout Idle state received.")
+                showLogoutLottie = false
+            }
+            is UiState.Loading -> {
+                Log.d("UserSettingsScreen", "[Effect] Logout Loading state received.")
+                // Tombol logout seharusnya disable
+            }
         }
     }
+
+    // --- 👇 Tampilkan Dialog Konfirmasi Jika State true 👇 ---
+    if (showLogoutConfirmationDialog) {
+        LogoutConfirmationDialog(
+            onConfirmLogout = {
+                showLogoutConfirmationDialog = false // Tutup dialog
+                Log.d("UserSettingsScreen", "Logout confirmed via dialog. Calling viewModel.logout().")
+                loginViewModel.logout() // Panggil fungsi logout di ViewModel
+            },
+            onDismiss = {
+                showLogoutConfirmationDialog = false // Tutup dialog
+                Log.d("UserSettingsScreen", "Logout confirmation dialog dismissed.")
+            }
+        )
+    }
+    // --- 👆 ---
 
 
     Scaffold(
@@ -212,7 +267,7 @@ fun UserSettingsScreen(
                         text = "Logout",
                         iconVector = Icons.AutoMirrored.Filled.ExitToApp, // Icon auto-mirrored
                         enabled = logoutState !is UiState.Loading,
-                        onClick = { loginViewModel.logout() },
+                        onClick = { showLogoutConfirmationDialog = true },
                         contentColor = MaterialTheme.colorScheme.error, // Warna merah
                         isLoading = logoutState is UiState.Loading // Kirim status loading
                     )

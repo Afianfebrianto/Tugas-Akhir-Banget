@@ -23,6 +23,9 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import androidx.compose.runtime.State
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 class UserProfileViewModel : ViewModel() {
     private val TAG = "UserProfileVM"
@@ -31,6 +34,9 @@ class UserProfileViewModel : ViewModel() {
     // State untuk data profil yang sedang ditampilkan/diedit
     private val _profileData = MutableStateFlow<UserProfileData?>(null)
     val profileData: StateFlow<UserProfileData?> = _profileData.asStateFlow()
+
+    private val _updateSuccessEvent = MutableSharedFlow<UserProfileData>() // Gunakan SharedFlow
+    val updateSuccessEvent: SharedFlow<UserProfileData> = _updateSuccessEvent.asSharedFlow()
 
     // State untuk input field (agar bisa diedit)
     val noHpInput = mutableStateOf("")
@@ -121,6 +127,7 @@ class UserProfileViewModel : ViewModel() {
             var photoPart: MultipartBody.Part? = null
             var saveSuccess = false
             var message = "Gagal menyimpan profil."
+            var updatedDataResult: UserProfileData? = null
 
             try {
                 // 1. Siapkan Part untuk Foto (jika ada URI baru)
@@ -161,7 +168,15 @@ class UserProfileViewModel : ViewModel() {
                     Log.i(TAG, "Profile update success: $message")
                     // Jika sukses & ada foto baru, update state foto profil di ViewModel
                     // dengan URL baru dari respons (jika backend mengirimnya)
-                    val newPhotoUrl = response.body()?.updated_photo_url
+//                    val newPhotoUrl = response.body()?.updated_photo_url
+                    // --- 👇 Bangun objek UserProfileData yang terupdate 👇 ---
+                    val newPhotoUrl = response.body()?.updated_photo_url ?: currentProfile?.foto_profile // Ambil URL baru jika ada, jika tidak pakai yg lama
+                    // Buat objek baru berdasarkan currentProfile TAPI dengan nilai input terbaru & foto baru
+                    updatedDataResult = currentProfile?.copy(
+                        no_hp = noHpValue,
+                        informasi = infoValue,
+                        foto_profile = newPhotoUrl
+                    )
                     if (newPhotoUrl != null) {
                         withContext(Dispatchers.Main) {
                             _profileData.update { it?.copy(foto_profile = newPhotoUrl) }
@@ -192,6 +207,19 @@ class UserProfileViewModel : ViewModel() {
                     _saveResult.value = Pair(saveSuccess, message) // Set hasil akhir
                     _isSaving.value = false // Set loading false
                     Log.d(TAG, "Profile save finished.")
+                    // --- 👇 TAMBAHKAN LOGGING DI SINI 👇 ---
+                    if (saveSuccess && updatedDataResult != null) {
+                        Log.d(TAG, ">>> Kondisi terpenuhi untuk emit: saveSuccess=$saveSuccess, data=$updatedDataResult")
+                        try {
+                            Log.d(TAG, ">>> MEMANGGIL _updateSuccessEvent.emit()...")
+                            _updateSuccessEvent.emit(updatedDataResult)
+                            Log.i(TAG, ">>> BERHASIL emit updateSuccessEvent.") // Konfirmasi emit berhasil
+                        } catch (e: Exception) {
+                            Log.e(TAG, ">>> GAGAL emit updateSuccessEvent", e) // Log jika emit error
+                        }
+                    } else {
+                        Log.w(TAG, ">>> TIDAK emit updateSuccessEvent. Kondisi: saveSuccess=$saveSuccess, updatedDataResult=$updatedDataResult")
+                    }
                 }
             }
         }

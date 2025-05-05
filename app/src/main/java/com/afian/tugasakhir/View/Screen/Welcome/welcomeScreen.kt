@@ -1,5 +1,6 @@
 package com.afian.tugasakhir.View.Screen.Welcome
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -142,6 +143,14 @@ fun WelcomeScreen1(navController: NavController) {
             ) {
                 Text(text = "let's start", color = Color.Black, fontSize = 16.sp)
             }
+        }
+    }
+    BackHandler {
+        // Mengarahkan kembali ke HomeScreen jika berada di halaman selain HomeScreen
+        navController.navigate(Screen.Welcome.route) {
+            // Menghapus seluruh stack navigasi yang ada sebelum HomeScreen
+            popUpTo(Screen.Welcome.route) { inclusive = true }
+            launchSingleTop = true
         }
     }
 }

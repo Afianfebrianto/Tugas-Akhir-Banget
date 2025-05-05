@@ -19,6 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -29,10 +32,14 @@ import androidx.navigation.NavController
 import com.afian.tugasakhir.Component.CardButtonBarMhs
 import com.afian.tugasakhir.Component.DosenList
 import com.afian.tugasakhir.Component.Header
+import com.afian.tugasakhir.Component.ProfilePromptDialog
 import com.afian.tugasakhir.Component.TopDosenLeaderboard
 import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.afian.tugasakhir.Controller.PeringkatDosenViewModel
+import com.afian.tugasakhir.Controller.Screen
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
 
 @Composable
 fun ScreenMhs() {
@@ -83,6 +90,44 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController, d
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+    }
+
+    // --- 👇 State & Efek untuk Dialog Prompt Profil 👇 ---
+    var showProfileDialog by remember { mutableStateOf(false) }
+    // Gunakan Unit sebagai key agar hanya cek sekali saat user data pertama kali valid
+    LaunchedEffect(key1 = user) {
+        if (user != null) {
+            // Cek apakah profil perlu dilengkapi
+            val needsUpdate = user.foto_profile.isNullOrBlank() || user.no_hp.isNullOrBlank()
+            if (needsUpdate) {
+                Log.d("HomeMahasiswaScreen", "Profile needs update (Photo: ${user.foto_profile}, HP: ${user.no_hp}). Showing prompt.")
+                showProfileDialog = true // Tampilkan dialog jika perlu update
+            } else {
+                Log.d("HomeMahasiswaScreen", "Profile seems complete. No prompt needed.")
+            }
+        }
+    }
+
+    // --- Tampilkan Dialog Secara Kondisional ---
+    if (showProfileDialog) {
+        ProfilePromptDialog(
+            onDismissRequest = { showProfileDialog = false }, // Tutup dialog
+            onConfirm = {
+                showProfileDialog = false // Tutup dialog
+                // Navigasi ke layar edit profil
+                // Pastikan route dan cara passing argumen sesuai definisi NavGraph Anda
+                if (user?.identifier != null) {
+                    // Asumsi route = "profile_edit/{identifier}/{role}"
+                    val route = Screen.UserProfileEdit.route // Ambil route dari sealed class
+                        .replace("{identifier}", user.identifier)
+                        .replace("{role}", user.role) // Kirim role juga
+                    navController.navigate(route)
+                } else {
+                    Log.e("HomeMahasiswaScreen", "Cannot navigate to edit profile, user identifier is null")
+                    // Tampilkan Toast error?
+                }
+            }
+        )
     }
 
     Column(

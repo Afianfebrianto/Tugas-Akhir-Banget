@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.afian.tugasakhir.API.RetrofitClient
 import com.afian.tugasakhir.Model.LoginRequest
 import com.afian.tugasakhir.Model.User
+import com.afian.tugasakhir.Model.UserProfileData
 import com.afian.tugasakhir.Service.FcmRepository
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
@@ -227,6 +228,23 @@ class LoginViewModel(private val context: Context) : ViewModel() {
                     _logoutState.value = UiState.Error(errorMsg ?: "Logout gagal.")
                 }
             }
+        }
+    }
+
+    fun updateLocalUserData(updatedProfile: UserProfileData) {
+        val currentUserData = getUserData()
+        if (currentUserData != null) {
+            // Buat objek User baru dengan data yang diperbarui
+            val newlyUpdatedUser = currentUserData.copy(
+                no_hp = updatedProfile.no_hp.toString(), // Ambil dari updatedProfile
+                foto_profile = updatedProfile.foto_profile.toString() // Ambil dari updatedProfile
+            )
+            // Simpan kembali ke SharedPreferences menggunakan fungsi yang sudah ada
+            saveLoginStatus(true, newlyUpdatedUser)
+            Log.i(TAG, "Local user data updated in SharedPreferences: $newlyUpdatedUser")
+        } else {
+            Log.e(TAG, "Cannot update local user data: No user currently logged in according to SharedPreferences.")
+            // Mungkin perlu tindakan lain? Misal logout paksa?
         }
     }
 

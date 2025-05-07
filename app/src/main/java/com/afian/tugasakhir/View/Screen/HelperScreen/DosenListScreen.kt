@@ -14,9 +14,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn // Import LazyColumn
 import androidx.compose.foundation.lazy.items // Import items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator // Untuk loading indicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,6 +29,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -36,12 +41,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.afian.tugasakhir.Component.DosenDetailDialog
 import com.afian.tugasakhir.Component.DosenItem // Import DosenItem
+import com.afian.tugasakhir.Component.MyCustomTopAppBar
 import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Model.Dosen
 
@@ -57,6 +64,7 @@ fun CombinedDosenListScreen(
 
     // Ambil state query pencarian
     val searchQuery by viewModel.searchQuery.collectAsState()
+//    var searchQuery by remember { mutableStateOf("") }
 
     val isLoading by viewModel.isLoading
     val errorMessage by viewModel.errorMessage
@@ -66,22 +74,7 @@ fun CombinedDosenListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Informasi Dosen") },
-                navigationIcon = { // <-- Tombol Kembali
-                    IconButton(onClick = { navController.navigateUp() }) { // Panggil navigateUp
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Icon panah kembali
-                            contentDescription = "Kembali"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors( // Sesuaikan warna jika perlu
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
+            MyCustomTopAppBar(title = "Informasi Dosen", navController = navController)
         }
     ) { innerPadding -> // Ambil padding dari Scaffold
 
@@ -91,20 +84,49 @@ fun CombinedDosenListScreen(
                 .padding(innerPadding) // Terapkan padding Scaffold ke Column
                 .padding(horizontal = 8.dp) // Padding kiri kanan utama
         ) {
-            // --- TextField Pencarian ---
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { viewModel.onSearchQueryChanged(it) }, // Update query di ViewModel
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 8.dp), // Padding field search
-                label = { Text("Cari Dosen (Nama/NIDN)") },
-                leadingIcon = { // Icon search di depan
-                    Icon(Icons.Default.Search, contentDescription = "Search Icon")
-                },
-                singleLine = true, // Agar hanya satu baris
-                colors = OutlinedTextFieldDefaults.colors() // Sesuaikan warna jika perlu
-            )
+                    .padding(horizontal = 16.dp, vertical = 8.dp), // Padding di luar Card
+                shape = RoundedCornerShape(20.dp), // Bentuk Card
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Elevation untuk Card
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface // Warna latar Card, bisa diganti
+                )
+            ) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        viewModel.onSearchQueryChanged(it) // Panggil lambda dari ViewModel
+                        // Jika menggunakan state lokal:
+                        // searchQuery = it
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp), // Padding di dalam Card, antara tepi Card dan TextField
+                    placeholder = {
+                        Text(
+                            "Cari Dosen (Nama/NIDN)",
+                            // fontFamily = poppinsFamily
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = "Search Icon")
+                    },
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors( // Warna TextField diatur transparan agar warna Card terlihat
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        cursorColor = MaterialTheme.colorScheme.onSurface, // Sesuaikan warna kursor dengan tema
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface, // Warna teks
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant // Warna teks placeholder
+                    )
+                )
+            }
             // --- Akhir TextField Pencarian ---
 
             // Tampilkan loading atau error jika ada
@@ -188,7 +210,9 @@ fun CombinedDosenListScreen(
     selectedDosen?.let { dosenData ->
         DosenDetailDialog(
             dosen = dosenData,
-            onDismissRequest = { selectedDosen = null }
+            onDismissRequest = { selectedDosen = null },
+            dosenOnCampusList = dosenOnCampus,         // <-- Teruskan list dosen di kampus
+            dosenNotInCampusList = dosenNotInCampus  // <-- Teruskan list dosen tidak di kampus
         )
     }
 } // Akhir Composable Screen

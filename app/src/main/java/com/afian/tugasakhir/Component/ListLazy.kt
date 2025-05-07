@@ -61,6 +61,9 @@ fun DosenList( // Ini adalah versi PRATINJAU
     val dosenListFiltered by viewModel.filteredDosenList.collectAsState()
     val isLoading by viewModel.isLoadingDosen
 
+    val dosenOnCampus by viewModel.filteredDosenList.collectAsState()
+    val dosenNotInCampus by viewModel.filteredDosenNotInCampusList.collectAsState()
+
     // State untuk dialog detail dosen (tetap)
     var selectedDosen by remember { mutableStateOf<Dosen?>(null) }
 
@@ -151,7 +154,9 @@ fun DosenList( // Ini adalah versi PRATINJAU
     selectedDosen?.let { dosenData ->
         DosenDetailDialog(
             dosen = dosenData,
-            onDismissRequest = { selectedDosen = null }
+            onDismissRequest = { selectedDosen = null },
+            dosenOnCampusList = dosenOnCampus,         // <-- Teruskan list dosen di kampus
+            dosenNotInCampusList = dosenNotInCampus  // <-- Teruskan list dosen tidak di kampus
         )
     }
 }

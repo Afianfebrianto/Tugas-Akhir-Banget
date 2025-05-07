@@ -52,7 +52,7 @@ fun CardButtonBarDosen(navController: NavController) {
             }
         )
         CardButton(
-            iconRes = R.drawable.ic_id_card, // Replace with your icon resource
+            iconRes = R.drawable.person_search_24px, // Replace with your icon resource
             label = "Cari Mahasiswa",
             onClick = {
                 navController.navigate("cari_mahasiswa")

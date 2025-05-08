@@ -12,32 +12,26 @@ import com.afian.tugasakhir.Model.PanggilanHistoryDosenItem
 import com.afian.tugasakhir.Model.RequestPanggilanBody
 import kotlinx.coroutines.async // Import async
 import kotlinx.coroutines.awaitAll // Import awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.lang.Long.min
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.pow
 
 class DosenViewModel : ViewModel() {
 
-    // --- State Flow Internal untuk list asli (private) ---
     private val _dosenList = MutableStateFlow<List<Dosen>>(emptyList())
     private val _dosenNotInCampusList = MutableStateFlow<List<Dosen>>(emptyList())
     private val _searchQuery = MutableStateFlow("")
-
-    // State Flow BARU untuk daftar SEMUA mahasiswa
     private val _allMahasiswaList = MutableStateFlow<List<Dosen>>(emptyList()) // Pakai model Dosen jika field mirip
-    val allMahasiswaList: StateFlow<List<Dosen>> = _allMahasiswaList.asStateFlow()
-
-    // State untuk status pemanggilan (misal: loading saat panggil, pesan sukses/gagal)
-    val isCalling = mutableStateOf<Int?>(null) // Simpan ID mhs yg sedang dipanggil
-
-
+//    val allMahasiswaList: StateFlow<List<Dosen>> = _allMahasiswaList.asStateFlow()
+//    val isCalling = mutableStateOf<Int?>(null) // Simpan ID mhs yg sedang dipanggil
     private val _isLoadingDosen = mutableStateOf(false)
     val isLoadingDosen: State<Boolean> = _isLoadingDosen
     private val _errorMessageDosen = mutableStateOf<String?>(null)
-    // --- State Internal untuk loading dan error (private) ---
     private val _isLoading = mutableStateOf(false)
     private val _errorMessage = mutableStateOf<String?>(null)
-
 
     // --- 👇 STATE BARU UNTUK RIWAYAT PANGGILAN DOSEN 👇 ---
     private val _dosenPanggilanHistory = MutableStateFlow<List<PanggilanHistoryDosenItem>>(emptyList())
@@ -64,6 +58,12 @@ class DosenViewModel : ViewModel() {
             .stateInViewModel(emptyList())
     // === 👆 Akhir State Publik 👆 ===
 
+    // --- Parameter untuk Retry Logic ---
+    private var dosenRetryAttempt = 0
+    private val maxRetryDelayMillis = 60000L // Maksimum delay 60 detik
+    private val initialRetryDelayMillis = 3000L // Delay awal 3 detik
+    private val MAX_DOSEN_RETRY_ATTEMPTS = 10 // Batas percobaan ulang (opsional, tapi disarankan)
+
     // --- State BARU untuk Daftar Semua Mahasiswa & Filtering ---
     private val _searchQueryMahasiswa = MutableStateFlow("")
     val searchQueryMahasiswa: StateFlow<String> = _searchQueryMahasiswa.asStateFlow()
@@ -83,18 +83,170 @@ class DosenViewModel : ViewModel() {
     val panggilStatus: State<Pair<Int?, String?>> = _panggilStatus
     // --- Akhir State Panggil ---
 
+    // --- Fungsi Inti Pengambilan Data Dosen dengan Retry (bisa tetap private atau internal) ---
+    private fun executeDosenLoadWithRetry() { // Ubah nama atau biarkan, intinya ini logika inti
+        // Hindari memulai load baru jika sedang dalam proses load awal tanpa retry
+        if (_isLoading.value && dosenRetryAttempt == 0) {
+            Log.d("DosenViewModel", "executeDosenLoadWithRetry skipped, already loading initial data.")
+            return
+        }
 
+        // Selalu set loading true saat memulai attempt baru (atau retry)
+        _isLoading.value = true
+        // Hanya hapus error message saat percobaan pertama (bukan saat retry)
+        if (dosenRetryAttempt == 0) {
+            _errorMessage.value = null
+        }
+
+        Log.i("DosenViewModel", "Starting/Retrying load all dosen data (Attempt ${dosenRetryAttempt + 1})...")
+
+        viewModelScope.launch {
+            try {
+                // Jalankan fetch secara paralel
+                val onCampusJob = async { fetchDosenOnCampusInternal() }
+                val notInCampusJob = async { fetchDosenNotInCampusInternal() }
+                // Tunggu keduanya selesai
+                awaitAll(onCampusJob, notInCampusJob)
+
+                // ---- Jika SUKSES ----
+                Log.i("DosenViewModel", "Successfully loaded both dosen lists (Attempt ${dosenRetryAttempt + 1}).")
+                _isLoading.value = false
+                _errorMessage.value = null
+                dosenRetryAttempt = 0 // Reset counter setelah sukses
+
+            } catch (e: CancellationException) {
+                // Jika coroutine dibatalkan (misal ViewModel dihancurkan)
+                _isLoading.value = false
+                dosenRetryAttempt = 0 // Reset juga jika dibatalkan
+                Log.i("DosenViewModel", "Dosen data loading was cancelled.")
+                // Tidak perlu retry
+
+            } catch (e: Exception) {
+                // ---- Jika GAGAL (Timeout, Network Error, dll.) ----
+                Log.e("DosenViewModel", "Error loading dosen lists (Attempt ${dosenRetryAttempt + 1}): ${e.javaClass.simpleName} - ${e.message}")
+
+                dosenRetryAttempt++ // Tambah hitungan percobaan
+
+                if (dosenRetryAttempt > MAX_DOSEN_RETRY_ATTEMPTS) {
+                    Log.e("DosenViewModel", "Max retry attempts ($MAX_DOSEN_RETRY_ATTEMPTS) reached. Stopping retries.")
+                    _errorMessage.value = "Gagal memuat data setelah $MAX_DOSEN_RETRY_ATTEMPTS percobaan. Periksa koneksi internet."
+                    _isLoading.value = false // Berhenti loading karena sudah menyerah
+                } else {
+                    val delayMillis = min(
+                        initialRetryDelayMillis * (2.0.pow(dosenRetryAttempt - 1).toLong()),
+                        maxRetryDelayMillis
+                    )
+                    Log.w("DosenViewModel", "Scheduling retry attempt ${dosenRetryAttempt + 1} after ${delayMillis}ms...")
+                    _errorMessage.value = "Gagal terhubung. Mencoba lagi (${dosenRetryAttempt}/${MAX_DOSEN_RETRY_ATTEMPTS})..."
+                    _isLoading.value = true // Pastikan loading tetap true sebelum delay
+                    delay(delayMillis)
+                    executeDosenLoadWithRetry() // Panggil fungsi ini lagi untuk mencoba ulang
+                }
+            }
+        }
+    }
+
+    // --- Fungsi Publik untuk memuat/memuat ulang data dosen dengan mekanisme retry ---
+    fun loadDosenDataWithRetry() {
+        // Jika sedang loading dan ini bukan bagian dari sequence retry (attempt 0), jangan mulai lagi.
+        // Jika ini adalah panggilan manual (misal dari tombol retry), kita ingin mereset dan memulai.
+        if (_isLoading.value && dosenRetryAttempt > 0) {
+            Log.d("DosenViewModel", "Load Dosen Data with Retry skipped, a retry sequence is already in progress.")
+            return
+        }
+        if (_isLoading.value && dosenRetryAttempt == 0 && _errorMessage.value == null) { // Kasus load awal masih berjalan
+            Log.d("DosenViewModel", "Load Dosen Data with Retry skipped, initial load in progress.")
+            return
+        }
+
+        Log.d("DosenViewModel", "Manual trigger for loadDosenDataWithRetry.")
+        dosenRetryAttempt = 0 // Selalu reset attempt untuk pemanggilan manual/awal dari fungsi publik ini
+        _errorMessage.value = null // Hapus pesan error lama
+        executeDosenLoadWithRetry() // Panggil logika inti
+    }
 
     init {
-        loadAllDosenData()
+//        loadAllDosenData()
+        loadAllDosenDataWithRetry()
         fetchAllMahasiswa()
     }
 
-    // --- Fungsi Refresh ---
-    fun refreshAllData() {
-        loadInitialDosenData()
-        fetchAllMahasiswa()
+    // --- Fungsi Utama Pengambilan Data Dosen dengan Retry ---
+    private fun loadAllDosenDataWithRetry() {
+        // Hindari memulai load baru jika sedang dalam proses load awal
+        if (_isLoading.value && dosenRetryAttempt == 0) {
+            Log.d("DosenViewModel", "loadAllDosenDataWithRetry skipped, already loading initial data.")
+            return
+        }
+
+        // Selalu set loading true saat memulai attempt baru (atau retry)
+        _isLoading.value = true
+        // Hanya hapus error message saat percobaan pertama (bukan saat retry)
+        if (dosenRetryAttempt == 0) {
+            _errorMessage.value = null
+        }
+
+        Log.i("DosenViewModel", "Starting/Retrying load all dosen data (Attempt ${dosenRetryAttempt + 1})...")
+
+        viewModelScope.launch {
+            try {
+                // Jalankan fetch secara paralel
+                val onCampusJob = async { fetchDosenOnCampusInternal() }
+                val notInCampusJob = async { fetchDosenNotInCampusInternal() }
+                // Tunggu keduanya selesai
+                awaitAll(onCampusJob, notInCampusJob)
+
+                // ---- Jika SUKSES ----
+                Log.i("DosenViewModel", "Successfully loaded both dosen lists (Attempt ${dosenRetryAttempt + 1}).")
+                _isLoading.value = false // <<< Berhenti Loading HANYA Jika Sukses >>>
+                _errorMessage.value = null // Hapus pesan error/retry
+                dosenRetryAttempt = 0 // Reset counter setelah sukses
+
+            } catch (e: CancellationException) {
+                // Jika coroutine dibatalkan (misal ViewModel dihancurkan)
+                _isLoading.value = false // Berhenti loading
+                dosenRetryAttempt = 0
+                Log.i("DosenViewModel", "Dosen data loading was cancelled.")
+                // Tidak perlu retry
+
+            } catch (e: Exception) {
+                // ---- Jika GAGAL (Timeout, Network Error, dll.) ----
+                Log.e("DosenViewModel", "Error loading dosen lists (Attempt ${dosenRetryAttempt + 1}): ${e.javaClass.simpleName} - ${e.message}")
+
+                dosenRetryAttempt++ // Tambah hitungan percobaan
+
+                // Periksa apakah batas retry sudah tercapai
+                if (dosenRetryAttempt > MAX_DOSEN_RETRY_ATTEMPTS) {
+                    Log.e("DosenViewModel", "Max retry attempts ($MAX_DOSEN_RETRY_ATTEMPTS) reached. Stopping retries.")
+                    _errorMessage.value = "Gagal memuat data setelah $MAX_DOSEN_RETRY_ATTEMPTS percobaan. Periksa koneksi internet." // Pesan error final
+                    _isLoading.value = false // Berhenti loading karena sudah menyerah
+                } else {
+                    // Hitung delay untuk percobaan berikutnya (Exponential Backoff)
+                    val delayMillis = min(
+                        initialRetryDelayMillis * (2.0.pow(dosenRetryAttempt - 1).toLong()),
+                        maxRetryDelayMillis
+                    )
+                    Log.w("DosenViewModel", "Scheduling retry attempt ${dosenRetryAttempt + 1} after ${delayMillis}ms...")
+                    // Update pesan error untuk memberi tahu user sedang mencoba lagi (opsional)
+                    _errorMessage.value = "Gagal terhubung. Mencoba lagi (${dosenRetryAttempt}/${MAX_DOSEN_RETRY_ATTEMPTS})..."
+
+                    // Pastikan loading tetap true sebelum delay
+                    _isLoading.value = true
+                    delay(delayMillis) // Tunggu
+
+                    // Panggil fungsi ini lagi untuk mencoba ulang
+                    loadAllDosenDataWithRetry()
+                }
+            }
+        }
     }
+
+
+    //    // --- Fungsi Refresh ---
+//    fun refreshAllData() {
+//        loadInitialDosenData()
+//        fetchAllMahasiswa()
+//    }
     // --- 👇 FUNGSI BARU UNTUK FETCH RIWAYAT DOSEN 👇 ---
     fun fetchDosenHistory(dosenUserId: Int) {
         if (dosenUserId == -1) {
@@ -215,7 +367,8 @@ class DosenViewModel : ViewModel() {
 
     fun refreshData() {
         if (!_isLoading.value) { // Baca nilai dari state (_isLoading atau isLoading sama saja)
-            loadAllDosenData()
+//            loadAllDosenData()
+            loadInitialDosenData()
         } else {
             Log.d("DosenViewModel", "Refresh skipped, already loading.")
         }

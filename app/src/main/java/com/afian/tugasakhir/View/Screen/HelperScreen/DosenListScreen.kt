@@ -12,12 +12,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn // Import LazyColumn
 import androidx.compose.foundation.lazy.items // Import items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator // Untuk loading indicator
@@ -43,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -130,16 +135,58 @@ fun CombinedDosenListScreen(
             // --- Akhir TextField Pencarian ---
 
             // Tampilkan loading atau error jika ada
+            // Tampilkan Loading JIKA isLoading true
+            // --- Logika untuk Menampilkan Loading, Error, atau Konten ---
             if (isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { // Center loading
+                // Tampilkan Indikator Loading
+                Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f), // weight agar mengisi sisa ruang jika ada elemen lain
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator()
+                    // Anda bisa tambahkan teks "Memuat data..." jika mau
                 }
-            } else if (errorMessage != null) {
-                Text(
-                    text = "Error: $errorMessage",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp)
-                )
+            } else if (errorMessage != null) { // Jika tidak loading DAN ada pesan error
+                // Tampilkan Pesan Error dan Tombol Retry
+                Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f).padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Warning, // Atau Icons.Filled.CloudOff
+                            contentDescription = "Error Icon",
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Oops! Terjadi Kesalahan",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = errorMessage!!, // errorMessage dijamin tidak null di sini
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(
+                            onClick = {
+                                // Panggil fungsi yang memiliki mekanisme retry
+                                viewModel.loadDosenDataWithRetry()
+                            }
+                        ) {
+                            Icon(Icons.Filled.Refresh, contentDescription = "Retry Icon", modifier = Modifier.padding(end=4.dp))
+                            Text("Coba Lagi")
+                        }
+                    }
+                }
             }
             // Tampilkan list jika tidak loading dan tidak error
             else {

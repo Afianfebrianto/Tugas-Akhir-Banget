@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-05-06T08:50:54.061097900Z">
+        <DropdownSelection timestamp="2025-05-08T06:22:30.438878700Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\afian\.android\avd\Pixel_8_Pro.avd" />
@@ -15,12 +15,12 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="PhysicalDevice" identifier="serial=RRCT400CC8R" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\afian\.android\avd\Pixel_8_Pro.avd" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\afian\.android\avd\Pixel_8_Pro.avd" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\afian\.android\avd\Pixel_8a.avd" />
               </handle>
             </Target>
           </targets>

@@ -166,7 +166,6 @@ class DosenViewModel : ViewModel() {
     }
 
     init {
-//        loadAllDosenData()
         loadAllDosenDataWithRetry()
         fetchAllMahasiswa()
     }

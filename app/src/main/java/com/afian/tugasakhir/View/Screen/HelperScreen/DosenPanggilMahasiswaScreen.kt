@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,6 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +40,8 @@ import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Controller.LoginViewModel
 import androidx.compose.runtime.getValue // <-- TAMBAHKAN IMPORT INI
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import com.afian.tugasakhir.Component.MyCustomTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,14 +73,16 @@ fun DosenPanggilMahasiswaScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Panggil Mahasiswa") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
-                    }
-                }
-            )
+            MyCustomTopAppBar(title = "Panggil Mahasiswa", navController)
+//            TopAppBar(
+//                title = { Text("Panggil Mahasiswa") },
+//                navigationIcon = {
+//                    IconButton(onClick = { navController.navigateUp() }) {
+//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
+//                    }
+//                }
+//            )
+
         }
     ) { innerPadding ->
         Column(
@@ -82,17 +91,49 @@ fun DosenPanggilMahasiswaScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 8.dp)
         ) {
-            // Search Bar Mahasiswa
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { dosenViewModel.onMahasiswaSearchQueryChanged(it) },
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 8.dp),
-                label = { Text("Cari Mahasiswa (Nama/NIM)") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                singleLine = true
-            )
+                    .padding(horizontal = 16.dp, vertical = 8.dp), // Padding di luar Card
+                shape = RoundedCornerShape(20.dp), // Bentuk Card
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Elevation untuk Card
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface // Warna latar Card, bisa diganti
+                )
+            ) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        dosenViewModel.onMahasiswaSearchQueryChanged(it) // Panggil lambda dari ViewModel
+                        // Jika menggunakan state lokal:
+                        // searchQuery = it
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp), // Padding di dalam Card, antara tepi Card dan TextField
+                    placeholder = {
+                        Text(
+                            "Cari Dosen (Nama/NIDN)",
+                            // fontFamily = poppinsFamily
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = "Search Icon")
+                    },
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors( // Warna TextField diatur transparan agar warna Card terlihat
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        cursorColor = MaterialTheme.colorScheme.onSurface, // Sesuaikan warna kursor dengan tema
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface, // Warna teks
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant // Warna teks placeholder
+                    )
+                )
+            }
 
             // Tampilkan Loading atau Error
             if (isLoading) {

@@ -60,6 +60,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.afian.tugasakhir.Component.LogoutConfirmationDialog
 import com.afian.tugasakhir.Component.LottieSuccessAnimation
+import com.afian.tugasakhir.Component.MyCustomTopAppBar
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.afian.tugasakhir.Controller.Screen
 import com.afian.tugasakhir.Controller.UiState
@@ -168,14 +169,15 @@ fun UserSettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Pengaturan Akun") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) { // Gunakan navigateUp
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
-                    }
-                }
-            )
+            MyCustomTopAppBar(title = "Pengaturan Akun", navController)
+//            TopAppBar(
+//                title = { Text("Pengaturan Akun") },
+//                navigationIcon = {
+//                    IconButton(onClick = { navController.navigateUp() }) { // Gunakan navigateUp
+//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
+//                    }
+//                }
+//            )
         }
     ) { paddingValues -> // Terima paddingValues dari Scaffold
 

@@ -1,29 +1,27 @@
 package com.afian.tugasakhir.Component
 
-import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -72,6 +70,7 @@ fun DosenList( // Ini adalah versi PRATINJAU
 
     // Ambil N item pertama untuk ditampilkan
     val displayedDosenList = dosenListFiltered.take(previewItemCount)
+    val searchQuery by viewModel.searchQuery.collectAsState() // Ambil search query
 
     Column(modifier = modifier.fillMaxWidth()) {
 
@@ -105,42 +104,104 @@ fun DosenList( // Ini adalah versi PRATINJAU
             }
         } // --- Akhir Row Judul ---
 
-        // --- Daftar Ringkasan Dosen (Max 4 item) ---
-        // Tampilkan pesan jika list kosong (setelah difilter)
-        if (displayedDosenList.isEmpty() && !isLoading) {
-            val searchQuery by viewModel.searchQuery.collectAsState()
-//            val searchQuery by viewModel.searchQueryDosen.collectAsState()
-            Text(
-                text = if(searchQuery.isBlank()) "Tidak ada dosen di kampus saat ini." else "Dosen \"$searchQuery\" tidak ditemukan di kampus.",
-                modifier = Modifier.padding(start=16.dp, top=8.dp, bottom=8.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
-        } else {
-            // Gunakan Column biasa karena item terbatas
-            Column(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                // Hanya tampilkan N item pertama
-                displayedDosenList.forEach { dosen ->
-                    DosenItem(
-                        dosen = dosen,
-//                        isOnCampus = true, // Selalu true untuk list ini
-                        onClick = { selectedDosen = it } // Tetap bisa buka dialog dari pratinjau
-                    )
+        // --- Card untuk membungkus konten daftar dosen atau pesan kosong ---
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+                .padding(horizontal = 8.dp,) ,// Padding di luar card ini
+                // Beri tinggi minimal agar pesan "kosong" bisa terlihat di tengah dengan baik
+                // Sesuaikan nilai minHeight sesuai kebutuhan desain Anda
+//                .defaultMinSize(minHeight = 50.dp),
+            shape = RoundedCornerShape(8.dp), // Bentuk card, bisa disesuaikan
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp) // Sedikit shadow
+        ) {
+            // Logika untuk menampilkan loading, pesan kosong, atau daftar item
+            when {
+                // 1. Jika sedang loading dan daftar yang akan ditampilkan (preview) masih kosong
+                isLoading && displayedDosenList.isEmpty() -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize() // Memenuhi ruang dalam Card
+                            .padding(16.dp), // Beri padding agar tidak terlalu mepet tepi Card
+                        contentAlignment = Alignment.Center // Konten di tengah Box
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                // 2. Jika tidak loading DAN daftar yang akan ditampilkan (preview) kosong
+                !isLoading && displayedDosenList.isEmpty() -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize() // Memenuhi ruang dalam Card
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            // Menggunakan teks sesuai permintaan Anda jika tidak ada query pencarian,
+                            // atau menampilkan pesan hasil pencarian jika ada query.
+                            text = if (searchQuery.isBlank()) "Tidak ada dosen di kampus"
+                            else "Dosen \"$searchQuery\" tidak ditemukan di kampus.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center // Teks juga di tengah secara horizontal
+                        )
+                    }
+                }
+                // 3. Jika ada item untuk ditampilkan (baik sedang loading data baru atau tidak)
+                else -> {
+                    Column(
+                        modifier = Modifier.padding(vertical = 8.dp), // Padding di dalam Card untuk list item
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        // Hanya tampilkan N item pertama
+                        displayedDosenList.forEach { dosen ->
+                            DosenItem(
+                                dosen = dosen,
+                                onClick = { selectedDosen = it }
+                            )
+                        }
+                    }
                 }
             }
         }
-        // --- Akhir Daftar Ringkasan ---
+        // --- Akhir Card untuk konten daftar dosen ---
+
+
+//        // --- Daftar Ringkasan Dosen (Max 4 item) ---
+//        // Tampilkan pesan jika list kosong (setelah difilter)
+//        if (displayedDosenList.isEmpty() && !isLoading) {
+//            val searchQuery by viewModel.searchQuery.collectAsState()
+////            val searchQuery by viewModel.searchQueryDosen.collectAsState()
+//            Text(
+//                text = if(searchQuery.isBlank()) "Tidak ada dosen di kampus saat ini." else "Dosen \"$searchQuery\" tidak ditemukan di kampus.",
+//                modifier = Modifier.padding(start=16.dp, top=8.dp, bottom=8.dp),
+//                style = MaterialTheme.typography.bodyMedium
+//            )
+//        } else {
+//            // Gunakan Column biasa karena item terbatas
+//            Column(
+//                modifier = Modifier.padding(horizontal = 8.dp),
+//                verticalArrangement = Arrangement.spacedBy(4.dp)
+//            ) {
+//                // Hanya tampilkan N item pertama
+//                displayedDosenList.forEach { dosen ->
+//                    DosenItem(
+//                        dosen = dosen,
+////                        isOnCampus = true, // Selalu true untuk list ini
+//                        onClick = { selectedDosen = it } // Tetap bisa buka dialog dari pratinjau
+//                    )
+//                }
+//            }
+//        }
+//        // --- Akhir Daftar Ringkasan ---
 
 
         // --- Tombol "Lihat Semua" ---
         // Tampilkan hanya jika jumlah total > jumlah yang ditampilkan di pratinjau
-        if (dosenListFiltered.size > previewItemCount) {
+        if (dosenListFiltered.size > previewItemCount && !isLoading) { // Sembunyikan juga jika sedang loading awal
             TextButton(
-                // Navigasi ke layar baru saat diklik
-                onClick = { navController.navigate("informasi_dosen") }, // <-- Ganti "list_dosen_screen" dengan nama route Anda
-                modifier = Modifier.align(Alignment.End).padding(end = 8.dp, top = 4.dp)
+                onClick = { navController.navigate("informasi_dosen") },
+                modifier = Modifier.align(Alignment.End).padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text("Lihat Semua")
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)

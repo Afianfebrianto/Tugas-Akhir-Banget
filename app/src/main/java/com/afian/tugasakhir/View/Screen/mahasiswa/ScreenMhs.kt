@@ -143,7 +143,7 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController, d
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
-            Column {
+            Column (modifier = Modifier .padding(20.dp)){
                 CardButtonBarMhs(navController)
                 TopDosenLeaderboard(
                     modifier = Modifier.padding(horizontal = 8.dp), // Beri padding section
@@ -154,7 +154,7 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController, d
                     selectedMonth = selectedMonthPeringkat,
                     selectedYear = selectedYearPeringkat
                 )
-                DosenList(modifier = Modifier,navController,dosenViewModel)
+                DosenList(modifier = Modifier .padding(bottom = 10.dp) ,navController,dosenViewModel)
             }
         }
     }

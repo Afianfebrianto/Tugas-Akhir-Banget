@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.LatLng
 object GeofenceHelper {
 
     private const val TAG = "GeofenceHelper"
+
     // Radius default untuk setiap geofence target kecil (dalam meter)
     private const val TARGET_GEOFENCE_RADIUS_METERS = 20f // Coba 20 meter, sesuaikan jika perlu
     private const val DWELL_DELAY_MILLISECONDS = 1000 * 10 // 10 detik (jika DWELL diaktifkan)
@@ -33,15 +34,21 @@ object GeofenceHelper {
 //        "TARGET_6" to LatLng(-5.1361475, 119.4489108), // Koordinat Target 6 diperbarui
 //        "TARGET_7" to LatLng(-5.1361669, 119.4490859)  // Koordinat Target 7 diperbarui
         // Target 8 dilewati sesuai data Anda
-        "Belakang_R" to LatLng(-5.1358115,119.4489161),
-        "Corner_Samping_Belakang" to LatLng (-5.1358267,119.4491116),
-        "Corner_Samping_Depan" to LatLng (-5.1359155,119.4491038),
-        "Corner_Depan_R" to LatLng(-5.1361354,119.4488866),
-        "Corner_Depan_L" to LatLng(-5.1361372,119.4489829),
+        "Belakang_R" to LatLng(-5.1358115, 119.4489161),
+        "Corner_Samping_Belakang" to LatLng(-5.1358267, 119.4491116),
+        "Corner_Samping_Depan" to LatLng(-5.1359155, 119.4491038),
+        "Corner_Depan_R" to LatLng(-5.1361354, 119.4488866),
+        "Corner_Depan_L" to LatLng(-5.1361372, 119.4489829),
 //        "Corner_Belakang_L" to LatLng (-5.1359406,119.4490079),
-        "Mid_Belakang" to LatLng(-5.1358624,119.4490039),
-        "Mid_Belakang_R" to LatLng(-5.1359339,119.4489137),
-        "Tengah_Depan" to LatLng(-5.1360345,119.4489478)
+        "Mid_Belakang" to LatLng(-5.1358624, 119.4490039),
+        "Mid_Belakang_R" to LatLng(-5.1359339, 119.4489137),
+        "Tengah_Depan" to LatLng(-5.1360345, 119.4489478),
+        "Parkiran_depan" to LatLng(-5.1362251, 119.4491960),
+        "parkiran_belakang_A" to LatLng(-5.1356162, 119.4489378),
+        "parkiran_belakang_B" to LatLng(-5.1355059, 119.4489591),
+        "parkiran_belakang_C" to LatLng(-5.1354308, 119.4490255),
+        "parkiran_belakang_D" to LatLng(-5.1354975, 119.4491218),
+        "parkiran_belakang_E" to LatLng(-5.1356263, 119.4490986),
     )
 
     // PendingIntent (logika tetap sama, flag MUTABLE disarankan dari tes sebelumnya)
@@ -126,7 +133,10 @@ object GeofenceHelper {
                 Log.e(TAG, "Failed to add ${geofencesToAdd.size} geofences.", exception)
                 // Tambahan: Cek status code spesifik jika perlu
                 if ((exception as? ApiException)?.statusCode == GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE) {
-                    Log.e(TAG, "Error: Geofence service not available (1000). Check location settings/Play Services.")
+                    Log.e(
+                        TAG,
+                        "Error: Geofence service not available (1000). Check location settings/Play Services."
+                    )
                 } else if ((exception as? ApiException)?.statusCode == GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES) {
                     Log.e(TAG, "Error: Exceeded maximum geofence limit (100).")
                 }
@@ -139,7 +149,10 @@ object GeofenceHelper {
         val geofencingClient = LocationServices.getGeofencingClient(context)
         val pendingIntent = getGeofencePendingIntent(context) // Dapatkan PendingIntent yang sama
 
-        Log.d(TAG, "Attempting to remove all geofences associated with PendingIntent: ${pendingIntent.hashCode()}")
+        Log.d(
+            TAG,
+            "Attempting to remove all geofences associated with PendingIntent: ${pendingIntent.hashCode()}"
+        )
 
         geofencingClient.removeGeofences(pendingIntent)?.run { // Hapus berdasarkan PendingIntent
             addOnSuccessListener {

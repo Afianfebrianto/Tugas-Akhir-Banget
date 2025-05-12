@@ -143,7 +143,7 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController, d
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
-            Column (modifier = Modifier .padding(20.dp)){
+            Column {
                 CardButtonBarMhs(navController)
                 TopDosenLeaderboard(
                     modifier = Modifier.padding(horizontal = 8.dp), // Beri padding section

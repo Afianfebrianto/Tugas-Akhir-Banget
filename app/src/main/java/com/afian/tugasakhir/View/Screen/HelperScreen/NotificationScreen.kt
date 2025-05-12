@@ -24,6 +24,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue // <--- Tambahkan ini
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import com.afian.tugasakhir.Component.MyCustomTopAppBar
 import com.afian.tugasakhir.Component.NotificationItem
 import com.afian.tugasakhir.Component.PanggilanItem
 import com.afian.tugasakhir.Model.NotificationViewModel
@@ -34,6 +36,7 @@ import com.afian.tugasakhir.Model.NotificationViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationMhsScreen( // Layar ini sekarang menampilkan Riwayat Panggilan untuk Mahasiswa
+    navController: NavController,
     viewModel: NotificationViewModel = viewModel()
 ) {
     // Ambil state yang BERKAITAN DENGAN PANGGILAN dari ViewModel
@@ -65,8 +68,9 @@ fun NotificationMhsScreen( // Layar ini sekarang menampilkan Riwayat Panggilan u
 
     Scaffold(
         topBar = {
+            MyCustomTopAppBar(title = "Riwayat Panggilan Dosen", navController = navController)
             // Ganti judul AppBar sesuai konten
-            TopAppBar(title = { Text("Riwayat Panggilan Dosen") })
+//            TopAppBar(title = { Text("Riwayat Panggilan Dosen") })
             // Tambahkan tombol refresh jika diinginkan
             // actions = {
             //    IconButton(onClick = { viewModel.fetchPanggilanHistory() }) {

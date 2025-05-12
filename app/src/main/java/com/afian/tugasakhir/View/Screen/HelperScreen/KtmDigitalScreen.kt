@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.afian.tugasakhir.Component.MyCustomTopAppBar
 import com.afian.tugasakhir.Controller.LoginViewModel
 import com.afian.tugasakhir.R
 import com.afian.tugasakhir.utils.BarcodeUtils
@@ -81,14 +82,15 @@ fun KtmScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("KTM Digital") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
-                    }
-                }
-            )
+            MyCustomTopAppBar(title = "KTM Digital", navController)
+//            TopAppBar(
+//                title = { Text("KTM Digital") },
+//                navigationIcon = {
+//                    IconButton(onClick = { navController.navigateUp() }) {
+//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+//                    }
+//                }
+//            )
         }
     ) { innerPadding ->
         Column(

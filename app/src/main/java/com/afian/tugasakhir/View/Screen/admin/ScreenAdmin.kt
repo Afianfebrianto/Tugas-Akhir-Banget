@@ -67,7 +67,7 @@ fun HomeAdminScreen(loginViewModel: LoginViewModel, navController: NavController
                     selectedMonth = selectedMonthPeringkat,
                     selectedYear = selectedYearPeringkat
                 )
-                DosenList(modifier = Modifier,navController = navController, viewModel = dosenViewModel)
+                DosenList(modifier = Modifier .padding(bottom = 10.dp) ,navController,dosenViewModel)
             }
         }
     }

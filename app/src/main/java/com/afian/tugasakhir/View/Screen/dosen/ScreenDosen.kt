@@ -326,7 +326,7 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
                 )
                 // DosenList mungkin perlu weight jika ingin scrollable dan mengisi sisa ruang Card
                 Box(modifier = Modifier.weight(1f)) { // Beri DosenList sisa ruang
-                    DosenList(modifier = Modifier,navController,dosenViewModel)
+                    DosenList(modifier = Modifier .padding(bottom = 10.dp) ,navController,dosenViewModel)
                 }
             }
         }

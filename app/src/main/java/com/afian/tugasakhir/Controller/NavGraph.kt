@@ -235,7 +235,7 @@ fun NavigationGraph(
         // --- Layar Lain ---
         composable(Screen.DebugMaps.route){ GeofencingMap() }
         composable(Screen.NotificationMhs.route){ // Layar notif Mahasiswa
-           NotificationMhsScreen()
+           NotificationMhsScreen(navController)
         }
         composable(Screen.UserProfileEdit.route) { // Ganti "profile_edit" dgn nama route Anda
             // Dapatkan ViewModel (bisa pakai viewModel() jika tidak perlu scope Activity)

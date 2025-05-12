@@ -51,7 +51,14 @@ object NewGeofenceTargets {
 //        "Corner_Belakang_L" to LatLng(-5.1359406, 119.4490079),
         "Mid_Belakang" to LatLng(-5.1358624, 119.4490039),
         "Mid_Belakang_R" to LatLng(-5.1359339, 119.4489137),
-        "Tengah_Depan" to LatLng(-5.1360345, 119.4489478)
+        "Tengah_Depan" to LatLng(-5.1360345, 119.4489478),
+
+        "Parkiran_depan" to LatLng(-5.1362251, 119.4491960),
+        "parkiran_belakang_A" to LatLng(-5.1356162, 119.4489378),
+        "parkiran_belakang_B" to LatLng(-5.1355059, 119.4489591),
+        "parkiran_belakang_C" to LatLng(-5.1354308, 119.4490255),
+        "parkiran_belakang_D" to LatLng(-5.1354975, 119.4491218),
+        "parkiran_belakang_E" to LatLng(-5.1356263, 119.4490986),
     )
 
     // Pusat perkiraan (tidak berubah)

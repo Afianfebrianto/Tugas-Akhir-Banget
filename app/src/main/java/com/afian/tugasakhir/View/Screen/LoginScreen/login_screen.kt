@@ -39,7 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
+//import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +62,7 @@ import androidx.compose.material3.* // Import Material 3
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.afian.tugasakhir.Component.LottieFailAnimation
 import com.afian.tugasakhir.Component.LottieSuccessAnimation
@@ -338,12 +339,16 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
                 ),
                 // Tetap teruskan flag isError
                 isError = false,
-                trailingIcon = { // Ikon visibility tetap sama
+                trailingIcon = {
                     val image = if (passwordVisible)
-                        R.drawable.visibility_24px
-                    else R.drawable.visibility_off_24px
+                        painterResource(id = R.drawable.visibility_24px)
+                    else
+                        painterResource(id = R.drawable.visibility_off_24px)
+
                     val description = if (passwordVisible) "Hide password" else "Show password"
+
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(painter = image, contentDescription = description) // Pastikan ini ada
                     }
                 },
                 keyboardActions = KeyboardActions(onDone = {

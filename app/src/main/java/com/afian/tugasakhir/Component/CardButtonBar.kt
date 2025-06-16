@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +39,7 @@ fun CardButtonBarDosen(navController: NavController) {
     ) {
         CardButton(
             iconRes = R.drawable.ic_group_search, // Replace with your icon resource
-            label = "Informasi Dosen",
+            label = stringResource(R.string.informasi_dosen),
             onClick = {
                 // TODO: Handle Informasi Dosen click
                 navController.navigate("informasi_dosen")
@@ -46,14 +47,14 @@ fun CardButtonBarDosen(navController: NavController) {
         )
         CardButton(
             iconRes = R.drawable.ic_notifications, // Replace with your icon resource
-            label = "Pemberitahuan",
+            label = stringResource(R.string.pemberitahuan),
             onClick = {
                 navController.navigate("riwayat_panggilan_dosen")
             }
         )
         CardButton(
             iconRes = R.drawable.person_search_24px, // Replace with your icon resource
-            label = "Cari Mahasiswa",
+            label = stringResource(R.string.cari_mahasiswa),
             onClick = {
                 navController.navigate("cari_mahasiswa")
                 // TODO: Handle KTM Digital click
@@ -61,7 +62,7 @@ fun CardButtonBarDosen(navController: NavController) {
         )
         CardButton(
             iconRes = R.drawable.ic_settings, // Replace with your icon resource
-            label = "Pengaturan",
+            label = stringResource(R.string.pengaturan),
             onClick = {
                 // TODO: Handle Pengaturan click
                 navController.navigate("user_settings")
@@ -81,7 +82,7 @@ fun CardButtonBarMhs(navController: NavController) {
     ) {
         CardButton(
             iconRes = R.drawable.ic_group_search, // Replace with your icon resource
-            label = "Informasi Dosen",
+            label = stringResource(R.string.informasi_dosen),
             onClick = {
                 // TODO: Handle Informasi Dosen click
                 navController.navigate("informasi_dosen")
@@ -89,22 +90,22 @@ fun CardButtonBarMhs(navController: NavController) {
         )
         CardButton(
             iconRes = R.drawable.ic_notifications, // Replace with your icon resource
-            label = "Pemberitahuan",
+            label = stringResource(R.string.pemberitahuan),
             onClick = {
                 navController.navigate(Screen.NotificationMhs.route)
             }
         )
-        CardButton(
-            iconRes = R.drawable.ic_id_card, // Replace with your icon resource
-            label = "KTM Digital",
-            onClick = {
-                // TODO: Handle KTM Digital click
-                navController.navigate("ktm_digital")
-            }
-        )
+//        CardButton(
+//            iconRes = R.drawable.ic_id_card, // Replace with your icon resource
+//            label = stringResource(R.string.ktm_digital),
+//            onClick = {
+//                // TODO: Handle KTM Digital click
+//                navController.navigate("ktm_digital")
+//            }
+//        )
         CardButton(
             iconRes = R.drawable.ic_settings, // Replace with your icon resource
-            label = "Pengaturan",
+            label = stringResource(R.string.pengaturan),
             onClick = {
                 // TODO: Handle Pengaturan click
                 navController.navigate("user_settings")
@@ -124,7 +125,7 @@ fun CardButtonBarAdmin(navController: NavController) {
     ) {
         CardButton(
             iconRes = R.drawable.co_present_24px, // Replace with your icon resource
-            label = "Monitoring Dosen",
+            label = stringResource(R.string.monitoring_dosen),
             onClick = {
                 navController.navigate("monitoring_dosen")
                 // TODO: Handle Informasi Dosen click
@@ -132,7 +133,7 @@ fun CardButtonBarAdmin(navController: NavController) {
         )
         CardButton(
             iconRes = R.drawable.person_add_24px, // Replace with your icon resource
-            label = "User Add",
+            label = stringResource(R.string.user_add),
             onClick = {
                 navController.navigate("add_user")
                 // TODO: Handle Informasi Dosen click
@@ -140,7 +141,7 @@ fun CardButtonBarAdmin(navController: NavController) {
         )
         CardButton(
             iconRes = R.drawable.manage_accounts_24px, // Replace with your icon resource
-            label = "Recovery Account",
+            label = stringResource(R.string.recovery_account),
             onClick = {
                 navController.navigate("user_recovery")
                 // TODO: Handle KTM Digital click
@@ -155,7 +156,7 @@ fun CardButtonBarAdmin(navController: NavController) {
 //        )
         CardButton(
             iconRes = R.drawable.ic_settings, // Replace with your icon resource
-            label = "Settings",
+            label = stringResource(R.string.settings),
             onClick = {
                 // TODO: Handle Pengaturan click
                 navController.navigate("user_settings")

@@ -1,6 +1,22 @@
 <resources>
-    <string name="app_name">Tugas Akhir</string>
+    <string name="app_name">Dosen Tracker</string>
     <string name="default_notification_channel_id" translatable="false">geofence_dosen_channel</string>
     <string name="default_notification_channel_name">Notifikasi Kehadiran Dosen</string>
     <string name="default_notification_channel_description">Channel untuk notifikasi saat dosen masuk/keluar area</string>
+    <string name="monitoring_dosen">Monitoring Dosen</string>
+    <string name="user_add">User Add</string>
+    <string name="recovery_account">Recovery Account</string>
+    <string name="settings">Settings</string>
+    <string name="informasi_dosen">Informasi Dosen</string>
+    <string name="pemberitahuan">Pemberitahuan</string>
+    <string name="ktm_digital">KTM Digital</string>
+    <string name="pengaturan">Pengaturan</string>
+    <string name="cari_mahasiswa">Cari Mahasiswa</string>
+    <string name="cari_dosen_nama_nidn">Cari Dosen (Nama/NIDN)</string>
+    <string name="search_icon">Search Icon</string>
+    <string name="oops_terjadi_kesalahan">Oops! Terjadi Kesalahan</string>
+    <string name="coba_lagi">Coba Lagi</string>
+    <string name="dosen_di_kampus">Dosen di Kampus (%1$s)</string>
+    <string name="dosen_tidak_di_kampus">Dosen Tidak di Kampus (%1$s)</string>
+    <string name="tidak_ada_data_mahasiswa">Tidak ada data mahasiswa.</string>
 </resources>

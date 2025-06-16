@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,6 +57,7 @@ import com.afian.tugasakhir.Component.DosenItem // Import DosenItem
 import com.afian.tugasakhir.Component.MyCustomTopAppBar
 import com.afian.tugasakhir.Controller.DosenViewModel
 import com.afian.tugasakhir.Model.Dosen
+import com.afian.tugasakhir.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +81,7 @@ fun CombinedDosenListScreen(
 
     Scaffold(
         topBar = {
-            MyCustomTopAppBar(title = "Informasi Dosen", navController = navController)
+            MyCustomTopAppBar(title = stringResource(R.string.informasi_dosen), navController = navController)
         }
     ) { innerPadding -> // Ambil padding dari Scaffold
 
@@ -111,12 +113,12 @@ fun CombinedDosenListScreen(
                         .padding(horizontal = 16.dp), // Padding di dalam Card, antara tepi Card dan TextField
                     placeholder = {
                         Text(
-                            "Cari Dosen (Nama/NIDN)",
+                            stringResource(R.string.cari_dosen_nama_nidn),
                             // fontFamily = poppinsFamily
                         )
                     },
                     leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "Search Icon")
+                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_icon))
                     },
                     singleLine = true,
                     colors = TextFieldDefaults.colors( // Warna TextField diatur transparan agar warna Card terlihat
@@ -140,7 +142,9 @@ fun CombinedDosenListScreen(
             if (isLoading) {
                 // Tampilkan Indikator Loading
                 Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f), // weight agar mengisi sisa ruang jika ada elemen lain
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f), // weight agar mengisi sisa ruang jika ada elemen lain
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -149,7 +153,10 @@ fun CombinedDosenListScreen(
             } else if (errorMessage != null) { // Jika tidak loading DAN ada pesan error
                 // Tampilkan Pesan Error dan Tombol Retry
                 Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f).padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -164,7 +171,7 @@ fun CombinedDosenListScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Oops! Terjadi Kesalahan",
+                            text = stringResource(R.string.oops_terjadi_kesalahan),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.error
@@ -183,7 +190,7 @@ fun CombinedDosenListScreen(
                             }
                         ) {
                             Icon(Icons.Filled.Refresh, contentDescription = "Retry Icon", modifier = Modifier.padding(end=4.dp))
-                            Text("Coba Lagi")
+                            Text(stringResource(R.string.coba_lagi))
                         }
                     }
                 }
@@ -198,7 +205,7 @@ fun CombinedDosenListScreen(
                     // --- Section Dosen Di Kampus ---
                     item {
                         Text(
-                            text = "Dosen di Kampus (${dosenOnCampus.size})",
+                            text = stringResource(R.string.dosen_di_kampus, dosenOnCampus.size),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp)
@@ -226,7 +233,10 @@ fun CombinedDosenListScreen(
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Dosen Tidak di Kampus (${dosenNotInCampus.size})",
+                            text = stringResource(
+                                R.string.dosen_tidak_di_kampus,
+                                dosenNotInCampus.size
+                            ),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp)

@@ -41,7 +41,9 @@ import com.afian.tugasakhir.Controller.LoginViewModel
 import androidx.compose.runtime.getValue // <-- TAMBAHKAN IMPORT INI
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import com.afian.tugasakhir.Component.MyCustomTopAppBar
+import com.afian.tugasakhir.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,7 +115,7 @@ fun DosenPanggilMahasiswaScreen(
                         .padding(horizontal = 16.dp), // Padding di dalam Card, antara tepi Card dan TextField
                     placeholder = {
                         Text(
-                            "Cari Dosen (Nama/NIDN)",
+                            stringResource(R.string.cari_dosen_nama_nidn),
                             // fontFamily = poppinsFamily
                         )
                     },
@@ -157,7 +159,7 @@ fun DosenPanggilMahasiswaScreen(
                     if (allMahasiswa.isEmpty()) {
                         item {
                             Text(
-                                if (searchQuery.isBlank()) "Tidak ada data mahasiswa." else "Mahasiswa \"$searchQuery\" tidak ditemukan.",
+                                if (searchQuery.isBlank()) stringResource(R.string.tidak_ada_data_mahasiswa) else "Mahasiswa \"$searchQuery\" tidak ditemukan.",
                                 modifier = Modifier.padding(16.dp)
                             )
                         }

@@ -93,7 +93,7 @@ object GeofenceHelper {
     private fun buildGeofencingRequest(geofences: List<Geofence>): GeofencingRequest {
         return GeofencingRequest.Builder().apply {
             // setInitialTrigger(0) direkomendasikan dari tes sebelumnya (tidak ada trigger awal)
-            setInitialTrigger(0)
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
             // setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER) // Alternatif jika ingin trigger ENTER awal
             addGeofences(geofences) // Tambahkan list geofence
         }.build()

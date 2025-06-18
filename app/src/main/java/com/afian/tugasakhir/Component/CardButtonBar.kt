@@ -135,7 +135,7 @@ fun CardButtonBarAdmin(navController: NavController) {
             iconRes = R.drawable.person_add_24px, // Replace with your icon resource
             label = stringResource(R.string.user_add),
             onClick = {
-                navController.navigate("add_user")
+                navController.navigate("add_user_excel")
                 // TODO: Handle Informasi Dosen click
             }
         )

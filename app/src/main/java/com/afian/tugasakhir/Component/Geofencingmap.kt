@@ -124,7 +124,7 @@ fun GeofencingMap() { // Nama fungsi mungkin perlu disesuaikan
                     // Gambar Lingkaran dengan radius tetap 20.0
                     Circle(
                         center = targetLatLng,
-                        radius = NewGeofenceTargets.FIXED_RADIUS_METERS_DOUBLE, // <-- Gunakan radius tetap (Double)
+                        radius = NewGeofenceTargets.FIXED_RADIUS_METERS_FLOAT.toDouble(), // <-- Gunakan radius tetap (Double)
                         strokeWidth = 2f, // Border tipis
                         strokeColor = Color.Cyan, // Warna border (sesuaikan agar kontras)
                         fillColor = Color.Cyan.copy(alpha = 0.3f) // Isi transparan

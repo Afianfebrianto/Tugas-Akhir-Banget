@@ -21,7 +21,7 @@ object GeofenceHelper {
     private const val TAG = "GeofenceHelper"
 
     // Radius default untuk setiap geofence target kecil (dalam meter)
-    private const val TARGET_GEOFENCE_RADIUS_METERS = 20f // Coba 20 meter, sesuaikan jika perlu
+    private const val TARGET_GEOFENCE_RADIUS_METERS = 30f // Coba 20 meter, sesuaikan jika perlu
     private const val DWELL_DELAY_MILLISECONDS = 1000 * 10 // 10 detik (jika DWELL diaktifkan)
 
     // Daftar koordinat target baru

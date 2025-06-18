@@ -23,10 +23,7 @@ import java.time.format.DateTimeFormatter
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     private val TAG = "GeofenceReceiver"
-    // Membuat CoroutineScope untuk tugas background
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    // Dapatkan instance ApiService (asumsi RetrofitClient adalah object singleton)
     private val apiService: ApiService = RetrofitClient.apiService
 
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -75,132 +72,125 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             LocationPrefsKeys.PREFS_NAME,
             Context.MODE_PRIVATE
         )
-        // --- Akhir Logika Aplikasi Anda ---
-
 
         // Proses transisi
-        when (geofenceTransition) {
-            Geofence.GEOFENCE_TRANSITION_ENTER -> {
-                // Panggil fungsi untuk menangani ENTER
-                handleEnterTransition(userId, locationPrefs, geofencingEvent)
-            }
-            Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                // Panggil fungsi untuk menangani EXIT
-                handleExitTransition(userId, locationPrefs, geofencingEvent)
-            }
-            Geofence.GEOFENCE_TRANSITION_DWELL -> {
-                // Log DWELL (atau hapus jika tidak diperlukan)
-                geofencingEvent.triggeringGeofences?.forEach { geofence: Geofence -> // Tipe eksplisit
-                    Log.d(TAG, ">>> LOG: Dwelling inside Geofence - ID: ${geofence.requestId}")
+        synchronized (this) {
+            when (geofenceTransition) {
+                Geofence.GEOFENCE_TRANSITION_ENTER -> {
+                    // Panggil fungsi untuk menangani ENTER
+                    handleEnterTransition(userId, locationPrefs, geofencingEvent)
+                }
+
+                Geofence.GEOFENCE_TRANSITION_EXIT -> {
+                    // Panggil fungsi untuk menangani EXIT
+                    handleExitTransition(userId, locationPrefs, geofencingEvent)
+                }
+
+                Geofence.GEOFENCE_TRANSITION_DWELL -> {
+                    // Log DWELL (atau hapus jika tidak diperlukan)
+                    geofencingEvent.triggeringGeofences?.forEach { geofence: Geofence -> // Tipe eksplisit
+                        Log.d(TAG, ">>> LOG: Dwelling inside Geofence - ID: ${geofence.requestId}")
+                    }
+                }
+
+                else -> {
+                    Log.e(TAG, "Unknown Geofence Transition type: $geofenceTransition")
                 }
             }
-            else -> {
-                Log.e(TAG, "Unknown Geofence Transition type: $geofenceTransition")
-            }
         }
     }
 
-    private fun handleEnterTransition(
-        userId: Int,
-        prefs: SharedPreferences,
-        event: GeofencingEvent
-    ) {
-        val currentLokasiId = prefs.getInt(LocationPrefsKeys.KEY_ID_LOKASI, LocationPrefsKeys.INVALID_LOKASI_ID)
+    private fun handleEnterTransition(userId: Int, prefs: SharedPreferences, event: GeofencingEvent) {
+        val triggers = event.triggeringGeofences ?: return // Keluar jika tidak ada trigger
+        Log.d(TAG, "ENTER event triggered by: ${triggers.joinToString { it.requestId }}")
 
-        // Hanya proses jika belum ada id_lokasi yang valid
-        if (currentLokasiId == LocationPrefsKeys.INVALID_LOKASI_ID) {
+        // 1. Dapatkan counter saat ini
+        val oldCount = prefs.getInt(LocationPrefsKeys.KEY_ACTIVE_GEOFENCE_COUNT, 0)
+        // 2. Hitung counter baru
+        val newCount = oldCount + triggers.size // Tambah counter sebanyak geofence yang terpicu
 
-            // Pastikan ada geofence yang terpicu sebelum lanjut
-            val triggers = event.triggeringGeofences
-            if (!triggers.isNullOrEmpty()) { // <--- Cek jika ada trigger
-                Log.d(TAG, "ENTER transition: No valid location ID found. Proceeding to add location ONCE for this event.")
-                val triggerIds = triggers.joinToString { it.requestId }
-                Log.d(TAG, "Triggering Geofence IDs for this event: $triggerIds")
+        Log.i(TAG, "ENTER: Active geofence count changed from $oldCount to $newCount.")
 
-                // Launch SATU coroutine saja untuk event ini  <--- Kunci Perbaikan
-                scope.launch {
-                    try {
-                        // ... (Persiapan data waktu dan requestBody)
-                        val now = LocalDateTime.now()
-                        val today = LocalDate.now()
-                        val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-                        val dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
-                        val jamMasukStr = now.format(dateTimeFormatter)
-                        val tanggalStr = today.format(dateFormatter)
-                        val requestBody = AddLocationRequest(userId, tanggalStr, jamMasukStr)
+        // 3. Simpan counter yang baru
+        prefs.edit().putInt(LocationPrefsKeys.KEY_ACTIVE_GEOFENCE_COUNT, newCount).apply()
 
+        // 4. HANYA panggil API jika ini adalah geofence PERTAMA yang dimasuki (counter dari 0 -> >0)
+        if (oldCount == 0 && newCount > 0) {
+            Log.i(TAG, "First entry detected! Calling addLocation API...")
+            scope.launch {
+                try {
+                    val now = LocalDateTime.now()
+                    val today = LocalDate.now()
+                    val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                    val dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+                    val requestBody = AddLocationRequest(userId, today.format(dateFormatter), now.format(dateTimeFormatter))
 
-                        Log.d(TAG, "Calling addLocation API ONCE with: $requestBody") // <--- Panggil API sekali
-                        val response = apiService.addLocation(requestBody)
+                    val response = apiService.addLocation(requestBody)
 
-                        if (response.status && response.id_lokasi != null) {
-                            // ... (Simpan id_lokasi sekali)
-                            val newLokasiId = response.id_lokasi
-                            Log.d(TAG, "addLocation API success. Received id_lokasi: $newLokasiId")
-                            prefs.edit().putInt(LocationPrefsKeys.KEY_ID_LOKASI, newLokasiId).apply()
-                            Log.d(TAG,"Saved id_lokasi: $newLokasiId to SharedPreferences.")
-                        } else {
-                            // ... (Log error)
-                        }
-                    } catch (e: Exception) {
-                        // ... (Log exception)
+                    if (response.status && response.id_lokasi != null) {
+                        val newLokasiId = response.id_lokasi
+                        Log.i(TAG, "addLocation API success. Received id_lokasi: $newLokasiId")
+                        // Simpan id_lokasi untuk digunakan saat EXIT nanti
+                        prefs.edit().putInt(LocationPrefsKeys.KEY_ID_LOKASI, newLokasiId).apply()
+                    } else {
+                        Log.e(TAG, "addLocation API failed: ${response.message}")
                     }
-                } // <--- Akhir scope.launch tunggal
-            } else {
-                Log.w(TAG, "ENTER transition detected, but triggeringGeofences list is null or empty. Skipping API call.")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception in addLocation API call", e)
+                }
             }
         } else {
-            Log.d(TAG, "ENTER transition: Valid location ID ($currentLokasiId) already exists. Skipping add location API call.")
+            Log.d(TAG, "Already inside another geofence. Skipping addLocation API call.")
         }
     }
 
-    // Pastikan handleExitTransition juga diperbaiki dengan cara yang sama
-    private fun handleExitTransition(
-        userId: Int,
-        prefs: SharedPreferences,
-        event: GeofencingEvent
-    ) {
-        val currentLokasiId = prefs.getInt(LocationPrefsKeys.KEY_ID_LOKASI, LocationPrefsKeys.INVALID_LOKASI_ID)
+    private fun handleExitTransition(userId: Int, prefs: SharedPreferences, event: GeofencingEvent) {
+        val triggers = event.triggeringGeofences ?: return
+        Log.d(TAG, "EXIT event triggered by: ${triggers.joinToString { it.requestId }}")
 
-        // Hanya proses jika ADA id_lokasi yang valid
-        if (currentLokasiId != LocationPrefsKeys.INVALID_LOKASI_ID) {
+        // 1. Dapatkan counter saat ini
+        val oldCount = prefs.getInt(LocationPrefsKeys.KEY_ACTIVE_GEOFENCE_COUNT, 0)
+        // 2. Hitung counter baru (pastikan tidak negatif)
+        val newCount = maxOf(0, oldCount - triggers.size)
 
-            val triggers = event.triggeringGeofences
-            if (!triggers.isNullOrEmpty()) { // <-- Cek jika ada trigger
-                Log.d(TAG, "EXIT transition: Found valid location ID ($currentLokasiId). Proceeding to update location ONCE for this event.")
-                val triggerIds = triggers.joinToString { it.requestId }
-                Log.d(TAG, "Triggering Geofence IDs for this event: $triggerIds")
+        Log.i(TAG, "EXIT: Active geofence count changed from $oldCount to $newCount.")
 
-                // Launch SATU coroutine saja  <--- Kunci Perbaikan
+        // 3. Simpan counter yang baru
+        prefs.edit().putInt(LocationPrefsKeys.KEY_ACTIVE_GEOFENCE_COUNT, newCount).apply()
+
+        // 4. HANYA panggil API jika ini adalah geofence TERAKHIR yang ditinggalkan (counter dari >0 -> 0)
+        if (newCount == 0 && oldCount > 0) {
+            val lokasiIdToUpdate = prefs.getInt(LocationPrefsKeys.KEY_ID_LOKASI, LocationPrefsKeys.INVALID_LOKASI_ID)
+
+            if (lokasiIdToUpdate != LocationPrefsKeys.INVALID_LOKASI_ID) {
+                Log.i(TAG, "Final exit detected! Calling updateLocation API for lokasiId: $lokasiIdToUpdate")
                 scope.launch {
                     try {
-                        // ... (Persiapan data waktu dan requestBody)
                         val now = LocalDateTime.now()
                         val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-                        val jamKeluarStr = now.format(dateTimeFormatter)
-                        val requestBody = UpdateLocationRequest(currentLokasiId, userId, jamKeluarStr)
+                        val requestBody = UpdateLocationRequest(lokasiIdToUpdate, userId, now.format(dateTimeFormatter))
 
-                        Log.d(TAG, "Calling updateLocation API ONCE with: $requestBody") // <-- Panggil API sekali
                         val response = apiService.updateLocation(requestBody)
 
                         if (response.status) {
-                            // ... (Hapus id_lokasi sekali)
-                            Log.d(TAG, "updateLocation API success. Message: ${response.message}")
-                            prefs.edit().remove(LocationPrefsKeys.KEY_ID_LOKASI).apply()
-                            Log.d(TAG,"Cleared id_lokasi from SharedPreferences.")
+                            Log.i(TAG, "updateLocation API success. Clearing location state.")
+                            // Hapus id_lokasi dan reset counter (walaupun sudah 0, untuk kebersihan)
+                            prefs.edit()
+                                .remove(LocationPrefsKeys.KEY_ID_LOKASI)
+                                .remove(LocationPrefsKeys.KEY_ACTIVE_GEOFENCE_COUNT)
+                                .apply()
                         } else {
-                            // ... (Log error)
+                            Log.e(TAG, "updateLocation API failed: ${response.message}")
                         }
                     } catch (e: Exception) {
-                        // ... (Log exception)
+                        Log.e(TAG, "Exception in updateLocation API call", e)
                     }
-                } // <--- Akhir scope.launch tunggal
+                }
             } else {
-                Log.w(TAG, "EXIT transition detected, but triggeringGeofences list is null or empty. Skipping API call.")
+                Log.w(TAG, "Final exit detected, but no valid lokasiId found to update.")
             }
         } else {
-            Log.d(TAG, "EXIT transition: No valid location ID found. Skipping update location API call.")
+            Log.d(TAG, "Still inside other geofences. Skipping updateLocation API call.")
         }
     }
-
 }

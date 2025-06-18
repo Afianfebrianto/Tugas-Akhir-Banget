@@ -240,21 +240,21 @@ fun UserSettingsScreen(
                     )
                     Divider(modifier=Modifier.padding(horizontal=8.dp)) // Pemisah
 
-                    // Item menu dengan Toggle
-                    SettingsMenuToggleItem(
-                        text = "Notifikasi",
-                        iconVector = Icons.Default.Notifications,
-                        checked = notificationEnabled,
-                        onCheckedChange = { notificationEnabled = it /* TODO: Simpan state? */ }
-                    )
-                    Divider(modifier=Modifier.padding(horizontal=8.dp))
-
-                    SettingsMenuItem(
-                        text = "Bahasa",
-                        iconVector = Icons.Default.MailOutline,
-                        onClick = { /* TODO: Navigasi ke layar bahasa */ }
-                    )
-                    Divider(modifier=Modifier.padding(horizontal=8.dp))
+//                    // Item menu dengan Toggle
+//                    SettingsMenuToggleItem(
+//                        text = "Notifikasi",
+//                        iconVector = Icons.Default.Notifications,
+//                        checked = notificationEnabled,
+//                        onCheckedChange = { notificationEnabled = it /* TODO: Simpan state? */ }
+//                    )
+//                    Divider(modifier=Modifier.padding(horizontal=8.dp))
+//
+//                    SettingsMenuItem(
+//                        text = "Bahasa",
+//                        iconVector = Icons.Default.MailOutline,
+//                        onClick = { /* TODO: Navigasi ke layar bahasa */ }
+//                    )
+//                    Divider(modifier=Modifier.padding(horizontal=8.dp))
 
                     SettingsMenuItem(
                         text = "Maps Debug",

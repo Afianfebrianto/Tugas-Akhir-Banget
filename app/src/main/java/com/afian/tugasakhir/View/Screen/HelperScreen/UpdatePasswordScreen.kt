@@ -44,7 +44,16 @@ import com.afian.tugasakhir.Controller.UpdatePasswordViewModel
 import kotlinx.coroutines.delay
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import com.afian.tugasakhir.R // Import R untuk ikon visibility
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,11 +74,14 @@ fun UpdatePasswordScreen(
     val updateState by viewModel.updateState
     val validationError by viewModel.validationError
 
+    // Lottie Composition
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.password))
+
     // Efek untuk navigasi setelah sukses update password
     LaunchedEffect(updateState) {
         if (updateState is UiState.Success<*>) {
             Toast.makeText(context, "Password berhasil diperbarui!", Toast.LENGTH_SHORT).show()
-            delay(1500L) // Beri waktu user baca toast
+            delay(1000L) // Beri waktu user baca toast
 
             // Ambil role dari LoginViewModel menggunakan identifier yg disimpan
             // atau idealnya, API update password mengembalikan data user lengkap
@@ -107,7 +119,8 @@ fun UpdatePasswordScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Update Password Default") }) }
+        containerColor = Color(0xFFFFD369),
+//        topBar = { TopAppBar(title = { Text("Update Password Default") }) }
         // Tidak ada navigation icon agar user tidak bisa skip
     ) { innerPadding ->
         Column(
@@ -116,18 +129,31 @@ fun UpdatePasswordScreen(
                 .padding(innerPadding)
                 .padding(32.dp), // Padding lebih besar
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center // Pusatkan form
+//            verticalArrangement = Arrangement.Center // Pusatkan form
         ) {
-            Text(
-                "Password Anda adalah password default.",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
+            LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever, // Agar animasi berulang terus
+                modifier = Modifier.size(200.dp),
+                contentScale = ContentScale.Fit
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                "Silakan buat password baru Anda.",
+                text = "Buat Password Baru",
+                style = MaterialTheme.typography.headlineSmall, // Dibuat lebih besar
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Update password untuk mengamankan akun Anda.",
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 24.dp)
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp) // Beri sedikit padding agar tidak terlalu lebar
             )
+
+            Spacer(modifier = Modifier.height(32.dp)) // Jarak lebih besar ke form
 
             // Field Password Baru
             OutlinedTextField(
@@ -189,7 +215,9 @@ fun UpdatePasswordScreen(
                     viewModel.updatePassword()
                 },
                 enabled = updateState !is UiState.Loading, // Disable saat loading
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E3E62))
+
             ) {
                 if (updateState is UiState.Loading) {
                     CircularProgressIndicator(modifier = Modifier.size(ButtonDefaults.IconSize), strokeWidth = 2.dp)

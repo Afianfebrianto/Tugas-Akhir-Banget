@@ -8,11 +8,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.afian.tugasakhir.API.ApiService
 import com.afian.tugasakhir.API.RetrofitClient
 import com.afian.tugasakhir.Model.LoginRequest
+import com.afian.tugasakhir.Model.UpdateLocationRequest
 import com.afian.tugasakhir.Model.User
 import com.afian.tugasakhir.Model.UserProfileData
 import com.afian.tugasakhir.Service.FcmRepository
+import com.afian.tugasakhir.Service.LocationPrefsKeys
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -22,6 +25,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 // Enum atau Sealed Class untuk representasi state login yg lebih jelas (opsional tapi bagus)
@@ -52,7 +57,12 @@ class LoginViewModel(private val context: Context) : ViewModel() {
     private val _logoutState = MutableStateFlow<UiState<Unit>>(UiState.Idle) // Tipe data sukses bisa Unit
     val logoutState: StateFlow<UiState<Unit>> = _logoutState.asStateFlow()
     // --- 👆 ---
-
+    private val locationPrefs: SharedPreferences = context.getSharedPreferences(
+        LocationPrefsKeys.PREFS_NAME,
+        Context.MODE_PRIVATE
+    )
+    // Dapatkan instance ApiService
+    private val apiService: ApiService = RetrofitClient.apiService
 
     var currentUser by mutableStateOf<User?>(null)
         private set // Hanya bisa diubah dari dalam ViewModel
@@ -204,28 +214,60 @@ class LoginViewModel(private val context: Context) : ViewModel() {
         _logoutState.value = UiState.Loading
         Log.d("LoginViewModel", "Logging out user...")
         viewModelScope.launch(Dispatchers.IO) {
-            var success = false
-            var errorMsg: String? = null
-            try {
-                sharedPreferences.edit().clear().apply()
-                success = true
-            } catch(e: Exception) {
-                Log.e("LoginViewModel", "Error clearing SharedPreferences", e)
-                errorMsg = "Gagal membersihkan sesi: ${e.message}"
-            }
+            val geofenceUpdateSuccess = handleLogoutGeofenceUpdate()
 
-            withContext(Dispatchers.Main) {
-                if(success) {
+//            var success = false
+//            var errorMsg: String? = null
+//            try {
+//                sharedPreferences.edit().clear().apply()
+//                success = true
+//            } catch(e: Exception) {
+//                Log.e("LoginViewModel", "Error clearing SharedPreferences", e)
+//                errorMsg = "Gagal membersihkan sesi: ${e.message}"
+//            }
+//
+//            withContext(Dispatchers.Main) {
+//                if(success) {
+//                    currentUser = null
+//                    _logoutState.value = UiState.Success(Unit) // Set Sukses
+//                    _loginUiState.value = LoginUiState.Idle
+//                    viewModelScope.launch {
+//                        delay(500L) // Beri jeda SANGAT SINGKAT (0.5 detik), cukup untuk UI bereaksi
+//                        resetLogoutStateToIdle() // Panggil fungsi reset
+//                    }
+//                    Log.d("LoginViewModel", "User logged out successfully. State set to Success.")
+//                } else {
+//                    _logoutState.value = UiState.Error(errorMsg ?: "Logout gagal.")
+//                }
+//            }
+
+            // 1. Jalankan update geofence terlebih dahulu
+//            val geofenceUpdateSuccess = handleLogoutGeofenceUpdate()
+
+            // 2. Hanya lanjutkan proses logout jika update geofence berhasil (atau tidak diperlukan)
+            if (geofenceUpdateSuccess) {
+                Log.d(TAG, "Geofence check complete. Proceeding to clear user session.")
+                // 3. Hapus data sesi pengguna dari SharedPreferences
+                sharedPreferences.edit().clear().apply()
+
+                // 4. Update state di Main thread
+                withContext(Dispatchers.Main) {
                     currentUser = null
-                    _logoutState.value = UiState.Success(Unit) // Set Sukses
+                    _logoutState.value = UiState.Success(Unit)
                     _loginUiState.value = LoginUiState.Idle
+                    Log.i(TAG, "User logged out successfully. State set to Success.")
+
+                    // Reset state setelah jeda singkat
                     viewModelScope.launch {
-                        delay(500L) // Beri jeda SANGAT SINGKAT (0.5 detik), cukup untuk UI bereaksi
-                        resetLogoutStateToIdle() // Panggil fungsi reset
+                        delay(500L)
+                        resetLogoutStateToIdle()
                     }
-                    Log.d("LoginViewModel", "User logged out successfully. State set to Success.")
-                } else {
-                    _logoutState.value = UiState.Error(errorMsg ?: "Logout gagal.")
+                }
+            } else {
+                // Jika update geofence GAGAL, batalkan proses logout dan tampilkan error
+                Log.e(TAG, "Logout process aborted due to geofence update failure.")
+                withContext(Dispatchers.Main) {
+                    _logoutState.value = UiState.Error("Gagal mengakhiri sesi lokasi. Silakan coba lagi.")
                 }
             }
         }
@@ -253,6 +295,45 @@ class LoginViewModel(private val context: Context) : ViewModel() {
         if (_logoutState.value !is UiState.Idle) {
             _logoutState.value = UiState.Idle
             Log.d("LoginViewModel", "Logout state reset to Idle by UI.")
+        }
+    }
+
+    private suspend fun handleLogoutGeofenceUpdate(): Boolean {
+        // 1. Ambil id_lokasi dan user_id
+        val lokasiId = locationPrefs.getInt(LocationPrefsKeys.KEY_ID_LOKASI, LocationPrefsKeys.INVALID_LOKASI_ID)
+        val userId = sharedPreferences.getInt("user_id", -1)
+
+        // 2. Cek jika ada sesi lokasi yang aktif
+        if (lokasiId != LocationPrefsKeys.INVALID_LOKASI_ID && userId != -1) {
+            Log.d(TAG, "Active geofence session found (lokasiId: $lokasiId). Updating exit time before logout.")
+
+            // 3. Siapkan dan panggil API updateLocation
+            return try {
+                val now = LocalDateTime.now()
+                val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                val jamKeluarStr = now.format(dateTimeFormatter)
+                val requestBody = UpdateLocationRequest(lokasiId, userId, jamKeluarStr)
+
+                Log.d(TAG, "Calling updateLocation API with: $requestBody")
+                val response = apiService.updateLocation(requestBody)
+
+                if (response.status) {
+                    Log.i(TAG, "Successfully updated exit time for lokasiId: $lokasiId.")
+                    // 4. Hapus id_lokasi dari SharedPreferences setelah berhasil
+                    locationPrefs.edit().remove(LocationPrefsKeys.KEY_ID_LOKASI).apply()
+                    true // Operasi berhasil
+                } else {
+                    Log.e(TAG, "Failed to update exit time. API Msg: ${response.message}")
+                    false // Terjadi error di API
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception during exit time update on logout.", e)
+                false // Terjadi error koneksi/exception
+            }
+        } else {
+            // Jika tidak ada sesi lokasi aktif, anggap proses berhasil dan lanjutkan logout
+            Log.d(TAG, "No active geofence session found. Skipping exit time update.")
+            return true
         }
     }
 

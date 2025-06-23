@@ -34,6 +34,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 
@@ -78,6 +79,7 @@ fun UserAddScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.shadow(elevation = 10.dp),
                 title = { Text("Tambah User Massal (Excel)") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {

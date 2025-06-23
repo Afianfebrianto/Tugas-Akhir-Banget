@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -103,7 +104,8 @@ fun MonitoringDosenScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Peringkat Durasi Dosen") },
+                modifier = Modifier.shadow(elevation = 10.dp),
+                title = { Text("Durasi Kehadiran Dosenn") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")

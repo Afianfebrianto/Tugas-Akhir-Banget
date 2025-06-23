@@ -50,7 +50,7 @@ fun TopDosenLeaderboard(
     Column(modifier = modifier.fillMaxWidth()) { // Gunakan modifier dari parameter
         // Judul Section Leaderboard
         Text(
-            text = "Peringkat Durasi Terlama ( ${getMonthNameLeaderboard(selectedMonth)} $selectedYear )",
+            text = "Top Kehadiran ( ${getMonthNameLeaderboard(selectedMonth)} $selectedYear )",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 8.dp, bottom = 8.dp) // Padding judul

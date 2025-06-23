@@ -53,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import com.afian.tugasakhir.Component.MyCustomTopAppBar
 import com.afian.tugasakhir.Controller.Screen
 import com.afian.tugasakhir.R
 import com.afian.tugasakhir.Controller.UserProfileViewModel
@@ -158,14 +159,15 @@ fun UserProfileEditScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Edit Informasi Personal") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
-                    }
-                }
-            )
+            MyCustomTopAppBar(title = "Edit Informasi Personal", navController)
+//            TopAppBar(
+//                title = { Text("Edit Informasi Personal") },
+//                navigationIcon = {
+//                    IconButton(onClick = { navController.navigateUp() }) {
+//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
+//                    }
+//                }
+//            )
         }
     ) { innerPadding ->
         // Tampilkan loading utama jika data profil belum ada

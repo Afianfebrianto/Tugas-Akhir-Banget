@@ -16,7 +16,7 @@
     <string name="search_icon">Search Icon</string>
     <string name="oops_terjadi_kesalahan">Oops! Terjadi Kesalahan</string>
     <string name="coba_lagi">Coba Lagi</string>
-    <string name="dosen_di_kampus">Dosen di Kampus (%1$s)</string>
-    <string name="dosen_tidak_di_kampus">Dosen Tidak di Kampus (%1$s)</string>
+    <string name="dosen_di_kampus">Saat Ini di Kampus (%1$s)</string>
+    <string name="dosen_tidak_di_kampus">Sedang di Luar Kampus (%1$s)</string>
     <string name="tidak_ada_data_mahasiswa">Tidak ada data mahasiswa.</string>
 </resources>

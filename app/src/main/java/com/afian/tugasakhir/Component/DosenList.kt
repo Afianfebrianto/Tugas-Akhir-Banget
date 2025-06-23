@@ -83,7 +83,7 @@ fun DosenList( // Ini adalah versi PRATINJAU
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Dosen di Kampus (${dosenListFiltered.size})", // Tetap tampilkan jumlah total
+                text = "Saat Ini di Kampus (${dosenListFiltered.size})", // Tetap tampilkan jumlah total
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )

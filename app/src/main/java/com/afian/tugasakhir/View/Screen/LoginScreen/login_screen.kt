@@ -158,7 +158,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
 
             is LoginUiState.Success -> {
                 Log.i(LOGIN_TAG, "State is Success. Starting 6s delay for navigation...") // Delay 6 detik
-                delay(6000L) // Tunggu animasi sukses
+                delay(1000L) // Tunggu animasi sukses
                 val user = state.user // Akses user dari 'state'
                 // Tentukan tujuan berdasarkan role menggunakan Screen object
                 val destination = when (user.role) {
@@ -187,7 +187,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
 
             is LoginUiState.Error -> {
                 Log.w(LOGIN_TAG, "State is Error. Starting 4s delay for reset...")
-                delay(4000L) // Tunggu animasi error / pesan tampil
+                delay(1000L) // Tunggu animasi error / pesan tampil
                 Log.d(LOGIN_TAG, "Error reset delay finished. Calling resetLoginStateToIdle().")
                 viewModel.resetLoginStateToIdle() // Kembali ke state Idle (form)
             }

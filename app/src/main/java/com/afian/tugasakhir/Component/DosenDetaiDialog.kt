@@ -85,23 +85,40 @@ fun DosenDetailDialog(
             // jika ingin dialog full-width di dalam Dialog wrapper, padding bisa dihilangkan atau dikurangi
         ) {
             Column(modifier = Modifier.fillMaxWidth()) { // Column utama untuk menampung konten dan status bar
-                Box(modifier = Modifier.fillMaxWidth()) { // Box untuk konten utama dan tombol close
-                    // Tombol Close (X) di kanan atas
-                    IconButton(
-                        onClick = {
-                            Log.d("DosenDetailDialog", "Tombol Close (X) diklik!")
-                            onDismissRequest()
-                        },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(4.dp)
-                    ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(onClick = {
+                        Log.d("DosenDetailDialog", "Tombol Close diklik!")
+                        onDismissRequest()
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.Close,
                             contentDescription = "Close Dialog",
                             tint = Color.White
                         )
                     }
+                }
+                Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp, end = 8.dp)) { // Box untuk konten utama dan tombol close
+                    // Tombol Close (X) di kanan atas
+//                    IconButton(
+//                        onClick = {
+//                            Log.d("DosenDetailDialog", "Tombol Close (X) diklik!")
+//                            onDismissRequest()
+//                        },
+//                        modifier = Modifier
+//                            .align(Alignment.TopEnd)
+//                            .padding(4.dp)
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Filled.Close,
+//                            contentDescription = "Close Dialog",
+//                            tint = Color.White
+//                        )
+//                    }
 
                     // Konten utama dialog
                     Column(

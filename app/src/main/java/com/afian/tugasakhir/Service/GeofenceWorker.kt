@@ -70,6 +70,8 @@ class GeofenceWorker(
         val newCount = oldCount + 1 // Asumsi 1 event per worker
         prefs.edit().putInt(LocationPrefsKeys.KEY_ACTIVE_GEOFENCE_COUNT, newCount).apply()
         Log.i(TAG, "WORKER-ENTER: Count changed $oldCount -> $newCount.")
+        Log.d(TAG, "Geofence ENTER detected. oldCount=$oldCount, newCount=$newCount")
+
 
         if (oldCount == 0 && newCount > 0) {
             Log.i(TAG, "WORKER-ENTER: First entry detected! Calling API.")

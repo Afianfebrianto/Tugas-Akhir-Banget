@@ -180,6 +180,7 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
             geofenceSetupAttempted = true // Tandai sudah dicoba
         }
     }
+
     // Launcher untuk meminta izin FINE_LOCATION
     val fineLocationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -273,6 +274,29 @@ fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController
         }
     }
     // --- AKHIR EFEK UNTUK START/STOP LOKASI AKTIF ---
+
+    // Minta izin notifikasi di Android 13+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val notificationPermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { isGranted ->
+                if (isGranted) {
+                    Log.i("HomeDosenScreen", "Notification permission granted.")
+                } else {
+                    Log.w("HomeDosenScreen", "Notification permission denied.")
+                    // Beri tahu user mengapa izin ini berguna (opsional)
+                }
+            }
+        )
+
+        LaunchedEffect(Unit) {
+            // Cek izin saat layar pertama kali muncul
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                Log.d("HomeDosenScreen", "Requesting notification permission...")
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
 
 // --- Tampilkan Dialog Secara Kondisional ---
     if (showProfileDialog) {

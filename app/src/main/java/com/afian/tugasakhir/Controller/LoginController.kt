@@ -216,39 +216,11 @@ class LoginViewModel(private val context: Context) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val geofenceUpdateSuccess = handleLogoutGeofenceUpdate()
 
-//            var success = false
-//            var errorMsg: String? = null
-//            try {
-//                sharedPreferences.edit().clear().apply()
-//                success = true
-//            } catch(e: Exception) {
-//                Log.e("LoginViewModel", "Error clearing SharedPreferences", e)
-//                errorMsg = "Gagal membersihkan sesi: ${e.message}"
-//            }
-//
-//            withContext(Dispatchers.Main) {
-//                if(success) {
-//                    currentUser = null
-//                    _logoutState.value = UiState.Success(Unit) // Set Sukses
-//                    _loginUiState.value = LoginUiState.Idle
-//                    viewModelScope.launch {
-//                        delay(500L) // Beri jeda SANGAT SINGKAT (0.5 detik), cukup untuk UI bereaksi
-//                        resetLogoutStateToIdle() // Panggil fungsi reset
-//                    }
-//                    Log.d("LoginViewModel", "User logged out successfully. State set to Success.")
-//                } else {
-//                    _logoutState.value = UiState.Error(errorMsg ?: "Logout gagal.")
-//                }
-//            }
-
-            // 1. Jalankan update geofence terlebih dahulu
-//            val geofenceUpdateSuccess = handleLogoutGeofenceUpdate()
-
             // 2. Hanya lanjutkan proses logout jika update geofence berhasil (atau tidak diperlukan)
             if (geofenceUpdateSuccess) {
                 Log.d(TAG, "Geofence check complete. Proceeding to clear user session.")
                 // 3. Hapus data sesi pengguna dari SharedPreferences
-                sharedPreferences.edit().clear().apply()
+                sharedPreferences.edit().clear() .remove(LocationPrefsKeys.KEY_ACTIVE_GEOFENCE_COUNT).apply()
 
                 // 4. Update state di Main thread
                 withContext(Dispatchers.Main) {
@@ -320,7 +292,10 @@ class LoginViewModel(private val context: Context) : ViewModel() {
                 if (response.status) {
                     Log.i(TAG, "Successfully updated exit time for lokasiId: $lokasiId.")
                     // 4. Hapus id_lokasi dari SharedPreferences setelah berhasil
-                    locationPrefs.edit().remove(LocationPrefsKeys.KEY_ID_LOKASI).apply()
+                    locationPrefs.edit()
+                        .remove(LocationPrefsKeys.KEY_ID_LOKASI)
+                        .remove(LocationPrefsKeys.KEY_ACTIVE_GEOFENCE_COUNT)
+                        .apply()
                     true // Operasi berhasil
                 } else {
                     Log.e(TAG, "Failed to update exit time. API Msg: ${response.message}")

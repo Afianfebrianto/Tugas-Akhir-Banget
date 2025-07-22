@@ -49,51 +49,45 @@ interface ApiService {
     suspend fun getDosenOnCampus(): DosenResponse
 
     @POST("api/users/add-location")
-    suspend fun addLocation(@Body body: AddLocationRequest): AddLocationResponse // Gunakan suspend
+    suspend fun addLocation(@Body body: AddLocationRequest): AddLocationResponse
 
     @PUT("api/users/update-location")
-    suspend fun updateLocation(@Body body: UpdateLocationRequest): UpdateLocationResponse // Gunakan suspend
+    suspend fun updateLocation(@Body body: UpdateLocationRequest): UpdateLocationResponse
 
-    @POST("api/users/register-fcm-token") // Sesuaikan path jika berbeda
-    suspend fun registerFcmToken(@Body body: RegisterTokenRequest): retrofit2.Response<Void> // Contoh Response, sesuaikan
-    // Atau bisa juga: suspend fun registerFcmToken(@Body body: Map<String, Any>): retrofit2.Response<Void>
+    @POST("api/users/register-fcm-token")
+    suspend fun registerFcmToken(@Body body: RegisterTokenRequest): retrofit2.Response<Void>
 
     @GET("api/users/dosen-not-in-campus")
-    suspend fun getDosenNotInCampus(): DosenNotInCampusResponse //
+    suspend fun getDosenNotInCampus(): DosenNotInCampusResponse
 
-    // Endpoint baru untuk ambil semua mahasiswa
     @GET("api/users/mahasiswa")
     suspend fun getAllMahasiswa(): MahasiswaListResponse
 
-    // Endpoint baru untuk dosen memanggil mahasiswa
     @POST("api/panggilan/request")
-    suspend fun requestPanggilan(@Body body: RequestPanggilanBody): Response<RequestPanggilanResponse> // Sesuaikan Response jika perlu
+    suspend fun requestPanggilan(@Body body: RequestPanggilanBody): Response<RequestPanggilanResponse>
 
-    // Endpoint baru untuk mahasiswa merespons panggilan
     @PUT("api/panggilan/respond")
-    suspend fun respondPanggilan(@Body body: RespondPanggilanBody): Response<RespondPanggilanResponse> // Sesuaikan Response
+    suspend fun respondPanggilan(@Body body: RespondPanggilanBody): Response<RespondPanggilanResponse>
 
     // Endpoint baru untuk riwayat panggilan dosen
-    @GET("api/panggilan/history/dosen/{dosen_user_id}") // Gunakan Path parameter
+    @GET("api/panggilan/history/dosen/{dosen_user_id}")
     suspend fun getDosenPanggilanHistory(@Path("dosen_user_id") dosenUserId: Int): DosenHistoryResponse
 
     // Endpoint baru untuk riwayat panggilan mahasiswa
-    @GET("api/panggilan/history/mahasiswa/{mahasiswa_user_id}") // Gunakan Path parameter
+    @GET("api/panggilan/history/mahasiswa/{mahasiswa_user_id}")
     suspend fun getMahasiswaPanggilanHistory(@Path("mahasiswa_user_id") mahasiswaUserId: Int): MahasiswaHistoryResponse
 
-    @GET("api/users/peringkat-dosen-durasi") // Sesuaikan path jika berbeda
+    @GET("api/users/peringkat-dosen-durasi")
     suspend fun getPeringkatDurasiDosen(
         @Query("month") month: Int,
         @Query("year") year: Int
     ): PeringkatResponse
 
-    @Multipart // Tandai sebagai multipart request
-    @POST("api/users/generate/bulk-excel") // Sesuaikan path jika perlu
+    @Multipart
+    @POST("api/users/generate/bulk-excel")
     suspend fun uploadUserExcel(
-        @Part file: MultipartBody.Part // File yang diupload
-        // Anda bisa tambahkan @Part lain jika perlu kirim data tambahan
-        // @Part("deskripsi") description: RequestBody
-    ): Response<BulkUploadResponse> // Sesuaikan response model
+        @Part file: MultipartBody.Part
+    ): Response<BulkUploadResponse>
 
     // Endpoint untuk mengambil semua user (hanya Admin)
     @GET("api/users/all")

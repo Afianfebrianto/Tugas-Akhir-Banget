@@ -35,13 +35,9 @@ import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.rememberCameraPositionState
 
 
-// --- Definisikan Koordinat Target Baru & Radius Tetap ---
 object NewGeofenceTargets {
-    // Radius tetap 20 meter
-    const val FIXED_RADIUS_METERS_DOUBLE = 20.0 // Untuk Map Circle (Double)
-    const val FIXED_RADIUS_METERS_FLOAT = 20f  // Untuk GeofenceHelper (Float)
+    const val FIXED_RADIUS_METERS_FLOAT = 20f
 
-    // Daftar koordinat target baru (Map: ID -> LatLng)
     val TARGET_LOCATIONS: Map<String, LatLng> = mapOf(
         "Belakang_R" to LatLng(-5.1358115, 119.4489161),
         "Corner_Samping_Belakang" to LatLng(-5.1358267, 119.4491116),
@@ -61,7 +57,6 @@ object NewGeofenceTargets {
         "parkiran_belakang_E" to LatLng(-5.1356263, 119.4490986),
     )
 
-    // Pusat perkiraan (tidak berubah)
     val APPROX_CENTER: LatLng by lazy {
         if (TARGET_LOCATIONS.isEmpty()) {
             LatLng(-5.1359, 119.4490)
@@ -71,20 +66,16 @@ object NewGeofenceTargets {
             LatLng(avgLat, avgLng)
         }
     }
-    // Tidak perlu logika radius dinamis lagi di sini
 }
-// --- Akhir Definisi Koordinat Baru ---
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GeofencingMap() { // Nama fungsi mungkin perlu disesuaikan
+fun GeofencingMap() {
 
-    // State kamera, atur zoom agar semua titik terlihat (misal 19f)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(NewGeofenceTargets.APPROX_CENTER, 19f)
     }
 
-    // Pengaturan UI Map
     val uiSettings = remember {
         MapUiSettings(
             zoomControlsEnabled = true,
@@ -92,7 +83,6 @@ fun GeofencingMap() { // Nama fungsi mungkin perlu disesuaikan
             myLocationButtonEnabled = true // Perlu izin lokasi
         )
     }
-    // Properti Map
     val mapProperties = remember {
         MapProperties(
             isMyLocationEnabled = true, // Perlu izin lokasi
@@ -102,7 +92,7 @@ fun GeofencingMap() { // Nama fungsi mungkin perlu disesuaikan
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Peta Target Geofence (Radius 20m)") }) // Update judul
+            TopAppBar(title = { Text("Peta Target Geofence (Radius 20m)") })
         }
     ) { paddingValues ->
         Box(
@@ -115,30 +105,22 @@ fun GeofencingMap() { // Nama fungsi mungkin perlu disesuaikan
                 cameraPositionState = cameraPositionState,
                 uiSettings = uiSettings,
                 properties = mapProperties
-            ) { // <-- Mulai blok konten GoogleMap
-
-                // === 👇 IMPLEMENTASI GAMBAR LINGKARAN & MARKER 👇 ===
-                // Loop melalui Map lokasi target BARU
+            ) {
                 NewGeofenceTargets.TARGET_LOCATIONS.forEach { (id, targetLatLng) ->
 
-                    // Gambar Lingkaran dengan radius tetap 20.0
                     Circle(
                         center = targetLatLng,
-                        radius = NewGeofenceTargets.FIXED_RADIUS_METERS_FLOAT.toDouble(), // <-- Gunakan radius tetap (Double)
-                        strokeWidth = 2f, // Border tipis
-                        strokeColor = Color.Cyan, // Warna border (sesuaikan agar kontras)
-                        fillColor = Color.Cyan.copy(alpha = 0.3f) // Isi transparan
+                        radius = NewGeofenceTargets.FIXED_RADIUS_METERS_FLOAT.toDouble(),
+                        strokeWidth = 2f,
+                        strokeColor = Color.Cyan,
+                        fillColor = Color.Cyan.copy(alpha = 0.3f)
                     )
-
-                    // Gambar Marker di pusat setiap lingkaran
                     Marker(
                         state = MarkerState(position = targetLatLng),
-                        title = id // Judul marker = ID dari map (misal: "Belakang_R")
+                        title = id
                     )
                 }
-                // === 👆 AKHIR IMPLEMENTASI 👆 ===
-
-            } // <-- Akhir blok konten GoogleMap
+            }
         }
     }
-} // <-- Akhir composable GeofencingMap
+}

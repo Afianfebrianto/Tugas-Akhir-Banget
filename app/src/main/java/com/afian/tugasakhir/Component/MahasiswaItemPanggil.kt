@@ -29,14 +29,14 @@ import com.afian.tugasakhir.R
 
 @Composable
 fun MahasiswaItemPanggil(
-    mahasiswa: Dosen, // Menggunakan model Dosen untuk data mahasiswa
-    isCalling: Boolean, // True jika sedang memanggil mahasiswa ini
+    mahasiswa: Dosen,
+    isCalling: Boolean,
     onPanggilClick: () -> Unit,
-    modifier: Modifier = Modifier // Tambahkan modifier
+    modifier: Modifier = Modifier
 ) {
     Card(modifier = modifier.fillMaxWidth().padding(vertical = 2.dp)) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), // Padding disesuaikan
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -48,31 +48,29 @@ fun MahasiswaItemPanggil(
                 contentDescription = "Foto ${mahasiswa.user_name}",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(40.dp) // Ukuran foto lebih kecil
+                    .size(40.dp)
                     .clip(CircleShape)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Column(modifier = Modifier.weight(1f)) { // Ambil sisa ruang
+            Column(modifier = Modifier.weight(1f)) {
                 Text(mahasiswa.user_name, style = MaterialTheme.typography.bodyLarge)
                 Text(mahasiswa.identifier, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Tombol Panggil
             Button(
                 onClick = onPanggilClick,
-                enabled = !isCalling, // Disable tombol jika sedang proses panggil
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp) // Padding tombol
+                enabled = !isCalling,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 if (isCalling) {
-                    // Tampilkan loading indicator kecil
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
                         strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary // Warna kontras
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
                     Text("Panggil")

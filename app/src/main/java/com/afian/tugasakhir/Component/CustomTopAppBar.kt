@@ -21,14 +21,12 @@ import androidx.navigation.NavController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyCustomTopAppBar(
-    title: String, // <-- Parameter title ditambahkan di sini
+    title: String,
     navController: NavController,
-    // Anda bisa menambahkan parameter lain jika perlu, misalnya actions
-    // actions: @Composable RowScope.() -> Unit = {}
 ) {
     Column {
         TopAppBar(
-            title = { Text(title) }, // <-- Gunakan parameter title
+            title = { Text(title) },
             navigationIcon = {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
@@ -37,16 +35,7 @@ fun MyCustomTopAppBar(
                     )
                 }
             },
-            // actions = actions, // <-- Gunakan parameter actions jika ada
-//            colors = TopAppBarDefaults.topAppBarColors(
-//                containerColor = Color.White,
-//                titleContentColor = MaterialTheme.colorScheme.onSurface,
-//                navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-//                actionIconContentColor = MaterialTheme.colorScheme.onSurface // Warna untuk ikon di actions
-//            ),
             modifier = Modifier.shadow(elevation = 10.dp)
-            // scrollBehavior = scrollBehavior // Jika Anda ingin menambahkan scroll behavior
         )
-//        Divider(color = Color.LightGray, thickness = 1.dp)
     }
 }

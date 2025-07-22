@@ -11,28 +11,11 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 
-// --- Composable Terpisah untuk Animasi Lottie ---
+
 
 @Composable
 fun LottieSuccessAnimation(modifier: Modifier = Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.sucses_animated)) // Ganti nama file
-    // Putar animasi sekali saja
-    val progress by animateLottieCompositionAsState(
-        composition = composition,
-        iterations = 1,
-        speed = 1f // Atur kecepatan jika perlu
-    )
-    LottieAnimation(
-        composition = composition,
-        progress = { progress },
-        modifier = modifier.size(150.dp) // Ukuran animasi sukses
-    )
-}
-
-@Composable
-fun LottieFailAnimation(modifier: Modifier = Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.dannied_animate)) // Ganti nama file
-    // Putar animasi sekali saja
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.sucses_animated))
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = 1,
@@ -41,6 +24,21 @@ fun LottieFailAnimation(modifier: Modifier = Modifier) {
     LottieAnimation(
         composition = composition,
         progress = { progress },
-        modifier = modifier.size(150.dp) // Ukuran animasi gagal
+        modifier = modifier.size(150.dp)
+    )
+}
+
+@Composable
+fun LottieFailAnimation(modifier: Modifier = Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.dannied_animate))
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = 1,
+        speed = 1f
+    )
+    LottieAnimation(
+        composition = composition,
+        progress = { progress },
+        modifier = modifier.size(150.dp)
     )
 }

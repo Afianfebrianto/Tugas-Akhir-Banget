@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
-// Fungsi helper nama bulan (bisa ditaruh di file terpisah/utilitas)
 private fun getMonthNameDialog(monthNumber: Int): String {
     val months = arrayOf("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember")
     return if (monthNumber in 1..12) months[monthNumber - 1] else "Invalid Month"
@@ -38,17 +37,15 @@ private fun getMonthNameDialog(monthNumber: Int): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MonthYearPickerDialog(
-    initialMonth: Int, // Bulan saat ini (1-12)
-    initialYear: Int,  // Tahun saat ini
-    yearRange: List<Int>, // Daftar tahun yang bisa dipilih
+    initialMonth: Int,
+    initialYear: Int,
+    yearRange: List<Int>,
     onDismissRequest: () -> Unit,
     onConfirm: (selectedMonth: Int, selectedYear: Int) -> Unit
 ) {
-    // State internal untuk menyimpan pilihan sementara di dalam dialog
     var tempSelectedMonth by remember { mutableIntStateOf(initialMonth) }
     var tempSelectedYear by remember { mutableIntStateOf(initialYear) }
 
-    // State untuk expand/collapse dropdown
     var monthMenuExpanded by remember { mutableStateOf(false) }
     var yearMenuExpanded by remember { mutableStateOf(false) }
 
@@ -58,8 +55,8 @@ fun MonthYearPickerDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight(), // Tinggi menyesuaikan konten
-            shape = MaterialTheme.shapes.large // Sudut lebih bulat
+                .wrapContentHeight(),
+            shape = MaterialTheme.shapes.large
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
                 Text(
@@ -67,13 +64,10 @@ fun MonthYearPickerDialog(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-
-                // Row untuk Dropdown Bulan dan Tahun
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Dropdown Bulan
                     ExposedDropdownMenuBox(
                         expanded = monthMenuExpanded,
                         onExpandedChange = { monthMenuExpanded = !monthMenuExpanded },
@@ -102,8 +96,6 @@ fun MonthYearPickerDialog(
                             }
                         }
                     }
-
-                    // Dropdown Tahun
                     ExposedDropdownMenuBox(
                         expanded = yearMenuExpanded,
                         onExpandedChange = { yearMenuExpanded = !yearMenuExpanded },
@@ -132,28 +124,25 @@ fun MonthYearPickerDialog(
                             }
                         }
                     }
-                } // Akhir Row
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Tombol Aksi
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End // Tombol di kanan
+                    horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismissRequest) {
                         Text("Batal")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(onClick = {
-                        // Panggil callback onConfirm dengan nilai terpilih
                         onConfirm(tempSelectedMonth, tempSelectedYear)
-                        // Tutup dialog (onDismissRequest dipanggil setelah onConfirm selesai di pemanggil)
                     }) {
                         Text("Pilih")
                     }
                 }
-            } // Akhir Column
-        } // Akhir Card
-    } // Akhir Dialog
+            }
+        }
+    }
 }

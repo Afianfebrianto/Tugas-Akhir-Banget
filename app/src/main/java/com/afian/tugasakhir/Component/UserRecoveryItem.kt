@@ -31,7 +31,7 @@ import com.afian.tugasakhir.R
 @Composable
 fun UserRecoveryItem(
     user: User,
-    isRecovering: Boolean, // True jika proses recovery sedang berjalan untuk user ini
+    isRecovering: Boolean,
     onRecoverClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -43,7 +43,7 @@ fun UserRecoveryItem(
             Image(
                 painter = rememberAsyncImagePainter(
                     model = user.foto_profile,
-                    placeholder = painterResource(id = R.drawable.placeholder_image), // Ganti placeholder
+                    placeholder = painterResource(id = R.drawable.placeholder_image),
                     error = painterResource(id = R.drawable.placeholder_image)
                 ),
                 contentDescription = "Foto ${user.user_name}",
@@ -55,7 +55,7 @@ fun UserRecoveryItem(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "${user.user_name} (${user.role.uppercase()})", // Tampilkan nama dan role
+                    "${user.user_name} (${user.role.uppercase()})",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -65,7 +65,7 @@ fun UserRecoveryItem(
                     color = Color.Gray
                 )
                 Text(
-                    "Perlu Update Pass: ${if(user.update_password == 0) "Ya" else "Tidak"}", // Tampilkan status update_pass (asumsi 0=false/perlu update)
+                    "Perlu Update Pass: ${if(user.update_password == 0) "Ya" else "Tidak"}",
                     style = MaterialTheme.typography.bodySmall,
                     color = if(user.update_password == 0) MaterialTheme.colorScheme.error else Color.Gray
                 )
@@ -73,16 +73,15 @@ fun UserRecoveryItem(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Tombol Reset Password
             Button(
                 onClick = onRecoverClick,
-                enabled = !isRecovering, // Disable jika sedang proses
+                enabled = !isRecovering,
                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 if (isRecovering) {
                     CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                 } else {
-                    Text("Reset Pass", style = MaterialTheme.typography.labelSmall) // Teks lebih kecil
+                    Text("Reset Pass", style = MaterialTheme.typography.labelSmall)
                 }
             }
         }

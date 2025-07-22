@@ -29,9 +29,9 @@ import java.text.DecimalFormat
 @Composable
 fun PeringkatDosenItem(
     item: PeringkatItem,
-    rank: Int // Peringkat (nomor urut)
+    rank: Int
 ) {
-    val hourFormat = remember { DecimalFormat("#,##0.00") } // Format jam
+    val hourFormat = remember { DecimalFormat("#,##0.00") }
 
     Card(
         modifier = Modifier
@@ -48,7 +48,7 @@ fun PeringkatDosenItem(
                 text = "$rank.",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.width(30.dp) // Lebar tetap untuk nomor
+                modifier = Modifier.width(30.dp)
             )
 
             // Foto Profil
@@ -69,14 +69,13 @@ fun PeringkatDosenItem(
             Text(
                 text = item.user_name,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f) // Ambil sisa ruang
+                modifier = Modifier.weight(1f)
             )
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Total Jam
             Text(
-                text = "${hourFormat.format(item.total_jam)} jam", // Format total jam
+                text = "${hourFormat.format(item.total_jam)} jam",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold
             )

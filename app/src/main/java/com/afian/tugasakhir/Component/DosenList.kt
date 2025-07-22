@@ -50,31 +50,26 @@ import com.afian.tugasakhir.Model.Dosen
 import com.afian.tugasakhir.R
 
 @Composable
-fun DosenList( // Ini adalah versi PRATINJAU
+fun DosenList(
     modifier: Modifier = Modifier,
-    navController: NavController, // <-- Parameter NavController diperlukan
-    viewModel: DosenViewModel = viewModel() // Bisa juga diteruskan dari parent
+    navController: NavController,
+    viewModel: DosenViewModel = viewModel()
 ) {
-    // Ambil list dosen di kampus yang sudah terfilter
     val dosenListFiltered by viewModel.filteredDosenList.collectAsState()
     val isLoading by viewModel.isLoadingDosen
 
     val dosenOnCampus by viewModel.filteredDosenList.collectAsState()
     val dosenNotInCampus by viewModel.filteredDosenNotInCampusList.collectAsState()
 
-    // State untuk dialog detail dosen (tetap)
     var selectedDosen by remember { mutableStateOf<Dosen?>(null) }
 
-    // Jumlah item yang ditampilkan di pratinjau
     val previewItemCount = 4
 
-    // Ambil N item pertama untuk ditampilkan
     val displayedDosenList = dosenListFiltered.take(previewItemCount)
-    val searchQuery by viewModel.searchQuery.collectAsState() // Ambil search query
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     Column(modifier = modifier.fillMaxWidth()) {
 
-        // --- Baris Judul dengan Refresh ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -83,16 +78,14 @@ fun DosenList( // Ini adalah versi PRATINJAU
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Saat Ini di Kampus (${dosenListFiltered.size})", // Tetap tampilkan jumlah total
+                text = "Saat Ini di Kampus (${dosenListFiltered.size})",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            // Tombol Refresh
             IconButton(
-                onClick = { viewModel.refreshData() }, // Asumsi fungsi ini ada
+                onClick = { viewModel.refreshData() },
                 enabled = !isLoading
             ) {
-                // Tampilkan loading hanya jika list kosong dan sedang fetch
                 if (isLoading && dosenListFiltered.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
@@ -102,8 +95,7 @@ fun DosenList( // Ini adalah versi PRATINJAU
                     )
                 }
             }
-        } // --- Akhir Row Judul ---
-
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -153,9 +145,7 @@ fun DosenList( // Ini adalah versi PRATINJAU
             }
         }
 
-        // --- Tombol "Lihat Semua" ---
-        // Tampilkan hanya jika jumlah total > jumlah yang ditampilkan di pratinjau
-        if (dosenListFiltered.size > previewItemCount && !isLoading) { // Sembunyikan juga jika sedang loading awal
+        if (dosenListFiltered.size > previewItemCount && !isLoading) {
             TextButton(
                 onClick = { navController.navigate("informasi_dosen") },
                 modifier = Modifier.align(Alignment.End).padding(horizontal = 8.dp, vertical = 4.dp)
@@ -164,17 +154,15 @@ fun DosenList( // Ini adalah versi PRATINJAU
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
             }
         }
-        // --- Akhir Tombol "Lihat Semua" ---
 
-    } // Akhir Column Utama
+    }
 
-    // Tampilkan Dialog jika selectedDosen tidak null (tidak berubah)
     selectedDosen?.let { dosenData ->
         DosenDetailDialog(
             dosen = dosenData,
             onDismissRequest = { selectedDosen = null },
-            dosenOnCampusList = dosenOnCampus,         // <-- Teruskan list dosen di kampus
-            dosenNotInCampusList = dosenNotInCampus  // <-- Teruskan list dosen tidak di kampus
+            dosenOnCampusList = dosenOnCampus,
+            dosenNotInCampusList = dosenNotInCampus
         )
     }
 }
@@ -183,7 +171,7 @@ fun DosenList( // Ini adalah versi PRATINJAU
 @Composable
 fun DosenItem(
     dosen: Dosen,
-    onClick: (Dosen) -> Unit // <-- Tambahkan parameter onClick lambda
+    onClick: (Dosen) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -195,25 +183,24 @@ fun DosenItem(
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically // Ratakan vertikal
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                // Gunakan rememberAsyncImagePainter untuk Coil versi baru
                 painter = rememberAsyncImagePainter(
-                    model = dosen.foto_profile, // URL dari Cloudinary
-                    placeholder = painterResource(id = R.drawable.placeholder_image_24), // Fallback placeholder
-                    error = painterResource(id = R.drawable.placeholder_image_24) // Gambar jika error load
+                    model = dosen.foto_profile,
+                    placeholder = painterResource(id = R.drawable.placeholder_image_24),
+                    error = painterResource(id = R.drawable.placeholder_image_24)
                 ),
                 contentDescription = "Profile Picture",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(50.dp) // Sedikit lebih besar mungkin?
+                    .size(50.dp)
                     .clip(CircleShape)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(text = dosen.user_name, style = MaterialTheme.typography.titleMedium) // Gaya teks lebih besar
-                Text(text = dosen.identifier, style = MaterialTheme.typography.bodyMedium, color = Color.Gray) // Gaya teks lebih kecil, warna abu
+                Text(text = dosen.user_name, style = MaterialTheme.typography.titleMedium)
+                Text(text = dosen.identifier, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
             }
         }
     }

@@ -11,25 +11,24 @@ import androidx.compose.runtime.Composable
 @Composable
 fun ProfilePromptDialog(
     onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit // Aksi untuk pindah ke layar edit
+    onConfirm: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Ikon Profil") }, // Ganti ikon jika perlu
+        icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Ikon Profil") },
         title = { Text(text = "Lengkapi Profil Anda") },
         text = { Text("Foto profil atau nomor HP Anda sepertinya belum lengkap. Mohon lengkapi data Anda.") },
         confirmButton = {
             TextButton(
                 onClick = {
-                    onConfirm() // Jalankan aksi konfirmasi (navigasi)
-                    // onDismissRequest() // Dialog akan otomatis dismiss saat onConfirm dipanggil di pemanggil? Atau panggil di sini juga? Umumnya cukup di pemanggil.
+                    onConfirm()
                 }
             ) {
                 Text("Lengkapi Sekarang")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismissRequest) { // Panggil dismiss saat batal
+            TextButton(onClick = onDismissRequest) {
                 Text("Nanti Saja")
             }
         }

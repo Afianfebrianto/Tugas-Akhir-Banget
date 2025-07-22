@@ -40,60 +40,14 @@ fun ButtonAbu(
         onClick = onClick,
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
-            .background(Color(0xFF3B3F46)), // Warna dark grey seperti pada gambar
+            .background(Color(0xFF3B3F46)),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF3B3F46),
-            contentColor = Color(0xFFFFD166) // Warna kuning pada teks
+            contentColor = Color(0xFFFFD166)
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
         Text(text = text, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-    }
-}
-
-@Composable
-fun HeaderOri() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(100.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween // Aligns items to the ends
-    ) {
-        // Text Column
-        Column {
-            Text(
-                text = "Hello,\nAfian Febrianto",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-
-                Image(
-                    painter = painterResource(id = R.drawable.ic_badge), // Replace with your badge icon resource
-                    contentDescription = "Badge Icon",
-                    modifier = Modifier.size(16.dp) // Adjust size as needed
-                )
-                Spacer(modifier = Modifier.width(4.dp)) // Space between text and icon
-                Text(
-                    text = "13020210018",
-                    fontSize = 16.sp,
-                    color = Color.White
-                )
-            }
-        }
-
-
-        // Profile Image
-        Image(
-            painter = painterResource(id = R.drawable.placeholder_white), // Replace with your image resource
-            contentDescription = "Profile Picture",
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape) // Clip the image to a circle
-        )
     }
 }
 
@@ -105,34 +59,33 @@ fun Header(username: String, identifier: String, profilePictureUrl: String) {
             .padding(16.dp)
             .height(100.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween // Aligns items to the ends
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         // Text Column
         Column {
             Text(
-                text = "Hello,\n$username", // Use the username parameter
+                text = "Hello,\n$username",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_badge), // Replace with your badge icon resource
+                    painter = painterResource(id = R.drawable.ic_badge),
                     contentDescription = "Badge Icon",
-                    modifier = Modifier.size(16.dp) // Adjust size as needed
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp)) // Space between text and icon
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = identifier, // Use the identifier parameter
+                    text = identifier,
                     fontSize = 16.sp,
                     color = Color.White
                 )
             }
         }
 
-        // Profile Image
             Image(
-                painter = rememberImagePainter(profilePictureUrl ?: R.drawable.placeholder_image), // Use an image loading library like Coil or Glide
+                painter = rememberImagePainter(profilePictureUrl ?: R.drawable.placeholder_image),
                 contentDescription = "Profile Picture",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

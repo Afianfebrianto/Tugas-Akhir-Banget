@@ -33,8 +33,7 @@ import java.util.Locale
 @Composable
 fun DosenPanggilanHistoryItem(item: PanggilanHistoryDosenItem) {
 
-    // Formatter Waktu (sama seperti di PanggilanItem Mahasiswa)
-    val inputFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US) } // SESUAIKAN format dari DB
+    val inputFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US) }
     val outputFormat = remember { SimpleDateFormat("E, dd MMM yy HH:mm", Locale("id", "ID")) }
     val formatTimestamp: (String?) -> String = remember {
         { ts -> ts?.let { try { inputFormat.parse(it)?.let { d -> outputFormat.format(d) } ?: it } catch (e: ParseException) { it } } ?: "-" }
@@ -42,11 +41,10 @@ fun DosenPanggilanHistoryItem(item: PanggilanHistoryDosenItem) {
     val formattedWaktuPanggil = formatTimestamp(item.waktu_panggil)
     val formattedWaktuRespon = formatTimestamp(item.waktu_respon)
 
-    // Warna Status (sama seperti di PanggilanItem Mahasiswa)
     val statusColor = when (item.status.lowercase()) {
-        "accepted" -> Color(0xFF4CAF50) // Hijau terang
-        "declined" -> MaterialTheme.colorScheme.error // Merah tema
-        "pending" -> MaterialTheme.colorScheme.primary // Biru tema
+        "accepted" -> Color(0xFF4CAF50)
+        "declined" -> MaterialTheme.colorScheme.error
+        "pending" -> MaterialTheme.colorScheme.primary
         else -> Color.Gray
     }
 
@@ -60,25 +58,23 @@ fun DosenPanggilanHistoryItem(item: PanggilanHistoryDosenItem) {
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Foto Mahasiswa yang Dipanggil
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = item.mahasiswa_foto, // URL foto mahasiswa
+                    model = item.mahasiswa_foto,
                     placeholder = painterResource(id = R.drawable.placeholder_image),
                     error = painterResource(id = R.drawable.placeholder_image)
                 ),
                 contentDescription = "Foto ${item.mahasiswa_name}",
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(45.dp).clip(CircleShape) // Ukuran sedikit disesuaikan
+                modifier = Modifier.size(45.dp).clip(CircleShape)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Kolom Detail Panggilan
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.mahasiswa_name ?: "Nama Mahasiswa Tdk Ada",
-                    style = MaterialTheme.typography.titleSmall, // Ukuran judul kecil
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
@@ -89,10 +85,9 @@ fun DosenPanggilanHistoryItem(item: PanggilanHistoryDosenItem) {
                 Text(
                     text = "Status: ${item.status.replaceFirstChar { it.titlecase() }}",
                     style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold, // Status selalu bold
-                    color = statusColor // Warna sesuai status
+                    fontWeight = FontWeight.Bold,
+                    color = statusColor
                 )
-                // Tampilkan waktu respon jika status bukan pending
                 if (item.status.lowercase() != "pending") {
                     Text(
                         text = "Direspon: $formattedWaktuRespon",
@@ -100,7 +95,7 @@ fun DosenPanggilanHistoryItem(item: PanggilanHistoryDosenItem) {
                         color = Color.Gray
                     )
                 }
-            } // Akhir Column Detail
-        } // Akhir Row
-    } // Akhir Card
+            }
+        }
+    }
 }

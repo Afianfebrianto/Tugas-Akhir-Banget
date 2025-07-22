@@ -43,7 +43,7 @@ fun WelcomeScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color(0xFFFFD369)), // Warna latar belakang FFD369
+            .background(color = Color(0xFFFFD369)),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),

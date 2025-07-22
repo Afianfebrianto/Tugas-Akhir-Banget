@@ -12,14 +12,7 @@ object BarcodeUtils {
 
     private const val TAG = "BarcodeUtils"
 
-    /**
-     * Membuat Bitmap barcode dari data String.
-     * @param data String yang akan di-encode (misal: NIM).
-     * @param format Format barcode (misal: BarcodeFormat.CODE_128).
-     * @param width Lebar bitmap barcode dalam pixel.
-     * @param height Tinggi bitmap barcode dalam pixel.
-     * @return Bitmap barcode atau null jika terjadi error.
-     */
+    
     fun generateBarcodeBitmap(
         data: String,
         format: BarcodeFormat = BarcodeFormat.CODE_128, // Default ke CODE_128 (umum untuk NIM)

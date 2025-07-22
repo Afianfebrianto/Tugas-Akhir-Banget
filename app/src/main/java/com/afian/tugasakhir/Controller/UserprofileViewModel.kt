@@ -55,7 +55,7 @@ class UserProfileViewModel : ViewModel() {
     val saveResult: State<Pair<Boolean, String>?> = _saveResult
 
 
-    /** Memuat profil user dari API */
+    
     fun loadUserProfile(userId: Int) {
         if (_isLoading.value || userId <= 0) return
         _isLoading.value = true
@@ -91,23 +91,23 @@ class UserProfileViewModel : ViewModel() {
         }
     }
 
-    /** Dipanggil saat input No HP berubah */
+    
     fun onNoHpChanged(newText: String) {
         noHpInput.value = newText
     }
 
-    /** Dipanggil saat input Informasi berubah */
+    
     fun onInformasiChanged(newText: String) {
         informasiInput.value = newText
     }
 
-    /** Dipanggil saat user memilih gambar baru */
+    
     fun onImageSelected(uri: Uri?) {
         _selectedImageUri.value = uri
         Log.d(TAG, "New image URI selected: $uri")
     }
 
-    /** Menyimpan perubahan profil ke backend */
+    
     fun saveProfile(context: Context) {
         val currentProfile = _profileData.value
         val identifier = currentProfile?.identifier

@@ -354,7 +354,7 @@ fun DosenDetailDialog(
 //                    ) {
 //                        // Tombol Status "On Campus" (contoh, belum dinamis)
 //                        Button(
-//                            onClick = { /* Aksi jika tombol status diklik? */ },
+//                            onClick = {  },
 //                            shape = RoundedCornerShape(50), // Sangat bulat
 //                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)) // Warna hijau
 //                        ) {

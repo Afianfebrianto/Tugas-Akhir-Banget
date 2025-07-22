@@ -77,26 +77,26 @@ fun UserSettingsScreen(
     val user = loginViewModel.getUserData()
     val username = user?.user_name ?: "Pengguna"
     val identifier = user?.identifier ?: "Tidak ada ID"
-    // Gunakan URL asli atau null jika kosong agar placeholder Coil bekerja
+
     val fotoProfileUrl = user?.foto_profile.takeIf { !it.isNullOrBlank() }
 
     val logoutState by loginViewModel.logoutState.collectAsState()
     var showLogoutLottie by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    // State contoh untuk toggle notifikasi
+
     var notificationEnabled by remember { mutableStateOf(true) }
     var showLogoutConfirmationDialog by remember { mutableStateOf(false) }
 
-    // LaunchedEffect untuk handle logout (Tidak Berubah - Sudah Benar)
-    // LaunchedEffect untuk handle logout state
-    // LaunchedEffect untuk menangani perubahan state logout
+
+
+
     LaunchedEffect(logoutState) {
-        Log.d("UserSettingsScreen", "[Effect] Detected logoutState change: $logoutState") // Log setiap perubahan state
+        Log.d("UserSettingsScreen", "[Effect] Detected logoutState change: $logoutState")
         when (logoutState) {
             is UiState.Success -> {
                 Log.i("UserSettingsScreen", "[Effect] Logout Success state received!")
-                // 1. Tampilkan Animasi
+
                 if (!showLogoutLottie) {
                     showLogoutLottie = true
                     Log.d("UserSettingsScreen", "[Effect] Showing Lottie animation...")
@@ -105,20 +105,20 @@ fun UserSettingsScreen(
                     showLogoutLottie = false
                 }
 
-                // 2. Reset State ViewModel
+
                 Log.d("UserSettingsScreen", "[Effect] Calling resetLogoutStateToIdle in ViewModel...")
                 loginViewModel.resetLogoutStateToIdle()
                 Log.d("UserSettingsScreen", "[Effect] ViewModel state reset.")
 
-//                // --- 👇 NAVIGASI & CLEAR STACK 👇 ---
-//                Log.i("UserSettingsScreen", "[Effect] Preparing navigation and stack clearing...")
-//                // Ganti Screen.Welcome.route jika perlu
-//                val initialScreenRoute = Screen.Login.route // <<< PASTIKAN ROUTE INI BENAR
-//                Log.d("UserSettingsScreen", "[Effect] Target route: '$initialScreenRoute'")
-//                try {
-//                    // <<< PERBAIKI popUpTo dengan inclusive = true >>>
-//                    navController.navigate(initialScreenRoute) {
-//                        Log.d("UserSettingsScreen", "[Effect] Configuring navigate options: popUpTo(0){inclusive=true}, launchSingleTop=true")
+
+
+
+
+
+
+
+
+
 //                        popUpTo(navController.graph.id) {
 //                            inclusive = true // <-- PENTING: Hapus semua termasuk index 0
 //                        }
@@ -245,14 +245,14 @@ fun UserSettingsScreen(
 //                        text = "Notifikasi",
 //                        iconVector = Icons.Default.Notifications,
 //                        checked = notificationEnabled,
-//                        onCheckedChange = { notificationEnabled = it /* TODO: Simpan state? */ }
+//                        onCheckedChange = { notificationEnabled = it  }
 //                    )
 //                    Divider(modifier=Modifier.padding(horizontal=8.dp))
 //
 //                    SettingsMenuItem(
 //                        text = "Bahasa",
 //                        iconVector = Icons.Default.MailOutline,
-//                        onClick = { /* TODO: Navigasi ke layar bahasa */ }
+//                        onClick = {  }
 //                    )
 //                    Divider(modifier=Modifier.padding(horizontal=8.dp))
 
@@ -352,7 +352,7 @@ fun SettingsMenuItem(
     }
 }
 
-/** Item menu dengan Switch toggle */
+
 @Composable
 fun SettingsMenuToggleItem(
     modifier: Modifier = Modifier,

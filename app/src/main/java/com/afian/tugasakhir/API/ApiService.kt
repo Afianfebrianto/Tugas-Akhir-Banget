@@ -69,11 +69,11 @@ interface ApiService {
     @PUT("api/panggilan/respond")
     suspend fun respondPanggilan(@Body body: RespondPanggilanBody): Response<RespondPanggilanResponse>
 
-    // Endpoint baru untuk riwayat panggilan dosen
+
     @GET("api/panggilan/history/dosen/{dosen_user_id}")
     suspend fun getDosenPanggilanHistory(@Path("dosen_user_id") dosenUserId: Int): DosenHistoryResponse
 
-    // Endpoint baru untuk riwayat panggilan mahasiswa
+
     @GET("api/panggilan/history/mahasiswa/{mahasiswa_user_id}")
     suspend fun getMahasiswaPanggilanHistory(@Path("mahasiswa_user_id") mahasiswaUserId: Int): MahasiswaHistoryResponse
 
@@ -89,46 +89,38 @@ interface ApiService {
         @Part file: MultipartBody.Part
     ): Response<BulkUploadResponse>
 
-    // Endpoint untuk mengambil semua user (hanya Admin)
     @GET("api/users/all")
-    suspend fun getAllUsers(): AllUsersResponse // Perlu Auth Header Admin
+    suspend fun getAllUsers(): AllUsersResponse
 
-    // Endpoint untuk recover password user (hanya Admin)
-    @PUT("api/users/recover-password/{user_id}") // <-- Perhatikan PUT dan Path param
+    @PUT("api/users/recover-password/{user_id}")
     suspend fun recoverUserPassword(
         @Path("user_id") userId: Int
-        // Tambahkan @Header("Authorization") jika perlu token admin
-    ): Response<SimpleStatusResponse> // Response sederhana
+    ): Response<SimpleStatusResponse>
 
-    @Streaming // Penting untuk download file agar tidak load semua ke memori
-    @GET("api/reports/dosen-durasi-harian.xlsx") // Download Report Excel
+    @Streaming
+    @GET("api/reports/dosen-durasi-harian.xlsx")
     suspend fun downloadDosenHarianReport(
         @Query("month") month: Int,
         @Query("year") year: Int
-        // Tambahkan @Header jika perlu token Auth Admin/Dosen
-    ): Response<ResponseBody> // <-- Return type ResponseBody untuk file
+    ): Response<ResponseBody>
 
     @GET("api/users/profile/{user_id}")
-    suspend fun getUserProfile(@Path("user_id") userId: Int): UserProfileResponse // Ganti T dgn UserProfileResponse
+    suspend fun getUserProfile(@Path("user_id") userId: Int): UserProfileResponse
 
-    @Multipart // Untuk update profile (karena ada kemungkinan file)
+    @Multipart
     @PUT("api/users/update-profile/{identifier}")
     suspend fun updateUserProfile(
         @Path("identifier") identifier: String,
-        // Kirim file sebagai Part jika ada
         @Part photo: MultipartBody.Part?,
-        // Kirim teks sebagai RequestBody Part jika ada
         @Part("no_hp") noHp: RequestBody?,
         @Part("informasi") informasi: RequestBody?
-        // Tambahkan @Header jika perlu Auth Token
-    ): Response<UpdateProfileResponse> // Kembalikan Response untuk cek status
-    // Endpoint untuk update password
-    @PUT("api/users/update-password") // Gunakan PUT
-    suspend fun updatePassword(@Body body: UpdatePasswordRequest): Response<SimpleStatusResponse> // Gunakan Response dan model status sederhana
+    ): Response<UpdateProfileResponse>
+    @PUT("api/users/update-password")
+    suspend fun updatePassword(@Body body: UpdatePasswordRequest): Response<SimpleStatusResponse>
 }
 
 object RetrofitClient {
-//    private const val BASE_URL = "http://192.168.1.8:3000/"
+
     private const val BASE_URL = "https://dosentracker.kebunrayabundahayati.com/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)

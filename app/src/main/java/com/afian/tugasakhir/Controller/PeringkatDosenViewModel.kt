@@ -47,7 +47,7 @@ class PeringkatDosenViewModel : ViewModel() {
         fetchPeringkat(_selectedMonth.intValue, _selectedYear.intValue)
     }
 
-    /** Dipanggil UI saat tahun dipilih */
+    
     fun onYearSelected(year: Int) {
         if (year != _selectedYear.intValue) {
             _selectedYear.intValue = year
@@ -55,7 +55,7 @@ class PeringkatDosenViewModel : ViewModel() {
         }
     }
 
-    /** Dipanggil UI saat bulan dipilih */
+    
     fun onMonthSelected(month: Int) { // Terima bulan 1-12
         if (month != _selectedMonth.intValue) {
             _selectedMonth.intValue = month
@@ -63,7 +63,7 @@ class PeringkatDosenViewModel : ViewModel() {
         }
     }
     // === 👇 FUNGSI BARU UNTUK UPDATE PERIODE 👇 ===
-    /** Dipanggil oleh Dialog saat user konfirmasi pilihan baru */
+    
     fun updatePeriod(month: Int, year: Int) {
         // Hanya fetch jika periode benar-benar berubah
         if (month != _selectedMonth.intValue || year != _selectedYear.intValue) {
@@ -77,7 +77,7 @@ class PeringkatDosenViewModel : ViewModel() {
     }
     // === 👆 AKHIR FUNGSI BARU 👆 ===
 
-    /** Mengambil data peringkat dari API */
+    
     fun fetchPeringkat(month: Int = _selectedMonth.intValue, year: Int = _selectedYear.intValue) {
         // Batalkan job fetch sebelumnya jika sedang berjalan
         fetchJob?.cancel()

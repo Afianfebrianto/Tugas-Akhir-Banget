@@ -28,7 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.afian.tugasakhir.Controller.UserAddViewModel
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.items // Untuk menampilkan list error
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -46,20 +46,20 @@ fun UserAddScreen(
 ) {
     val context = LocalContext.current
 
-    // State dari ViewModel
+
     val selectedFileName by viewModel.selectedFileName
     val isUploading by viewModel.isUploading
     val uploadResult by viewModel.uploadResult
     val errorMessage by viewModel.errorMessage
 
-    // Launcher untuk memilih file Excel
-//    val filePickerLauncher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.GetContent() // Kontrak standar untuk pilih file
-//    ) { uri: Uri? ->
-//        viewModel.onFileSelected(uri, context) // Teruskan URI ke ViewModel
-//    }
 
-    // === 👇 UBAH KONTRAK DI SINI 👇 ===
+
+
+
+
+
+
+
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument() // <-- Gunakan OpenDocument
     ) { uri: Uri? ->

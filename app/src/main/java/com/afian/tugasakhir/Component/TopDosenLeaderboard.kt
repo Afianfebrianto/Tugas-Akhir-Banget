@@ -24,17 +24,7 @@ private fun getMonthNameLeaderboard(monthNumber: Int): String {
     return if (monthNumber in 1..12) months[monthNumber - 1] else "..."
 }
 
-/**
- * Composable reusable untuk menampilkan bagian leaderboard Top 3 Dosen.
- * Menerima data state sebagai parameter.
- *
- * @param modifier Modifier untuk mengatur tata letak Column utama dari luar.
- * @param peringkatList Daftar lengkap peringkat dosen (akan diambil top 3).
- * @param isLoading Status loading untuk data peringkat.
- * @param errorMessage Pesan error jika gagal memuat peringkat.
- * @param selectedMonth Bulan yang sedang ditampilkan peringkatnya (1-12).
- * @param selectedYear Tahun yang sedang ditampilkan peringkatnya.
- */
+
 @Composable
 fun TopDosenLeaderboard(
     modifier: Modifier = Modifier, // Modifier untuk Column luar

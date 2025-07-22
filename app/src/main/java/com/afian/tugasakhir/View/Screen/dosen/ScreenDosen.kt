@@ -58,7 +58,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 
-// --- Helper check permission (bisa diletakkan di file utilitas) ---
+
 private fun checkFineLocationPermission(context: Context): Boolean {
     return ContextCompat.checkSelfPermission(
         context,
@@ -73,16 +73,16 @@ private fun checkBackgroundLocationPermission(context: Context): Boolean {
             Manifest.permission.ACCESS_BACKGROUND_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     } else {
-        true // Tidak perlu izin terpisah sebelum Android Q
+        true
     }
 }
-// --- End Helper ---
 
-// Opt-in tidak wajib untuk ActivityResultContracts, tapi tidak masalah jika ada
-// @OptIn(ExperimentalPermissionsApi::class) // Hapus jika tidak pakai Accompanist
+
+
+
 @Composable
 fun HomeDosenScreen(loginViewModel: LoginViewModel, navController: NavController, dosenViewModel: DosenViewModel, peringkatViewModel: PeringkatDosenViewModel = viewModel()) {
-    // Ambil data pengguna dari ViewModel
+
     val user = loginViewModel.getUserData()
     val username = user?.user_name ?: "Guest"
     val identifier = user?.identifier ?: "No Identifier"

@@ -34,7 +34,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavController) {
-    // Mengatur warna background
+
     Box(
         modifier = Modifier
             .fillMaxSize()

@@ -139,7 +139,7 @@ class LoginViewModel(private val context: Context) : ViewModel() {
 
 
     // --- 👇 Fungsi BARU untuk reset state dari UI 👇 ---
-    /** Dipanggil dari UI (misal setelah animasi error) untuk kembali ke form login */
+    
     fun resetLoginStateToIdle() {
         // Hanya reset jika state saat ini bukan Idle atau Loading
         if (_loginUiState.value !is LoginUiState.Idle && _loginUiState.value !is LoginUiState.Loading) {
@@ -190,10 +190,7 @@ class LoginViewModel(private val context: Context) : ViewModel() {
     }
 
     // --- 👇 FUNGSI BARU UNTUK TOKEN 👇 ---
-    /**
-     * Mendapatkan token FCM saat ini dan mengirimkannya ke server jika user_id valid.
-     * Dilakukan di background thread.
-     */
+    
     private fun registerAndSendFcmToken(userId: Int) {
         // Jalankan di Dispatchers.IO karena ada network call (await() dan sendTokenToServer)
         viewModelScope.launch(Dispatchers.IO) {

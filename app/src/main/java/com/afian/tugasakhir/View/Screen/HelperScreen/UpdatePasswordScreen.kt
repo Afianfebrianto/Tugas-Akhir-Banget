@@ -109,7 +109,7 @@ fun UpdatePasswordScreen(
                 }
             } else {
                 Log.e("UpdatePasswordScreen", "Cannot determine home destination, navigating back to Login. Role: $role")
-                navController.navigate(destination) { /* popUpTo */ }
+                navController.navigate(destination) {  }
             }
         } else if (updateState is UiState.Error) {
             // Tampilkan error API menggunakan Toast

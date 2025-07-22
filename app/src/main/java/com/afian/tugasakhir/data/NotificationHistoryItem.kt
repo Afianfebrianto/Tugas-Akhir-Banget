@@ -9,5 +9,5 @@ data class NotificationHistoryItem(
     val id: Int = 0,
     val title: String?,
     val body: String,
-    val timestamp: Long // Waktu notifikasi diterima (misal: System.currentTimeMillis())
+    val timestamp: Long
 )

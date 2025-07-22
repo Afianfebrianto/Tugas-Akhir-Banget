@@ -28,15 +28,15 @@ import androidx.compose.runtime.getValue
 
 @Composable
 fun HomeAdminScreen(loginViewModel: LoginViewModel, navController: NavController, dosenViewModel: DosenViewModel, peringkatViewModel: PeringkatDosenViewModel = viewModel()) {
-    // Ambil data pengguna dari ViewModel
+
     val user = loginViewModel.getUserData()
 
-    // Jika user tidak ada, tampilkan pesan atau tampilan default
+
     val username = user?.user_name ?: "Guest"
     val identifier = user?.identifier ?: "No Identifier"
     val fotoProfile = user?.foto_profile ?: ""
 
-    // --- Ambil State Peringkat dari ViewModel Peringkat ---
+
     val peringkatList by peringkatViewModel.peringkatList.collectAsState()
     val isLoadingPeringkat by peringkatViewModel.isLoading
     val errorPeringkat by peringkatViewModel.errorMessage
@@ -49,7 +49,7 @@ fun HomeAdminScreen(loginViewModel: LoginViewModel, navController: NavController
             .background(color = Color(0xFF1E3E62))
             .padding(top = 16.dp)
     ) {
-        Header(username, identifier, fotoProfile) // Panggil Header dengan data pengguna
+        Header(username, identifier, fotoProfile)
         Card(modifier = Modifier
             .fillMaxWidth()
             .weight(1f),
@@ -59,8 +59,8 @@ fun HomeAdminScreen(loginViewModel: LoginViewModel, navController: NavController
             Column {
                 CardButtonBarAdmin(navController)
                 TopDosenLeaderboard(
-                    modifier = Modifier.padding(horizontal = 8.dp), // Beri padding section
-                    // Teruskan state dari peringkatViewModel sebagai parameter
+                    modifier = Modifier.padding(horizontal = 8.dp),
+
                     peringkatList = peringkatList,
                     isLoading = isLoadingPeringkat,
                     errorMessage = errorPeringkat,

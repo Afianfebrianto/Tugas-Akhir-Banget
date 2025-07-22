@@ -72,7 +72,7 @@ class NotificationViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    /** Memuat atau memuat ulang riwayat panggilan dari API */
+    
     fun fetchPanggilanHistory() {
         // Cek ID Mahasiswa lagi untuk keamanan
         if (currentMahasiswaId == -1) {
@@ -103,7 +103,7 @@ class NotificationViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    /** Mengirim respons mahasiswa (accepted/declined) ke backend */
+    
     fun respondToPanggilan(panggilanId: Int, respon: String) {
         if (currentMahasiswaId == -1) {
             _responseMessage.value = "Gagal merespon: ID Mahasiswa tidak valid."

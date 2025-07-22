@@ -57,7 +57,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun KtmScreen(
     navController: NavController,
-    loginViewModel: LoginViewModel = viewModel() // Ambil dari NavGraph jika di-scope ke Activity
+    loginViewModel: LoginViewModel = viewModel()
 ) {
     // Ambil data user mahasiswa yang sedang login
     val userData = loginViewModel.getUserData() // Asumsi fungsi ini mengembalikan User?

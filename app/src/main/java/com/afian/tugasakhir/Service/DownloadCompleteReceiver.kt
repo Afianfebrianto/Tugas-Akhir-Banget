@@ -75,13 +75,13 @@ class DownloadCompleteReceiver : BroadcastReceiver() {
                                     Log.e(TAG, "Error parsing URI or opening file", e)
                                     runOnMainThread { Toast.makeText(context, "Gagal membuka file: Format URI tidak valid.", Toast.LENGTH_LONG).show() }
                                 }
-                            } else { /* Handle null URI/MIME */ }
-                        } else { /* Handle kolom tidak ditemukan */ }
+                            } else {  }
+                        } else {  }
                         // --- 👆 AKHIR LOGIKA BARU 👆 ---
-                    } else { /* Handle FAILED status (tidak berubah) */ }
-                } else { /* Handle kolom status tidak ditemukan */ }
-            } else { /* Handle cursor null/kosong */ }
-        } catch (e: Exception) { /* Handle exception query */ }
+                    } else {  }
+                } else {  }
+            } else {  }
+        } catch (e: Exception) {  }
         finally { cursor?.close() }
         Log.d(TAG, "Finished processing broadcast for ID: $id")
     }

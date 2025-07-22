@@ -15,14 +15,14 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
 
         fun getDatabase(context: Context): AppDatabase {
-            // Singleton pattern untuk mencegah multiple instance database
+
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "app_database" // Nama file database
+                    "app_database"
                 )
-                    // .fallbackToDestructiveMigration() // Hati-hati: hapus data lama saat migrasi versi
+
                     .build()
                 INSTANCE = instance
                 instance

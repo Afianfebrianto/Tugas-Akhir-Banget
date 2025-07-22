@@ -48,28 +48,28 @@ fun ScreenMhs() {
 
 @Composable
 fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController, dosenViewModel : DosenViewModel, peringkatViewModel: PeringkatDosenViewModel = viewModel()) {
-    // Ambil data pengguna dari ViewModel
+
     val user = loginViewModel.getUserData()
 
-    // Jika user tidak ada, tampilkan pesan atau tampilan default
+
     val username = user?.user_name ?: "Guest"
     val identifier = user?.identifier ?: "No Identifier"
     val fotoProfile = user?.foto_profile ?: ""
     val context = LocalContext.current
 
-    // --- Ambil State Peringkat dari ViewModel Peringkat ---
+
     val peringkatList by peringkatViewModel.peringkatList.collectAsState()
     val isLoadingPeringkat by peringkatViewModel.isLoading
     val errorPeringkat by peringkatViewModel.errorMessage
     val selectedMonthPeringkat by peringkatViewModel.selectedMonth
     val selectedYearPeringkat by peringkatViewModel.selectedYear
 
-    // Tambahkan log untuk mencetak informasi pengguna
+
     Log.d("HomeMhsScreen", "Username: $username")
     Log.d("HomeMhsScreen", "Identifier: $identifier")
     Log.d("HomeMhsScreen", "Foto Profile: $fotoProfile")
 
-    // Minta izin notifikasi di Android 13+
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
@@ -78,13 +78,13 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController, d
                     Log.i("HomeMhsScreen", "Notification permission granted.")
                 } else {
                     Log.w("HomeMhsScreen", "Notification permission denied.")
-                    // Beri tahu user mengapa izin ini berguna (opsional)
+
                 }
             }
         )
 
         LaunchedEffect(Unit) {
-            // Cek izin saat layar pertama kali muncul
+
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 Log.d("HomeMhsScreen", "Requesting notification permission...")
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -92,7 +92,7 @@ fun HomeMhsScreen(loginViewModel: LoginViewModel,navController: NavController, d
         }
     }
 
-    // --- 👇 State & Efek untuk Dialog Prompt Profil 👇 ---
+
     var showProfileDialog by remember { mutableStateOf(false) }
     // Gunakan Unit sebagai key agar hanya cek sekali saat user data pertama kali valid
     LaunchedEffect(key1 = user) {

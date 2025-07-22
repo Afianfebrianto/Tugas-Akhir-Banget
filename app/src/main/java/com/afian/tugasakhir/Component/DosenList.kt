@@ -78,7 +78,7 @@ fun DosenList( // Ini adalah versi PRATINJAU
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
+                .padding(horizontal = 4.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -104,56 +104,44 @@ fun DosenList( // Ini adalah versi PRATINJAU
             }
         } // --- Akhir Row Judul ---
 
-        // --- Card untuk membungkus konten daftar dosen atau pesan kosong ---
-        Card(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 12.dp)
-                .padding(horizontal = 8.dp,) ,// Padding di luar card ini
-                // Beri tinggi minimal agar pesan "kosong" bisa terlihat di tengah dengan baik
-                // Sesuaikan nilai minHeight sesuai kebutuhan desain Anda
-//                .defaultMinSize(minHeight = 50.dp),
-            shape = RoundedCornerShape(8.dp), // Bentuk card, bisa disesuaikan
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp) // Sedikit shadow
+                .padding(horizontal = 4.dp, vertical = 4.dp)
         ) {
-            // Logika untuk menampilkan loading, pesan kosong, atau daftar item
             when {
-                // 1. Jika sedang loading dan daftar yang akan ditampilkan (preview) masih kosong
                 isLoading && displayedDosenList.isEmpty() -> {
                     Box(
                         modifier = Modifier
-                            .fillMaxSize() // Memenuhi ruang dalam Card
-                            .padding(16.dp), // Beri padding agar tidak terlalu mepet tepi Card
-                        contentAlignment = Alignment.Center // Konten di tengah Box
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
                     }
                 }
-                // 2. Jika tidak loading DAN daftar yang akan ditampilkan (preview) kosong
+
                 !isLoading && displayedDosenList.isEmpty() -> {
                     Box(
                         modifier = Modifier
-                            .fillMaxSize() // Memenuhi ruang dalam Card
+                            .fillMaxSize()
                             .padding(16.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            // Menggunakan teks sesuai permintaan Anda jika tidak ada query pencarian,
-                            // atau menampilkan pesan hasil pencarian jika ada query.
                             text = if (searchQuery.isBlank()) "Tidak ada dosen di kampus"
                             else "Dosen \"$searchQuery\" tidak ditemukan di kampus.",
                             style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center // Teks juga di tengah secara horizontal
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
-                // 3. Jika ada item untuk ditampilkan (baik sedang loading data baru atau tidak)
+
                 else -> {
                     Column(
-                        modifier = Modifier.padding(vertical = 8.dp), // Padding di dalam Card untuk list item
+                        modifier = Modifier.padding(vertical = 4.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        // Hanya tampilkan N item pertama
                         displayedDosenList.forEach { dosen ->
                             DosenItem(
                                 dosen = dosen,
@@ -164,37 +152,6 @@ fun DosenList( // Ini adalah versi PRATINJAU
                 }
             }
         }
-        // --- Akhir Card untuk konten daftar dosen ---
-
-
-//        // --- Daftar Ringkasan Dosen (Max 4 item) ---
-//        // Tampilkan pesan jika list kosong (setelah difilter)
-//        if (displayedDosenList.isEmpty() && !isLoading) {
-//            val searchQuery by viewModel.searchQuery.collectAsState()
-////            val searchQuery by viewModel.searchQueryDosen.collectAsState()
-//            Text(
-//                text = if(searchQuery.isBlank()) "Tidak ada dosen di kampus saat ini." else "Dosen \"$searchQuery\" tidak ditemukan di kampus.",
-//                modifier = Modifier.padding(start=16.dp, top=8.dp, bottom=8.dp),
-//                style = MaterialTheme.typography.bodyMedium
-//            )
-//        } else {
-//            // Gunakan Column biasa karena item terbatas
-//            Column(
-//                modifier = Modifier.padding(horizontal = 8.dp),
-//                verticalArrangement = Arrangement.spacedBy(4.dp)
-//            ) {
-//                // Hanya tampilkan N item pertama
-//                displayedDosenList.forEach { dosen ->
-//                    DosenItem(
-//                        dosen = dosen,
-////                        isOnCampus = true, // Selalu true untuk list ini
-//                        onClick = { selectedDosen = it } // Tetap bisa buka dialog dari pratinjau
-//                    )
-//                }
-//            }
-//        }
-//        // --- Akhir Daftar Ringkasan ---
-
 
         // --- Tombol "Lihat Semua" ---
         // Tampilkan hanya jika jumlah total > jumlah yang ditampilkan di pratinjau
@@ -231,8 +188,10 @@ fun DosenItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable { onClick(dosen) } // <-- Tambahkan clickable di sini
+            .padding(vertical = 8.dp)
+            .clickable { onClick(dosen) },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

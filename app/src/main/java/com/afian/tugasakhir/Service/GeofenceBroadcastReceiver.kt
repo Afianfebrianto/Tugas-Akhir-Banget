@@ -26,26 +26,20 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
-
     private val TAG = "GeofenceReceiver"
-
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.d(TAG, "<<< Geofence Event Received by Receiver >>>")
-
         if (context == null || intent == null) {
             Log.e(TAG, "Context or Intent is null.")
             return
         }
-
         val appContext = context.applicationContext
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
-
         if (geofencingEvent == null || geofencingEvent.hasError()) {
             val errorMessage = if (geofencingEvent != null) GeofenceStatusCodes.getStatusCodeString(geofencingEvent.errorCode) else "Event is null"
             Log.e(TAG, "Geofence Error or Null Event: $errorMessage")
             return
         }
-
         val geofenceTransition = geofencingEvent.geofenceTransition
         val userPrefs = appContext.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         val userId = userPrefs.getInt("user_id", -1)
@@ -54,32 +48,21 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             Log.e(TAG, "User ID not found. Cannot schedule work.")
             return
         }
-
-        // Jadwalkan pekerjaan menggunakan WorkManager
         scheduleGeofenceWork(appContext, geofenceTransition, userId)
     }
-
     private fun scheduleGeofenceWork(context: Context, transitionType: Int, userId: Int) {
-        // 1. Buat batasan: hanya jalan jika ada jaringan
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-
-        // 2. Siapkan data untuk dikirim ke Worker
         val inputData = workDataOf(
             GeofenceWorker.KEY_TRANSITION_TYPE to transitionType,
             GeofenceWorker.KEY_USER_ID to userId
         )
-
-        // 3. Buat Work Request
         val geofenceWorkRequest = OneTimeWorkRequestBuilder<GeofenceWorker>()
             .setConstraints(constraints)
             .setInputData(inputData)
             .build()
-
-        // 4. Jalankan Work Request
         WorkManager.getInstance(context).enqueue(geofenceWorkRequest)
-
         val transitionName = if (transitionType == Geofence.GEOFENCE_TRANSITION_ENTER) "ENTER" else "EXIT"
         Log.i(TAG, "Work scheduled for user $userId with transition: $transitionName. WorkManager will handle execution.")
     }

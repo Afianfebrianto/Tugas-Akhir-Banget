@@ -101,21 +101,17 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
 
 
-            "geofence_masuk" -> { // <-- TAMBAHKAN CASE INI
-                // --- Logika Handle Notifikasi Dosen Masuk Geofence ---
+            "geofence_masuk" -> {
                 val title = remoteMessage.data["title"] ?: "Dosen Tiba"
                 val body = remoteMessage.data["body"] ?: "Seorang dosen telah memasuki area."
-                val dosenName = remoteMessage.data["dosenName"] ?: "Dosen" // Ambil nama jika ada
+                val dosenName = remoteMessage.data["dosenName"] ?: "Dosen"
                 Log.i(TAG,"Received 'geofence_masuk': Dosen=$dosenName")
-
-                saveNotificationToHistory(title, body) // Simpan ke history umum
-
-                // Tampilkan Notifikasi Sistem (arahkan ke layar daftar dosen di kampus?)
+                saveNotificationToHistory(title, body)
                 val intent = Intent(this, MainActivity::class.java).apply {
                     putExtra("navigateTo", "dosen_di_kampus") // Contoh route, sesuaikan
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 }
-                val requestCode = Random().nextInt() // ID notif unik
+                val requestCode = Random().nextInt()
                 val pendingIntent = PendingIntent.getActivity(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 sendLocalNotification(title, body, pendingIntent, notificationId = requestCode)
             }

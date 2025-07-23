@@ -24,14 +24,12 @@ object GeofenceHelper {
     private const val TARGET_GEOFENCE_RADIUS_METERS = 20f // Coba 20 meter, sesuaikan jika perlu
     private const val DWELL_DELAY_MILLISECONDS = 1000 * 10 // 10 detik (jika DWELL diaktifkan)
 
-    // Daftar koordinat target baru
     private val TARGET_LOCATIONS = mapOf(
         "Belakang_R" to LatLng(-5.1358115, 119.4489161),
         "Corner_Samping_Belakang" to LatLng(-5.1358267, 119.4491116),
         "Corner_Samping_Depan" to LatLng(-5.1359155, 119.4491038),
         "Corner_Depan_R" to LatLng(-5.1361354, 119.4488866),
         "Corner_Depan_L" to LatLng(-5.1361372, 119.4489829),
-//        "Corner_Belakang_L" to LatLng (-5.1359406,119.4490079),
         "Mid_Belakang" to LatLng(-5.1358624, 119.4490039),
         "Mid_Belakang_R" to LatLng(-5.1359339, 119.4489137),
         "Tengah_Depan" to LatLng(-5.1360345, 119.4489478),
@@ -93,7 +91,7 @@ object GeofenceHelper {
 
     // Fungsi utama untuk menambahkan SEMUA geofence target
     @SuppressLint("MissingPermission")
-    fun addGeofences(context: Context) { // Nama fungsi diubah sedikit
+    fun addGeofences(context: Context) {
         if (ContextCompat.checkSelfPermission(
                 context, Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
@@ -101,29 +99,21 @@ object GeofenceHelper {
             Log.w(TAG, "Fine location permission not granted.")
             return
         }
-
-        val geofencesToAdd = buildGeofencesList() // Buat list geofence
-
+        val geofencesToAdd = buildGeofencesList()
         if (geofencesToAdd.isEmpty()) {
             Log.w(TAG, "Geofence list to add is empty.")
             return
         }
-
         val geofencingClient = LocationServices.getGeofencingClient(context)
-        val geofencingRequest = buildGeofencingRequest(geofencesToAdd) // Buat request dari list
+        val geofencingRequest = buildGeofencingRequest(geofencesToAdd)
         val pendingIntent = getGeofencePendingIntent(context)
-
         Log.d(TAG, "Attempting to add ${geofencesToAdd.size} geofences...")
-
         geofencingClient.addGeofences(geofencingRequest, pendingIntent)?.run {
             addOnSuccessListener {
                 Log.i(TAG, "${geofencesToAdd.size} Geofences added successfully.")
-                // Log ID geofence yang ditambahkan jika perlu
-                // Log.d(TAG, "Added IDs: ${geofencesToAdd.joinToString { it.requestId }}")
             }
             addOnFailureListener { exception ->
                 Log.e(TAG, "Failed to add ${geofencesToAdd.size} geofences.", exception)
-                // Tambahan: Cek status code spesifik jika perlu
                 if ((exception as? ApiException)?.statusCode == GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE) {
                     Log.e(
                         TAG,
@@ -154,9 +144,7 @@ object GeofenceHelper {
                 Log.e(TAG, "Failed to remove geofences by PendingIntent.", exception)
             }
         }
-        // Jika Anda ingin menghapus berdasarkan ID secara spesifik di masa depan:
-        // val geofenceIds = TARGET_LOCATIONS.keys.toList()
-        // geofencingClient.removeGeofences(geofenceIds).addOnCompleteListener { ... }
+
     }
 }
 
